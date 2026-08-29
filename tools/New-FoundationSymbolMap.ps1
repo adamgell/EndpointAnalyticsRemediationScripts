@@ -121,7 +121,7 @@ $packageDataContent = Import-PowerShellDataFile -Path $PackageData
 if (-not $pathData.ContainsKey('Paths')) {
     throw "Path map is missing 'Paths'."
 }
-foreach ($requiredKey in 'CanonicalCmdlets', 'AliasMappings', 'FunctionMappings') {
+foreach ($requiredKey in 'CanonicalCmdlets', 'CanonicalAliases', 'AliasMappings', 'FunctionMappings') {
     if (-not $packageDataContent.ContainsKey($requiredKey)) {
         throw "Package data is missing '$requiredKey'."
     }
@@ -191,27 +191,20 @@ foreach ($canonicalName in @($packageDataContent.CanonicalCmdlets)) {
     }
     $canonicalCmdlets.Add($name, $name)
 }
-foreach ($cmdlet in @(Get-Command -CommandType Cmdlet -ErrorAction Stop)) {
-    $name = [string] $cmdlet.Name
-    if ($canonicalCmdlets.ContainsKey($name)) {
-        if ($canonicalCmdlets[$name] -cne $name) {
-            throw "Available cmdlet '$name' conflicts with the reviewed canonical casing '$($canonicalCmdlets[$name])'."
-        }
-        continue
-    }
-    $canonicalCmdlets.Add($name, $name)
-}
 
 $knownAliases = [System.Collections.Generic.Dictionary[string, string]]::new(
     [System.StringComparer]::OrdinalIgnoreCase
 )
-foreach ($alias in @(Get-Alias -ErrorAction SilentlyContinue)) {
-    if ([string]::IsNullOrWhiteSpace([string] $alias.ResolvedCommandName)) {
-        continue
+foreach ($aliasName in @($packageDataContent.CanonicalAliases.Keys)) {
+    $name = [string] $aliasName
+    $resolvedCommandName = [string] $packageDataContent.CanonicalAliases[$aliasName]
+    if ([string]::IsNullOrWhiteSpace($name) -or [string]::IsNullOrWhiteSpace($resolvedCommandName)) {
+        throw "Canonical alias '$name' is incomplete."
     }
-    if (-not $knownAliases.ContainsKey([string] $alias.Name)) {
-        $knownAliases.Add([string] $alias.Name, [string] $alias.ResolvedCommandName)
+    if ($knownAliases.ContainsKey($name)) {
+        throw "Canonical alias '$name' is duplicated or case-colliding."
     }
+    $knownAliases.Add($name, $resolvedCommandName)
 }
 
 $configuredAliases = [System.Collections.Generic.Dictionary[string, object]]::new(
@@ -230,13 +223,11 @@ foreach ($mapping in @($packageDataContent.AliasMappings)) {
         throw "Alias mapping '$path|$oldName' is incomplete or targets an unmapped destination."
     }
 
-    if ($knownAliases.ContainsKey($oldName)) {
-        if ($knownAliases[$oldName] -cne $newName) {
-            throw "Alias '$oldName' resolves to '$($knownAliases[$oldName])', not '$newName'."
-        }
+    if (-not $knownAliases.ContainsKey($oldName)) {
+        throw "Alias '$oldName' is not present in the pinned canonical alias catalog."
     }
-    else {
-        $knownAliases.Add($oldName, $newName)
+    if ($knownAliases[$oldName] -cne $newName) {
+        throw "Alias '$oldName' resolves to '$($knownAliases[$oldName])', not '$newName'."
     }
 
     $key = $path + [char] 0 + $oldName.ToLowerInvariant() + [char] 0 + $occurrence
@@ -329,7 +320,7 @@ foreach ($key in $configuredAliases.Keys) {
     }
     $configured = $configuredAliases[$key]
     $discovered = $discoveredAliases[$key]
-    if ($discovered.OldName -ine $configured.OldName -or $discovered.NewName -cne $configured.NewName) {
+    if ($discovered.OldName -cne $configured.OldName -or $discovered.NewName -cne $configured.NewName) {
         throw "Alias occurrence '$($configured.Path)|$($configured.OldName)|$($configured.Occurrence)' differs from the reviewed mapping."
     }
 }

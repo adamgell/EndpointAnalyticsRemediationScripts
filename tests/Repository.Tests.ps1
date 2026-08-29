@@ -64,7 +64,13 @@ Describe 'Foundation path map details' -Tag 'FoundationMap' {
 
 Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     BeforeAll {
-        $symbolMap = Import-PowerShellDataFile "$PSScriptRoot/../evidence/foundation/SymbolRenames.psd1"
+        $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $symbolGenerator = Join-Path $repositoryRoot 'tools/New-FoundationSymbolMap.ps1'
+        $pathMapPath = Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1'
+        $packageDataPath = Join-Path $repositoryRoot 'standards/FoundationPackages.psd1'
+        $symbolMapPath = Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1'
+        $expectedSymbolMapBytes = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($symbolMapPath))
+        $symbolMap = Import-PowerShellDataFile $symbolMapPath
     }
 
     It 'records every canonical cmdlet-casing rewrite' {
@@ -89,8 +95,8 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1|Where|Where-Object|1'
             'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1|Where|Where-Object|2'
             'Run-Browser/Remediate-Run-Browser.ps1|Start|Start-Process|1'
-            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|Where|Where-Object|1'
-            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|Where|Where-Object|2'
+            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|1'
+            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|2'
         )
         $actual = @($symbolMap.Aliases | ForEach-Object {
             '{0}|{1}|{2}|{3}' -f $_.Path, $_.OldName, $_.NewName, $_.Occurrence
@@ -100,6 +106,61 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         @($symbolMap.Aliases.Path | Sort-Object -Unique).Count | Should -Be 9
         Compare-Object -ReferenceObject $expected -DifferenceObject $actual -CaseSensitive |
             Should -BeNullOrEmpty
+    }
+
+    It 'preserves both lowercase Toast aliases with source-exact casing' {
+        $actual = @($symbolMap.Aliases | Where-Object {
+            $_.Path -ceq 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
+        } | ForEach-Object {
+            '{0}|{1}' -f $_.OldName, $_.Occurrence
+        })
+
+        ($actual -join "`n") | Should -BeExactly "where|1`nwhere|2"
+    }
+
+    It 'regenerates byte-identically when live command discovery is unavailable' {
+        $outputPath = Join-Path $TestDrive 'without-live-discovery.psd1'
+
+        & {
+            function Get-Command {
+                throw 'Live command discovery is unavailable.'
+            }
+            function Get-Alias {
+                throw 'Live alias discovery is unavailable.'
+            }
+
+            & $symbolGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
+        }
+
+        [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
+            Should -BeExactly $expectedSymbolMapBytes
+    }
+
+    It 'regenerates byte-identically when live command discovery is polluted' {
+        $outputPath = Join-Path $TestDrive 'with-polluted-live-discovery.psd1'
+
+        & {
+            function Get-Command {
+                [CmdletBinding()]
+                param([object] $CommandType)
+
+                [pscustomobject]@{ Name = 'Get-SmbServerConfiguration' }
+            }
+            function Get-Alias {
+                [CmdletBinding()]
+                param()
+
+                [pscustomobject]@{
+                    Name = 'write-host'
+                    ResolvedCommandName = 'Host-Pollution'
+                }
+            }
+
+            & $symbolGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
+        }
+
+        [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
+            Should -BeExactly $expectedSymbolMapBytes
     }
 
     It 'records the five reviewed function definitions' {

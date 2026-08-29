@@ -164,9 +164,17 @@
         'Write-Output'
     )
 
+    CanonicalAliases = @{
+        '%' = 'ForEach-Object'
+        '?' = 'Where-Object'
+        'echo' = 'Write-Output'
+        'start' = 'Start-Process'
+        'where' = 'Where-Object'
+    }
+
     AliasMappings = @(
-        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 2 }
+        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'where'; NewName = 'Where-Object'; Occurrence = 1 }
+        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'where'; NewName = 'Where-Object'; Occurrence = 2 }
         @{ Path = 'Check-DiskHealth/Detect-Check-DiskHealth.ps1'; OldName = '?'; NewName = 'Where-Object'; Occurrence = 1 }
         @{ Path = 'Device-Auto-Syncer/Remediate-Device-Auto-Syncer.ps1'; OldName = '?'; NewName = 'Where-Object'; Occurrence = 1 }
         @{ Path = 'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1'; OldName = 'echo'; NewName = 'Write-Output'; Occurrence = 1 }

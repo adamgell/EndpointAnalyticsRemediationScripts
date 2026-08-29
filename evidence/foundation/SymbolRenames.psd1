@@ -94,8 +94,8 @@
         @{ Path = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 1 }
         @{ Path = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 2 }
         @{ Path = 'Run-Browser/Remediate-Run-Browser.ps1'; OldName = 'Start'; NewName = 'Start-Process'; Occurrence = 1 }
-        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 2 }
+        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'where'; NewName = 'Where-Object'; Occurrence = 1 }
+        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'where'; NewName = 'Where-Object'; Occurrence = 2 }
     )
 
     Functions = @(
