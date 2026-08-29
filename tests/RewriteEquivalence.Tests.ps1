@@ -329,7 +329,7 @@ Describe 'PowerShell rewrite wrapper' {
         (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json).Passed | Should -BeFalse
     }
 
-    It 'rejects an old function symbol in every destination script' {
+    It 'orders multiple unresolved catalog reference failures by ordinal repository path' {
         $repo = Join-Path $TestDrive 'unresolved-repo'
         $tools = Join-Path $repo 'tools'
         $catalog = Join-Path $repo 'Catalog'
@@ -345,6 +345,8 @@ function IsMember {
 }
 IsMember -Group 'Administrators'
 '@ | Set-Content -LiteralPath (Join-Path $catalog 'A.ps1') -Encoding utf8
+        "`$reference = 'IsMember'" | Set-Content -LiteralPath (Join-Path $catalog 'Zeta.md') -Encoding utf8
+        "`$reference = 'IsMember'" | Set-Content -LiteralPath (Join-Path $catalog 'alpha.psd1') -Encoding utf8
         "`$reference = 'IsMember'" | Set-Content -LiteralPath (Join-Path $catalog 'B.ps1') -Encoding utf8
         & git -C $repo init --quiet
         & git -C $repo config core.autocrlf false
@@ -391,6 +393,10 @@ Test-GroupMembership -Group 'Administrators'
         $LASTEXITCODE | Should -Be 1
         $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
         $report.Passed | Should -BeFalse
-        $report.Failures -join "`n" | Should -Match 'unresolved old function symbol'
+        @($report.Failures) | Should -Be @(
+            "Catalog file 'Catalog/B.ps1' contains unresolved old function symbol 'IsMember'."
+            "Catalog file 'Catalog/Zeta.md' contains unresolved old function symbol 'IsMember'."
+            "Catalog file 'Catalog/alpha.psd1' contains unresolved old function symbol 'IsMember'."
+        )
     }
 }

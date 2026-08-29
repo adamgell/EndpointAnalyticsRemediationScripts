@@ -213,25 +213,36 @@ try {
         $gateFailures.Add('Every symbol map entry must apply exactly once at its declared destination path.')
     }
 
-    $catalogReferences = New-Object 'System.Collections.Generic.List[System.IO.FileInfo]'
+    $catalogReferences = New-Object 'System.Collections.Generic.List[object]'
     foreach ($directory in Get-ChildItem -LiteralPath $repositoryRoot -Directory) {
         if ($directory.Name -in $infrastructureDirectories) {
             continue
         }
         foreach ($file in Get-ChildItem -LiteralPath $directory.FullName -Recurse -File) {
             if ($file.Extension -in @('.ps1', '.psd1', '.md')) {
-                $catalogReferences.Add($file)
+                $relativePath = $file.FullName.Substring($repositoryRoot.Length).TrimStart('\', '/').Replace('\', '/')
+                $catalogReferences.Add([pscustomobject]@{
+                    File = $file
+                    RelativePath = $relativePath
+                })
             }
         }
     }
+    $catalogReferenceComparison = [System.Comparison[object]] {
+        param($left, $right)
+        return [System.StringComparer]::Ordinal.Compare(
+            [string] $left.RelativePath,
+            [string] $right.RelativePath
+        )
+    }
+    $catalogReferences.Sort($catalogReferenceComparison)
     if ($symbolMapData.ContainsKey('Functions')) {
         foreach ($mapping in @($symbolMapData.Functions)) {
             $oldName = [string] $mapping.OldName
             $pattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($oldName) + '(?![A-Za-z0-9_-])'
-            foreach ($file in $catalogReferences) {
-                if ([regex]::IsMatch([System.IO.File]::ReadAllText($file.FullName), $pattern)) {
-                    $relativePath = $file.FullName.Substring($repositoryRoot.Length).TrimStart('\', '/').Replace('\', '/')
-                    $gateFailures.Add("Catalog file '$relativePath' contains unresolved old function symbol '$oldName'.")
+            foreach ($reference in $catalogReferences) {
+                if ([regex]::IsMatch([System.IO.File]::ReadAllText($reference.File.FullName), $pattern)) {
+                    $gateFailures.Add("Catalog file '$($reference.RelativePath)' contains unresolved old function symbol '$oldName'.")
                 }
             }
         }
