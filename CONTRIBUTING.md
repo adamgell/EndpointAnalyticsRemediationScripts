@@ -66,9 +66,7 @@ The foundation cutover evidence is stored in `evidence/foundation/`:
 - `SymbolRenames.psd1` records reviewed symbol migrations.
 - `RewriteReport.json` records the accepted equivalence result.
 
-The foundation rewrite check is one-time CI work. It runs when a pull request introduces the persisted foundation report, regenerates the report with the pinned Windows PowerShell 5.1 toolchain, and compares the generated report with the committed evidence. Later behavior pull requests inherit that report and do not rerun the fixed baseline.
-
-A later formatting-only rewrite must opt in with a new evidence directory under `evidence/rewrites/<name>/` containing its own `BaseRevision.txt`, `PathMap.psd1`, and `SymbolRenames.psd1`. Run the required `ValidateRewrite` command and commit only the deterministic report and maps that belong to that rewrite. `ValidateRewrite` requires all four parameters:
+The foundation rewrite check is one-time cutover-only CI work. It runs only when a pull request introduces the persisted foundation report, regenerates the report with the pinned Windows PowerShell 5.1 toolchain, and compares the generated report with the committed evidence. Later behavior pull requests inherit that report and do not rerun the fixed baseline. The foundation-only command is retained here for that cutover and must not be used for a declared later rewrite:
 
 ```powershell
 $baseRevision = Get-Content .\evidence\foundation\BaseRevision.txt -Raw
@@ -78,6 +76,18 @@ powershell.exe -NoProfile -File .\build.ps1 `
     -PathMap .\evidence\foundation\PathMap.psd1 `
     -SymbolMap .\evidence\foundation\SymbolRenames.psd1 `
     -ReportPath .\evidence\foundation\RewriteReport.json
+```
+
+A later formatting-only rewrite must opt in with a new evidence directory under `evidence/rewrites/<name>/` containing its own `BaseRevision.txt`, `PathMap.psd1`, and `SymbolRenames.psd1`. Run the required `ValidateRewrite` command against that rewrite-specific evidence set and commit only the deterministic report and maps that belong to that rewrite. `ValidateRewrite` requires all four parameters:
+
+```powershell
+$baseRevision = Get-Content .\evidence\rewrites\<name>\BaseRevision.txt -Raw
+powershell.exe -NoProfile -File .\build.ps1 `
+    -Task ValidateRewrite `
+    -BaseRevision $baseRevision `
+    -PathMap .\evidence\rewrites\<name>\PathMap.psd1 `
+    -SymbolMap .\evidence\rewrites\<name>\SymbolRenames.psd1 `
+    -ReportPath .\evidence\rewrites\<name>\RewriteReport.json
 ```
 
 Rewrite evidence proves source and destination equivalence. It is not a deployment input and must never cause the catalog or any deployment script to execute.
