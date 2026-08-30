@@ -681,7 +681,10 @@ Describe 'PowerShell rewrite wrapper' {
         $reportPath = Join-Path $repo 'RewriteReport.json'
 
         $uppercaseRevision = $baseRevision.ToUpperInvariant()
-        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+        & $windowsPowerShellPath `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
             -BaseRevision $uppercaseRevision `
             -PathMap $pathMap `
             -SymbolMap $symbolMap `
@@ -693,7 +696,10 @@ Describe 'PowerShell rewrite wrapper' {
         $uppercaseReport.Passed | Should -BeTrue
 
         $abbreviatedRevision = $baseRevision.Substring(0, 12)
-        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+        & $windowsPowerShellPath `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
             -BaseRevision $abbreviatedRevision `
             -PathMap $pathMap `
             -SymbolMap $symbolMap `
@@ -739,7 +745,10 @@ Describe 'PowerShell rewrite wrapper' {
 
         & git -C $repo replace $baseRevision $replacementRevision
         try {
-            & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+            & $windowsPowerShellPath `
+                -NoProfile `
+                -ExecutionPolicy Bypass `
+                -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
                 -BaseRevision $baseRevision `
                 -PathMap $pathMap `
                 -SymbolMap $symbolMap `

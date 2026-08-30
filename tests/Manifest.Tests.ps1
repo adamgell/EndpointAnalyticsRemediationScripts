@@ -395,9 +395,9 @@ Describe 'Catalog script manifests' {
 Describe 'Deterministic manifest generation' {
     It 'generates the complete registry under Windows PowerShell 5.1' -Skip:(
         [Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -or
-        -not [System.IO.File]::Exists((
-            Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
-        ))
+        -not [System.IO.File]::Exists(
+            (Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe')
+        )
     ) {
         $windowsPowerShellPath = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
         $outputRoot = Join-Path $TestDrive 'windows-powershell-5.1'

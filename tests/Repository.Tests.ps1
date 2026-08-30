@@ -459,7 +459,10 @@ IsMember -Group 'Administrators'
                 -Fixture $fixture `
                 -MarkerPath $fixture.MarkerPath `
                 -OutputPath $outputPath
-        } | Should -Throw "*Function mapping 'Enable-RDP/Detect-Enable-RDP.ps1|IsMember' has an ambiguous or non-static reference.*"
+        } | Should -Throw (
+            "*Function mapping 'Enable-RDP/Detect-Enable-RDP.ps1|IsMember' " +
+            "has an ambiguous or non-static reference.*"
+        )
     }
 
     It 'ignores repository-local Git replacement objects for the baseline revision' {
