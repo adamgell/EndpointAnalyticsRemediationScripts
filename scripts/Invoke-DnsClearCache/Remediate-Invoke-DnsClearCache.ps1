@@ -13,4 +13,55 @@ Run as: Admin
 Context: 64 Bit
 #>
 
-Clear-DnsClientCache
+function Invoke-InvokeDnsClearCacheCommand {
+    [CmdletBinding()]
+    param()
+
+    Clear-DnsClientCache -ErrorAction Stop
+}
+
+function Invoke-InvokeDnsClearCacheRemediation {
+    [CmdletBinding()]
+    param(
+        [scriptblock]$ClearDns
+    )
+
+    if ($null -eq $ClearDns) {
+        $ClearDns = { Invoke-InvokeDnsClearCacheCommand }
+    }
+
+    try {
+        $output = @(& $ClearDns)
+        [pscustomobject][ordered]@{
+            Succeeded = $true
+            Changed = $true
+            ExitCode = 0
+            Message = 'DNS client cache clear completed.'
+            State = 'Cleared'
+            Output = $output
+            Error = $null
+        }
+    }
+    catch {
+        [pscustomobject][ordered]@{
+            Succeeded = $false
+            Changed = $false
+            ExitCode = 1
+            Message = "Failed to clear DNS client cache: $($_.Exception.Message)"
+            State = 'Unknown'
+            Output = @()
+            Error = $_.Exception.Message
+        }
+    }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $result = Invoke-InvokeDnsClearCacheRemediation
+    if (@($result.Output).Count -gt 0) {
+        $result.Output | Write-Output
+    }
+    if (-not $result.Succeeded) {
+        Write-Error $result.Message
+    }
+    exit $result.ExitCode
+}

@@ -28,6 +28,7 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-ItemProperty'
             'New-Item'
             'New-ItemProperty'
             'Out-File'

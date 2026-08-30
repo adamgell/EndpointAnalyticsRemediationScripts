@@ -28,6 +28,7 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-NetFirewallProfile'
             'Set-NetFirewallProfile'
             'Write-Error'
             'Write-Output'

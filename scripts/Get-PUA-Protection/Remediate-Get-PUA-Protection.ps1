@@ -13,13 +13,184 @@ Run as: User/Admin
 Context: 32 & 64 Bit
 #>
 
-$version = 'R1'
-try {
-    Set-MpPreference -PUAProtection Enabled
-    Write-Output "$version Remediated"
-    exit 0
+function Test-GetPUAProtection {
+    [CmdletBinding()]
+    param(
+        [scriptblock] $GetPreference = { Get-MpPreference -ErrorAction Stop }
+    )
+
+    if ($null -eq $GetPreference) {
+        return [pscustomobject]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'C1 DETECTION FAILED'
+            State = $null
+            Error = [pscustomobject]@{
+                Type = 'MissingDependency'
+                Message = 'Defender preference provider is required.'
+            }
+            Evidence = $null
+        }
+    }
+
+    try {
+        $preference = & $GetPreference
+        if ($null -eq $preference) { throw 'Defender preference provider returned no state.' }
+        $compliant = ($preference.PUAProtection -eq 1)
+        return [pscustomobject]@{
+            Compliant = $compliant
+            ExitCode = if ($compliant) { 0 } else { 1 }
+            Message = if ($compliant) { 'C1 COMPLIANT' } else { 'C1 NON-COMPLIANT' }
+            State = [pscustomobject]@{ PUAProtection = $preference.PUAProtection }
+            Error = $null
+            Evidence = [pscustomobject]@{ PUAProtection = $preference.PUAProtection }
+        }
+    }
+    catch {
+        return [pscustomobject]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'C1 DETECTION FAILED'
+            State = $null
+            Error = [pscustomobject]@{ Type = 'DependencyFailure'; Message = $_.Exception.Message }
+            Evidence = $null
+        }
+    }
 }
-catch {
-    Write-Output "$version Failed"
-    exit 1
+
+function Repair-GetPUAProtection {
+    [CmdletBinding()]
+    param(
+        [scriptblock] $GetPreference = { Get-MpPreference -ErrorAction Stop },
+        [scriptblock] $SetPreference = {
+            param([hashtable]$values)
+            Set-MpPreference -PUAProtection $values.PUAProtection -ErrorAction Stop
+        }
+    )
+
+    $before = Test-GetPUAProtection -GetPreference $GetPreference
+    if ($null -ne $before.Error) {
+        return [pscustomobject]@{
+            Succeeded = $false
+            Changed = $false
+            ExitCode = 1
+            Message = 'R1 Failed'
+            State = [pscustomobject]@{
+                Before = $before.State
+                After = $null
+                Desired = [pscustomobject]@{
+                    PUAProtection = 1
+                }
+            }
+            Error = $before.Error
+            Evidence = $before.Error
+        }
+    }
+
+    if ($before.Compliant) {
+        return [pscustomobject]@{
+            Succeeded = $true
+            Changed = $false
+            ExitCode = 0
+            Message = 'R1 Remediated'
+            State = [pscustomobject]@{
+                Before = $before.State
+                After = $before.State
+                Desired = [pscustomobject]@{
+                    PUAProtection = 1
+                }
+            }
+            Error = $null
+            Evidence = [pscustomobject]@{ AlreadyCompliant = $true }
+        }
+    }
+
+    if ($null -eq $SetPreference) {
+        return [pscustomobject]@{
+            Succeeded = $false
+            Changed = $false
+            ExitCode = 1
+            Message = 'R1 Failed'
+            State = [pscustomobject]@{
+                Before = $before.State
+                After = $null
+                Desired = [pscustomobject]@{
+                    PUAProtection = 1
+                }
+            }
+            Error = [pscustomobject]@{ Type = 'MissingDependency'; Message = 'Defender preference setter is required.' }
+            Evidence = $null
+        }
+    }
+
+    try {
+        $null = & $SetPreference ([ordered]@{ PUAProtection = 'Enabled' })
+    }
+    catch {
+        return [pscustomobject]@{
+            Succeeded = $false
+            Changed = $false
+            ExitCode = 1
+            Message = 'R1 Failed'
+            State = [pscustomobject]@{
+                Before = $before.State
+                After = $null
+                Desired = [pscustomobject]@{
+                    PUAProtection = 1
+                }
+            }
+            Error = [pscustomobject]@{ Type = 'DependencyFailure'; Message = $_.Exception.Message }
+            Evidence = $null
+        }
+    }
+
+    $after = Test-GetPUAProtection -GetPreference $GetPreference
+    if ($null -ne $after.Error -or -not $after.Compliant) {
+        $error = if ($null -ne $after.Error) {
+            $after.Error
+        }
+        else {
+            [pscustomobject]@{
+                Type = 'PostconditionFailure'
+                Message = 'PUA protection remained disabled after remediation.'
+            }
+        }
+        return [pscustomobject]@{
+            Succeeded = $false
+            Changed = $true
+            ExitCode = 1
+            Message = 'R1 Failed'
+            State = [pscustomobject]@{
+                Before = $before.State
+                After = $after.State
+                Desired = [pscustomobject]@{
+                    PUAProtection = 1
+                }
+            }
+            Error = $error
+            Evidence = $after.State
+        }
+    }
+
+    return [pscustomobject]@{
+        Succeeded = $true
+        Changed = $true
+        ExitCode = 0
+        Message = 'R1 Remediated'
+        State = [pscustomobject]@{
+            Before = $before.State
+            After = $after.State
+            Desired = [pscustomobject]@{
+                PUAProtection = 1
+            }
+        }
+        Error = $null
+        Evidence = $after.State
+    }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $result = Repair-GetPUAProtection
+    Write-Output $result.Message
+    exit $result.ExitCode
 }

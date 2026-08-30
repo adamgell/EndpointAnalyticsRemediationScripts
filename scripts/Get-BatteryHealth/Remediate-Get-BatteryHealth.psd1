@@ -28,10 +28,13 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-CimInstance'
+            'Get-Content'
             'Get-Date'
             'Join-Path'
             'New-Item'
             'Out-Null'
+            'Remove-Item'
             'Test-Path'
             'Write-Error'
             'Write-Output'

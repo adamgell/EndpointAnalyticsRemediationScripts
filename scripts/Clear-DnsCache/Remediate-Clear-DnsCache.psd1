@@ -30,7 +30,10 @@
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @()
+        Cmdlets = @(
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @(
             'ipconfig'
         )

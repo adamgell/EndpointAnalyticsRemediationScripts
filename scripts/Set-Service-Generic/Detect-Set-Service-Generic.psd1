@@ -33,6 +33,7 @@
         Modules = @()
         Cmdlets = @(
             'Get-Service'
+            'Select-Object'
             'Write-Host'
         )
         Executables = @()

@@ -10,20 +10,60 @@ Run as: System
 Context: 64 Bit
 #>
 
-try {
-    $LogName = "Microsoft-Windows-DNS-Client/Operational"
-    $Log = Get-WinEvent -ListLog $LogName -ErrorAction Stop
+function Test-EnableDNSOperationalLogs {
+    [CmdletBinding()]
+    param(
+        [scriptblock] $GetLog = {
+            Get-WinEvent -ListLog 'Microsoft-Windows-DNS-Client/Operational' -ErrorAction Stop
+        }
+    )
 
-    if ($Log.IsEnabled) {
-        Write-Output "DNS Operational Log is enabled."
-        exit 0
+    if ($null -eq $GetLog) {
+        return [pscustomobject]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'DNS Operational Log detection failed.'
+            State = $null
+            Error = [pscustomobject]@{ Type = 'MissingDependency'; Message = 'DNS event log provider is required.' }
+            Evidence = $null
+        }
     }
-    else {
-        Write-Output "DNS Operational Log is disabled."
-        exit 1
+
+    try {
+        $log = & $GetLog
+        if ($null -eq $log -or $null -eq $log.PSObject.Properties['IsEnabled']) {
+            throw 'DNS event log provider returned no IsEnabled value.'
+        }
+
+        $enabled = [bool]$log.IsEnabled
+        return [pscustomobject]@{
+            Compliant = $enabled
+            ExitCode = if ($enabled) { 0 } else { 1 }
+            Message = if ($enabled) { 'DNS Operational Log is enabled.' } else { 'DNS Operational Log is disabled.' }
+            State = [pscustomobject]@{ IsEnabled = $enabled }
+            Error = $null
+            Evidence = [pscustomobject]@{ IsEnabled = $enabled }
+        }
+    }
+    catch {
+        return [pscustomobject]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'DNS Operational Log detection failed.'
+            State = $null
+            Error = [pscustomobject]@{ Type = 'DependencyFailure'; Message = $_.Exception.Message }
+            Evidence = $null
+        }
     }
 }
-catch {
-    Write-Error "Failed to check DNS Operational Log status: $_"
-    exit 1
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $result = Test-EnableDNSOperationalLogs
+    if ($null -ne $result.Error) {
+        Write-Error ('Failed to check DNS Operational Log status: ' + $result.Error.Message)
+    }
+    else {
+        Write-Output $result.Message
+    }
+    exit $result.ExitCode
 }

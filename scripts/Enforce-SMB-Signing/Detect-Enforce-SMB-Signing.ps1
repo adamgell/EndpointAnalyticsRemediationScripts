@@ -10,20 +10,76 @@ Run as: Admin
 Context: 64 Bit
 #>
 
-$Path = 'HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManWorkstation\Parameters'
-$Name = 'RequireSecuritySignature'
-$Value = 1
+$EnforceSMBSigningPath = 'HKLM:\System\CurrentControlSet\Services\LanManWorkstation\Parameters'
+$EnforceSMBSigningName = 'RequireSecuritySignature'
+$EnforceSMBSigningValue = 1
 
-Try {
-    $Registry = Get-ItemProperty -Path $Path -Name $Name -ErrorAction Stop | Select-Object -ExpandProperty $Name
-    If ($Registry -eq $Value) {
-        Write-Output "Compliant"
-        Exit 0
+function Get-EnforceSMBSigningRegistryState {
+    [CmdletBinding()]
+    param()
+
+    $value = Get-ItemProperty -Path $EnforceSMBSigningPath -Name $EnforceSMBSigningName -ErrorAction Stop |
+        Select-Object -ExpandProperty $EnforceSMBSigningName
+    [pscustomobject][ordered]@{
+        RequireSecuritySignature = $value
     }
-    Write-Warning "Not Compliant"
-    Exit 1
 }
-Catch {
-    Write-Warning "Not Compliant"
-    Exit 1
+
+function Test-EnforceSMBSigning {
+    [CmdletBinding()]
+    param(
+        [Alias('GetRegistry', 'GetSmbState')]
+        [scriptblock]$GetState = { Get-EnforceSMBSigningRegistryState }
+    )
+
+    if ($null -eq $GetState) {
+        return [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'Not Compliant'
+            State = 'Unknown'
+            Error = [pscustomobject]@{
+                Type = 'MissingDependency'
+                Message = 'An SMB signing state reader is required.'
+            }
+        }
+    }
+
+    try {
+        $state = & $GetState
+        $compliant = $null -ne $state -and
+        ($state.PSObject.Properties.Name -contains $EnforceSMBSigningName) -and
+        $null -ne $state.RequireSecuritySignature -and
+        ([int]$state.RequireSecuritySignature -eq $EnforceSMBSigningValue)
+        [pscustomobject][ordered]@{
+            Compliant = $compliant
+            ExitCode = if ($compliant) { 0 } else { 1 }
+            Message = if ($compliant) { 'Compliant' } else { 'Not Compliant' }
+            State = if ($null -eq $state) { 'Unknown' } else { $state }
+            Error = $null
+        }
+    }
+    catch {
+        [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'Not Compliant'
+            State = 'Unknown'
+            Error = [pscustomobject]@{
+                Type = 'DependencyFailure'
+                Message = $_.Exception.Message
+            }
+        }
+    }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $decision = Test-EnforceSMBSigning
+    if ($decision.Compliant) {
+        Write-Output $decision.Message
+    }
+    else {
+        Write-Warning $decision.Message
+    }
+    exit $decision.ExitCode
 }

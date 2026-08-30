@@ -750,6 +750,50 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
             -Raw |
             ConvertFrom-Json
         $approvedLongLineDigest = 'd43eae67fa2231aeebc5895e9e1418ca025361dca6c4643ca8c50e990c282abe'
+        $migratedStylePackages = @(
+            'Activate-Numlock'
+            'AutomaticTimezone'
+            'BlockAADWorkplaceJoin'
+            'Disable-Coinstaller'
+            'Disable-Fastboot'
+            'Disable-LegacyTLS'
+            'Disable-StartMenuWebSearch'
+            'Enable-DarkMode'
+            'Enforce-CredentialGuard'
+            'Enforce-DOH'
+            'Enforce-SMB-Signing'
+            'Fortinet-VPN-Profile'
+            'Get-Always-Elevated'
+            'Get-LSA-Protection'
+            'Get-OfficeTelemetry'
+            'Set-Cached-Logon-Count-0'
+            'Disable-SMBv1'
+            'Enable-DNSOperationalLogs'
+            'Enforce-WindowsFirewall'
+            'Get-CloudDeliveredProtection'
+            'Get-NetworkProtection'
+            'Get-PUA-Protection'
+            'Get-RealTimeBehaviour'
+            'Get-RealTimeProtection'
+            'Clear-DnsCache'
+            'Invoke-DnsClearCache'
+            'Restart-Service-Generic'
+            'Restart-Windows-Search-Service'
+            'Restart-Windows-Update-Service'
+            'Set-MTU-Optimal'
+            'Set-Service-Generic'
+            'Clear-OutlookCache'
+            'Get-BatteryHealth'
+            'Set-DefaultBrowser'
+        )
+        $migratedStylePaths = [System.Collections.Generic.HashSet[string]]::new(
+            [System.StringComparer]::Ordinal
+        )
+        foreach ($package in $migratedStylePackages) {
+            foreach ($role in 'Detect', 'Remediate') {
+                $null = $migratedStylePaths.Add("$package/${role}-$package.ps1")
+            }
+        }
         $scriptFiles = @(Get-DeploymentScript -Root $scriptRoot)
         $trackedPowerShellPaths = @(
             Get-FoundationTrackedPowerShellPath -RepositoryRoot $repositoryRoot |
@@ -1161,18 +1205,32 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
                 }
             }
         )
-        $expected = @($styleExclusions.LongLines | ForEach-Object {
+        $catalogKeys = @($styleExclusions.LongLines | ForEach-Object {
                 Get-FoundationStyleLineKey `
                     -Path $_.Path `
                     -Line $_.Line `
                     -LineSha256 $_.LineSha256
             })
+        $expected = @($styleExclusions.LongLines |
+                Where-Object { -not $migratedStylePaths.Contains($_.Path) } |
+                ForEach-Object {
+                    Get-FoundationStyleLineKey `
+                        -Path $_.Path `
+                        -Line $_.Line `
+                        -LineSha256 $_.LineSha256
+                })
+        $migratedActual = @($actual | Where-Object {
+                $path = ([string] $_ -split '\|', 2)[0]
+                $migratedStylePaths.Contains($path)
+            })
 
         $trackedPowerShellFiles.Count | Should -Be $trackedPowerShellPaths.Count
-        $trackedPowerShellFiles.Count | Should -Be 578
-        $expected.Count | Should -Be 93
+        $trackedPowerShellFiles.Count | Should -Be 612
+        $catalogKeys.Count | Should -Be 93
+        $expected.Count | Should -Be 78
+        $migratedActual | Should -BeNullOrEmpty
         Assert-FoundationApprovedLongLineCatalog `
-            -Keys $expected `
+            -Keys $catalogKeys `
             -ExpectedDigest $approvedLongLineDigest
         Join-FoundationStyleKeys -Keys $actual |
             Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)

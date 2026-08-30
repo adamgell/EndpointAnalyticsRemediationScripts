@@ -13,25 +13,81 @@ Run as: System
 Context: 64 Bit
 #>
 
-$servicename = "ServiceName"
 
-$checkarray = 0
+function Get-RestartServiceGenericService {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
 
-$serviceexist = Get-Service -Name $servicename -ErrorAction SilentlyContinue
-if ($null -ne $serviceexist) {
-    $checkarray++
+    try {
+        Get-Service -Name $Name -ErrorAction Stop | Select-Object -First 1
+    }
+    catch {
+        $message = $_.Exception.Message
+        $errorId = [string]$_.FullyQualifiedErrorId
+        if (($errorId -like 'NoServiceFoundForGivenName*') -or
+            ($message -match 'Cannot find any service with service name')) {
+            return $null
+        }
+        throw
+    }
 }
 
-$servicerunning = Get-Service -Name $servicename | Where-Object { $_.Status -eq "Running" }
-if ($null -ne $servicerunning) {
-    $checkarray++
+function Get-RestartServiceGenericDetectionDecision {
+    param(
+        [string]$ServiceName = 'ServiceName',
+        [scriptblock]$GetService
+    )
+
+    if ($null -eq $GetService) {
+        $GetService = { param($Name) Get-RestartServiceGenericService -Name $Name }
+    }
+
+    try {
+        $service = & $GetService $ServiceName
+        if ($null -eq $service) {
+            return [pscustomobject][ordered]@{
+                Compliant = $false
+                ExitCode = 1
+                Message = 'Service is not there/running'
+                State = 'Missing'
+                Error = $null
+            }
+        }
+
+        if ([string]$service.Status -eq 'Running') {
+            return [pscustomobject][ordered]@{
+                Compliant = $true
+                ExitCode = 0
+                Message = 'Service is available and running'
+                State = 'Running'
+                Error = $null
+            }
+        }
+
+        [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'Service is not there/running'
+            State = [string]$service.Status
+            Error = $null
+        }
+    }
+    catch {
+        [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = "Failed to inspect service '$ServiceName': $($_.Exception.Message)"
+            State = 'Error'
+            Error = $_.Exception.Message
+        }
+    }
 }
 
-if ($checkarray -ne 0) {
-    Write-Host "Service is available and running"
-    exit 0
-}
-else {
-    Write-Host "Service is not there/running"
-    exit 1
+if ($MyInvocation.InvocationName -ne '.') {
+    $decision = Get-RestartServiceGenericDetectionDecision
+    Write-Host $decision.Message
+    exit $decision.ExitCode
 }

@@ -13,13 +13,125 @@ Run as: User
 Context: 64 Bit
 #>
 
-if ("0" -eq (
-        Get-ItemProperty -Path 'Registry::HKU\.DEFAULT\Control Panel\Keyboard' -Name "InitialKeyboardIndicators").
-    InitialKeyboardIndicators) {
-    Write-Host "Numlock at Startup not found"
-    exit 0
+function Get-ActivateNumlockRegistryState {
+    [CmdletBinding()]
+    param()
+
+    $path = 'Registry::HKU\.DEFAULT\Control Panel\Keyboard'
+    $name = 'InitialKeyboardIndicators'
+    $item = Get-ItemProperty -Path $path -Name $name -ErrorAction Stop
+    [pscustomobject][ordered]@{
+        Value = $item.$name
+        Path = $path
+        Name = $name
+    }
 }
-else {
-    Write-Host "Numlock at Startup found"
-    Exit 1
+
+function Resolve-ActivateNumlockValue {
+    param($State)
+
+    if ($null -eq $State) {
+        return $null
+    }
+    if ($null -ne $State.PSObject.Properties['Value']) {
+        return $State.Value
+    }
+    if ($null -ne $State.PSObject.Properties['InitialKeyboardIndicators']) {
+        return $State.InitialKeyboardIndicators
+    }
+    return $State
+}
+
+function New-ActivateNumlockError {
+    param(
+        [string]$Type,
+        [string]$Message
+    )
+
+    [pscustomobject][ordered]@{
+        Type = $Type
+        Message = $Message
+    }
+}
+
+function Test-ActivateNumlock {
+    [CmdletBinding()]
+    param(
+        [AllowNull()]
+        [scriptblock]$GetState = { Get-ActivateNumlockRegistryState }
+    )
+
+    $path = 'Registry::HKU\.DEFAULT\Control Panel\Keyboard'
+    $name = 'InitialKeyboardIndicators'
+    $desiredValue = '2'
+    $notFoundMessage = 'Numlock at Startup not found'
+    $foundMessage = 'Numlock at Startup found'
+
+    if ($null -eq $GetState) {
+        return [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = $notFoundMessage
+            State = [pscustomobject][ordered]@{
+                Status = 'MissingDependency'
+                Value = $null
+                DesiredValue = $desiredValue
+                Path = $path
+                Name = $name
+            }
+            Error = (
+                New-ActivateNumlockError `
+                    -Type 'MissingDependency' `
+                    -Message 'A registry state provider is required.'
+            )
+        }
+    }
+
+    try {
+        $observedState = & $GetState
+        $value = Resolve-ActivateNumlockValue -State $observedState
+        $compliant = $null -ne $value -and ([string]$value -eq $desiredValue)
+        $exitCode = 1
+        $message = $notFoundMessage
+        $status = 'NonCompliant'
+        if ($compliant) {
+            $exitCode = 0
+            $message = $foundMessage
+            $status = 'Compliant'
+        }
+        [pscustomobject][ordered]@{
+            Compliant = $compliant
+            ExitCode = $exitCode
+            Message = $message
+            State = [pscustomobject][ordered]@{
+                Status = $status
+                Value = $value
+                DesiredValue = $desiredValue
+                Path = $path
+                Name = $name
+            }
+            Error = $null
+        }
+    }
+    catch {
+        [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = $notFoundMessage
+            State = [pscustomobject][ordered]@{
+                Status = 'DependencyFailure'
+                Value = $null
+                DesiredValue = $desiredValue
+                Path = $path
+                Name = $name
+            }
+            Error = (New-ActivateNumlockError -Type 'DependencyFailure' -Message $_.Exception.Message)
+        }
+    }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $decision = Test-ActivateNumlock
+    Write-Host $decision.Message
+    exit $decision.ExitCode
 }

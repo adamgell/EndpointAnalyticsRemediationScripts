@@ -13,12 +13,62 @@ Run as: Admin
 Context: 32 & 64 Bit
 #>
 
-$version = 'C1'
-if ((Get-MpComputerStatus).BehaviorMonitorEnabled -eq "True") {
-    Write-Output "$version COMPLIANT"
-    exit 0
+function Test-GetRealTimeBehaviour {
+    [CmdletBinding()]
+    param(
+        [scriptblock] $GetStatus = { Get-MpComputerStatus -ErrorAction Stop }
+    )
+
+    if ($null -eq $GetStatus) {
+        return [pscustomobject]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'C1 DETECTION FAILED'
+            State = $null
+            Error = [pscustomobject]@{ Type = 'MissingDependency'; Message = 'Defender status provider is required.' }
+            Evidence = $null
+        }
+    }
+
+    try {
+        $status = & $GetStatus
+        if ($null -eq $status) { throw 'Defender status provider returned no state.' }
+        $value = $status.BehaviorMonitorEnabled
+        $enabled = ($value -eq $true) -or (
+            [string]::Equals(
+                [string]$value,
+                'True',
+                [System.StringComparison]::OrdinalIgnoreCase
+            )
+        )
+        return [pscustomobject]@{
+            Compliant = $enabled
+            ExitCode = if ($enabled) { 0 } else { 1 }
+            Message = if ($enabled) { 'C1 COMPLIANT' } else { 'C1 NON-COMPLIANT' }
+            State = [pscustomobject]@{ BehaviorMonitorEnabled = $enabled }
+            Error = $null
+            Evidence = [pscustomobject]@{ BehaviorMonitorEnabled = $enabled }
+        }
+    }
+    catch {
+        return [pscustomobject]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'C1 DETECTION FAILED'
+            State = $null
+            Error = [pscustomobject]@{ Type = 'DependencyFailure'; Message = $_.Exception.Message }
+            Evidence = $null
+        }
+    }
 }
-else {
-    Write-Output "$version NON-COMPLIANT"
-    exit 1
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $result = Test-GetRealTimeBehaviour
+    if ($null -ne $result.Error) {
+        Write-Error $result.Error.Message
+    }
+    else {
+        Write-Output $result.Message
+    }
+    exit $result.ExitCode
 }

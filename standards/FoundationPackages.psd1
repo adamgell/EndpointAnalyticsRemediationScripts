@@ -2074,7 +2074,10 @@
     "NotApplicable",
     [
       [],
-      [],
+      [
+        "Write-Error",
+        "Write-Output"
+      ],
       [
         "ipconfig"
       ],
@@ -2463,7 +2466,8 @@
     [
       [],
       [
-        "Start-Process"
+        "Start-Process",
+        "Test-Path"
       ],
       [
         "OUTLOOK.EXE"
@@ -4007,9 +4011,9 @@
     [
       [],
       [
-        "get-smbserverconfiguration",
-        "Select-Object",
-        "write-host"
+        "Get-SmbServerConfiguration",
+        "Write-Error",
+        "Write-Host"
       ],
       [],
       [],
@@ -4055,7 +4059,9 @@
     [
       [],
       [
-        "Set-SmbServerConfiguration"
+        "Get-SmbServerConfiguration",
+        "Set-SmbServerConfiguration",
+        "Write-Error"
       ],
       [],
       [],
@@ -4387,6 +4393,7 @@
     [
       [],
       [
+        "Get-WinEvent",
         "New-Object",
         "Write-Error",
         "Write-Output"
@@ -5357,6 +5364,7 @@
     [
       [],
       [
+        "Get-NetFirewallProfile",
         "Set-NetFirewallProfile",
         "Write-Error",
         "Write-Output"
@@ -6366,10 +6374,13 @@
     [
       [],
       [
+        "Get-CimInstance",
+        "Get-Content",
         "Get-Date",
         "Join-Path",
         "New-Item",
         "Out-Null",
+        "Remove-Item",
         "Test-Path",
         "Write-Error",
         "Write-Output"
@@ -6639,6 +6650,7 @@
       [],
       [
         "Get-MpPreference",
+        "Write-Error",
         "Write-Output"
       ],
       [],
@@ -6685,6 +6697,7 @@
     [
       [],
       [
+        "Get-MpPreference",
         "Set-MpPreference",
         "Write-Output"
       ],
@@ -6996,6 +7009,7 @@
       [],
       [
         "Get-MpPreference",
+        "Write-Error",
         "Write-Output"
       ],
       [],
@@ -7042,6 +7056,7 @@
     [
       [],
       [
+        "Get-MpPreference",
         "Set-MpPreference",
         "Write-Output"
       ],
@@ -7191,6 +7206,7 @@
       [],
       [
         "Get-MpPreference",
+        "Write-Error",
         "Write-Output"
       ],
       [],
@@ -7237,6 +7253,7 @@
     [
       [],
       [
+        "Get-MpPreference",
         "Set-MpPreference",
         "Write-Output"
       ],
@@ -7285,6 +7302,7 @@
       [],
       [
         "Get-MpComputerStatus",
+        "Write-Error",
         "Write-Output"
       ],
       [],
@@ -7331,6 +7349,7 @@
     [
       [],
       [
+        "Get-MpComputerStatus",
         "Set-MpPreference",
         "Write-Output"
       ],
@@ -7379,6 +7398,7 @@
       [],
       [
         "Get-MpComputerStatus",
+        "Write-Error",
         "Write-Output"
       ],
       [],
@@ -7425,6 +7445,7 @@
     [
       [],
       [
+        "Get-MpComputerStatus",
         "Set-MpPreference",
         "Write-Output"
       ],
@@ -8358,7 +8379,9 @@
     [
       [],
       [
-        "Clear-DnsClientCache"
+        "Clear-DnsClientCache",
+        "Write-Error",
+        "Write-Output"
       ],
       [],
       [],
@@ -11357,7 +11380,7 @@
       [],
       [
         "Get-Service",
-        "Where-Object",
+        "Select-Object",
         "Write-Host"
       ],
       [],
@@ -11409,7 +11432,10 @@
     [
       [],
       [
-        "Restart-Service"
+        "Get-Service",
+        "Restart-Service",
+        "Select-Object",
+        "Write-Error"
       ],
       [],
       [],
@@ -11461,7 +11487,7 @@
       [],
       [
         "Get-Service",
-        "Where-Object",
+        "Select-Object",
         "Write-Host"
       ],
       [],
@@ -11508,7 +11534,10 @@
     [
       [],
       [
-        "Restart-Service"
+        "Get-Service",
+        "Restart-Service",
+        "Select-Object",
+        "Write-Error"
       ],
       [],
       [],
@@ -11555,7 +11584,7 @@
       [],
       [
         "Get-Service",
-        "Where-Object",
+        "Select-Object",
         "Write-Host"
       ],
       [],
@@ -11602,7 +11631,10 @@
     [
       [],
       [
-        "Restart-Service"
+        "Get-Service",
+        "Restart-Service",
+        "Select-Object",
+        "Write-Error"
       ],
       [],
       [],
@@ -12416,6 +12448,7 @@
     [
       [],
       [
+        "Get-ItemProperty",
         "New-Item",
         "New-ItemProperty",
         "Out-File",
@@ -12566,6 +12599,7 @@
       [],
       [
         "Get-Service",
+        "Select-Object",
         "Write-Host"
       ],
       [],
@@ -12626,7 +12660,10 @@
     [
       [],
       [
-        "Set-Service"
+        "Get-Service",
+        "Select-Object",
+        "Set-Service",
+        "Write-Error"
       ],
       [],
       [],

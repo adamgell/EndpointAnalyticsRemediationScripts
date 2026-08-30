@@ -31,9 +31,9 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
-            'get-smbserverconfiguration'
-            'Select-Object'
-            'write-host'
+            'Get-SmbServerConfiguration'
+            'Write-Error'
+            'Write-Host'
         )
         Executables = @()
         Policies = @()

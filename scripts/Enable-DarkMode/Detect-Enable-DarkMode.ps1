@@ -9,21 +9,88 @@ Run as: System
 Context: 64 Bit
 #>
 
-try {
-    $Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-    $AppsUseLightTheme = Get-ItemProperty -Path $Path -Name "AppsUseLightTheme" -ErrorAction SilentlyContinue
-    $SystemUsesLightTheme = Get-ItemProperty -Path $Path -Name "SystemUsesLightTheme" -ErrorAction SilentlyContinue
+$EnableDarkModePath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+$EnableDarkModeAppsName = "AppsUseLightTheme"
+$EnableDarkModeSystemName = "SystemUsesLightTheme"
 
-    if (($AppsUseLightTheme -and $AppsUseLightTheme.AppsUseLightTheme -eq 0) -and
-        ($SystemUsesLightTheme -and $SystemUsesLightTheme.SystemUsesLightTheme -eq 0)) {
-        Write-Output "Compliant - Dark mode is enabled"
-        exit 0
+function Get-EnableDarkModeRegistryState {
+    [CmdletBinding()]
+    param()
+
+    $apps = Get-ItemProperty -Path $EnableDarkModePath -Name $EnableDarkModeAppsName -ErrorAction SilentlyContinue
+    $system = Get-ItemProperty -Path $EnableDarkModePath -Name $EnableDarkModeSystemName -ErrorAction SilentlyContinue
+    [pscustomobject][ordered]@{
+        AppsUseLightTheme = if ($apps) { $apps.AppsUseLightTheme } else { $null }
+        SystemUsesLightTheme = if ($system) { $system.SystemUsesLightTheme } else { $null }
+    }
+}
+
+function Test-EnableDarkMode {
+    [CmdletBinding()]
+    param(
+        [Alias('GetRegistry', 'GetPersonalizationState')]
+        [scriptblock]$GetState = { Get-EnableDarkModeRegistryState }
+    )
+
+    if ($null -eq $GetState) {
+        return [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'Not Compliant - Dark mode is not fully enabled'
+            State = 'Unknown'
+            Error = [pscustomobject]@{
+                Type = 'MissingDependency'
+                Message = 'A registry state reader is required.'
+            }
+        }
     }
 
-    Write-Warning "Not Compliant - Dark mode is not fully enabled"
-    exit 1
+    try {
+        $state = & $GetState
+        $hasApps = $null -ne $state -and
+        ($state.PSObject.Properties.Name -contains $EnableDarkModeAppsName) -and
+        $null -ne $state.AppsUseLightTheme
+        $hasSystem = $null -ne $state -and
+        ($state.PSObject.Properties.Name -contains $EnableDarkModeSystemName) -and
+        $null -ne $state.SystemUsesLightTheme
+        $compliant = $hasApps -and $hasSystem -and
+        ([int]$state.AppsUseLightTheme -eq 0) -and
+        ([int]$state.SystemUsesLightTheme -eq 0)
+        if ($compliant) {
+            $message = 'Compliant - Dark mode is enabled'
+        }
+        else {
+            $message = 'Not Compliant - Dark mode is not fully enabled'
+        }
+        [pscustomobject][ordered]@{
+            Compliant = $compliant
+            ExitCode = if ($compliant) { 0 } else { 1 }
+            Message = $message
+            State = if ($null -eq $state) { 'Unknown' } else { $state }
+            Error = $null
+        }
+    }
+    catch {
+        [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = "Error checking dark mode: $($_.Exception.Message)"
+            State = 'Unknown'
+            Error = [pscustomobject]@{
+                Type = 'DependencyFailure'
+                Message = $_.Exception.Message
+            }
+        }
+    }
 }
-catch {
-    Write-Warning "Error checking dark mode: $_"
-    exit 1
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $decision = Test-EnableDarkMode
+    if ($decision.Compliant) {
+        Write-Output $decision.Message
+    }
+    else {
+        Write-Warning $decision.Message
+    }
+    exit $decision.ExitCode
 }

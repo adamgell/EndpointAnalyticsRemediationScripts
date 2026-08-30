@@ -32,6 +32,7 @@
         Modules = @()
         Cmdlets = @(
             'Get-MpPreference'
+            'Write-Error'
             'Write-Output'
         )
         Executables = @()

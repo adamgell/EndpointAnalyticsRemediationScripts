@@ -1,121 +1,160 @@
-<!-- jr-brand:start -->
-<div align="center">
-  <a href="https://jannikreinhard.com/">
-    <img src="https://raw.githubusercontent.com/JayRHa/.github/main/assets/readme/brand-header.png" alt="Jannik Reinhard — Driving AI with passion" width="100%">
-  </a>
-  <h1>Endpoint Analytics Remediation Scripts</h1>
-  <p><strong>Ready-to-use Microsoft Intune Endpoint Analytics Proactive Remediation detection and remediation scripts.</strong></p>
-  <p>
-  <a href="https://jannikreinhard.com/"><img src="https://img.shields.io/badge/Website-146CDD?style=flat-square&amp;logo=wordpress&amp;logoColor=white" alt="Website"></a>
-  <a href="https://github.com/JayRHa"><img src="https://img.shields.io/badge/GitHub-081427?style=flat-square&amp;logo=github&amp;logoColor=white" alt="GitHub"></a>
-  <a href="https://www.linkedin.com/in/jannik-r/"><img src="https://img.shields.io/badge/LinkedIn-0795FF?style=flat-square&amp;logo=linkedin&amp;logoColor=white" alt="LinkedIn"></a>
-  <a href="https://x.com/jannik_reinhard"><img src="https://img.shields.io/badge/X-081427?style=flat-square&amp;logo=x&amp;logoColor=white" alt="X"></a>
-  <a href="https://www.youtube.com/@jannikreinhard"><img src="https://img.shields.io/badge/YouTube-146CDD?style=flat-square&amp;logo=youtube&amp;logoColor=white" alt="YouTube"></a>
-  </p>
-  <p><sub>Driving AI with passion · Microsoft Foundry · Intune · Azure</sub></p>
-</div>
-<!-- jr-brand:end -->
+# Windows Endpoint Remediation Toolkit
 
-**The largest community-driven collection of Intune Endpoint Analytics remediation scripts.**
+A maintained collection of Windows PowerShell detection and remediation packages for Microsoft Intune Endpoint analytics and controlled endpoint administration.
 
-Detect. Remediate. Automate.
+The project is designed for administrators who need to:
 
-## Overview
+- inspect endpoint state with a deterministic detection script;
+- correct that state with a paired remediation script;
+- review configuration, risk, dependencies, and user impact before deployment;
+- validate repository quality with Windows PowerShell 5.1; and
+- promote only behavior-tested packages into wider use.
 
-This repository provides a growing library of **production-ready** detection and remediation scripts for [Microsoft Intune Endpoint Analytics](https://learn.microsoft.com/en-us/mem/analytics/proactive-remediations). Each script package includes a detection script and (where applicable) a remediation script that you can deploy directly to your environment.
+## Project status
 
-> **Browse `scripts/`** to explore all available packages -- from security hardening and Defender configuration to disk cleanup, Teams management, and more.
+The repository currently contains:
 
-<!-- project-context:start -->
-## Project Context
+- 134 package directories;
+- 271 deployment scripts and manifests;
+- a canonical package root at `scripts/`; and
+- a behavior-coverage migration starting with 34 package directories, approximately 25% of the package inventory.
 
-Endpoint Analytics Remediation Scripts is a deployable script library for Intune administrators who want ready-to-use detection and remediation packages. The repository is organized around script folders, where each package can be reviewed, tested, and then deployed through Microsoft Intune proactive remediations.
+The foundation path and naming migration is complete. Existing scripts remain `PendingMigration` until their observable detection and remediation behavior has focused tests and the required Windows evidence. See the [25% behavior migration plan](docs/superpowers/plans/2026-08-30-25-percent-behavior-migration.md) for the selected batches and release gates.
 
-- Use it when endpoint issues should be detected automatically and remediated consistently.
-- Each script package is designed to separate detection from remediation so administrators can validate behavior before rollout.
-- The repository acts as both a community script catalog and a practical deployment reference.
+## Requirements
 
-## How It Works
+- Windows PowerShell 5.1, 64-bit. This is the repository's authoritative validation runtime.
+- Git.
+- Internet access to install the pinned quality modules from PowerShell Gallery during the first bootstrap.
+- Administrator or appropriate endpoint permissions when validating packages whose manifests require elevation.
+- A revertible Windows VM for packages with the `WindowsVm` integration tier.
+- A logged-on Windows session for packages with the `InteractiveWindows` integration tier.
 
-Administrators pick a script package, review the detection and remediation logic, upload it to Intune, and assign it to the intended device scope. Endpoints run detection first; remediation runs only when the detection result indicates that action is needed.
+The deployment packages themselves do not require PowerShell 7. The quality workflow and `go.ps1` target standard Windows PowerShell 5.1 so the validation environment matches the primary Intune administrator experience.
 
-```mermaid
-flowchart LR
-    Library[Script package library] --> Review[Review detection and remediation]
-    Review --> Intune[Upload to Microsoft Intune]
-    Intune --> Assignment[Assign to device scope]
-    Assignment --> Detection[Run detection script]
-    Detection --> Decision{Issue detected?}
-    Decision -- No --> Report[Report compliant result]
-    Decision -- Yes --> Remediation[Run remediation script]
-    Remediation --> Verify[Verify endpoint state]
-    Verify --> Report
+## Quick start
+
+Clone the repository, open Windows PowerShell 5.1, and run from the repository root:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\go.ps1
 ```
 
-<!-- project-context:end -->
+`go.ps1` runs the complete non-destructive quality sequence:
 
-## Quickstart
+1. `Bootstrap` installs the pinned Pester and PSScriptAnalyzer versions for the current user.
+2. `Validate` checks package discovery, manifests, parsing, path metadata, generated manifests, and repository references.
+3. `Analyze` runs the pinned PSScriptAnalyzer configuration.
+4. `Test` runs the Pester suite and any covered-package tests.
+5. `CheckFormat` verifies the immutable style catalog without rewriting files.
 
-### Deploy a script package in Intune
+The launcher trusts only the `PSGallery` repository before bootstrapping, so module installation does not prompt once per package. To skip module installation after bootstrap:
 
-1. Open the [**Intune Portal**](https://intune.microsoft.com/) and navigate to **Devices** > **Scripts and remediations**
+```powershell
+.\go.ps1 -SkipBootstrap
+```
 
-2. Click **+ Create**
+Run the checks before opening a pull request and after changing package code, manifests, tests, or repository tooling.
 
-   ![Create script package](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/blob/main/assets/1.png)
+## Repository layout
 
-3. Enter a **Name**, **Description**, **Publisher**, and **Version**, then click **Next**
+```text
+scripts/<Package>/                 Deployment packages
+  Detect-<Package>.ps1             Detection entry point
+  Detect-<Package>.psd1             Detection manifest
+  Remediate-<Package>.ps1          Remediation entry point, when applicable
+  Remediate-<Package>.psd1          Remediation manifest, when applicable
+build.ps1                          Quality task entry point
+go.ps1                             One-command local quality launcher
+standards/                          Manifest schema and reviewed package metadata
+tests/                              Repository and package behavior tests
+evidence/                           Immutable foundation and declared rewrite evidence
+tools/                              Inventory, manifest, and rewrite tooling
+.github/workflows/                  Windows PowerShell quality workflow
+```
 
-   ![Enter details](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/blob/main/assets/2.png)
+A package directory is the deployment unit. A detection-only package is valid when its manifest declares that shape. A package with a remediation script must keep detection and remediation manifests paired by `Identity.Counterpart`.
 
-4. Upload the **Detection script** (and optionally the **Remediation script**), then click **Next**
+## Using a package
 
-   ![Upload scripts](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/blob/main/assets/3.webp)
+Every package must be reviewed before deployment. Start with the package directory under `scripts/` and read both manifests before copying either script into Intune.
 
-5. Configure **Scope tags** and **Assignments**, then click **Review + create**
+Review:
 
-   ![Assign and create](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/blob/main/assets/4.webp)
+- `Runtime.PowerShellVersion`, architecture, identity, and run context;
+- `Configuration` values and required placeholders;
+- `Dependencies` including cmdlets, executables, policies, and endpoints;
+- `Risk` level, destructive behavior, user impact, reboot behavior, rollback, and data handling; and
+- `Test.Status` and `Test.CoverageFloor`.
+
+A typical Intune deployment flow is:
+
+1. Create a detection and remediation package in Intune.
+2. Upload the matching `Detect-*.ps1` and `Remediate-*.ps1` files.
+3. Apply the configuration described by the manifest without adding secrets to the repository.
+4. Assign the package to a small test group.
+5. Confirm detection, remediation, the expected immediate or deferred postcondition, and the endpoint state at the appropriate lifecycle boundary.
+6. Expand the assignment only after the pilot evidence and rollback path are understood.
+
+`go.ps1`, `build.ps1`, and the repository catalog never execute deployment entry points. Do not use the quality suite as an endpoint smoke-test runner, and do not run remediation scripts directly on a production device.
+
+## Behavior coverage
+
+`PendingMigration` means the package is inventory- and manifest-valid but does not yet have the required behavioral evidence. It is not a claim that the package is safe for production deployment.
+
+A package can move to `Covered` only after its tests and evidence prove the applicable contract:
+
+- detection handles compliant and noncompliant state;
+- missing dependencies and dependency failures produce truthful results;
+- detection messages and exit codes match the declared adapter behavior;
+- remediation is a no-op when state is already compliant;
+- successful remediation converges immediately, or reports a declared deferred postcondition such as reboot or sign-in;
+- failed remediation leaves the state noncompliant and reports a nonzero result;
+- repeated remediation is idempotent; and
+- package-specific safety bounds and failure aggregation are tested.
+
+Lifecycle-deferred behavior must not be simulated as an immediate endpoint transition. In the current migration, `Enforce-CredentialGuard` is `PendingReboot`, `Set-DefaultBrowser` is `PendingSignIn`, `Clear-OutlookCache` reports an unknown cache state after its launch request, and `Get-BatteryHealth` reports optimization/report postconditions while physical health remains deferred/unchanged.
+
+Behavior tests live under `tests/packages/<Scenario>/` and target package-relative paths. They use stateful fakes or disposable files for endpoint boundaries; they must not mutate the developer workstation.
+
+The current migration is split into small batches:
+
+- `registry-state` — registry and policy state packages;
+- `security-state` — Defender, SMB, firewall, and event-log packages;
+- `service-network` — service, DNS, MTU, and native-command packages; and
+- `files-and-browser` — file, report, and default-browser packages.
+
+The migration plan defines the required Windows VM and interactive-session evidence for those tiers. No selected package currently declares `RequiresIntunePilot = $true`; that does not remove Windows VM or logged-on-session requirements from the manifest integration tier.
 
 ## Contributing
 
-Contributions must follow the repository's package, naming, manifest, testing, and review standards. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the required workflow, build commands, migration rules, and safety requirements.
+Before changing a package:
 
-| | How to contribute |
-|---|---|
-| **Got an idea?** | [Open an issue](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/issues/new) describing the script you'd like to see |
-| **Got a script?** | Follow the [contributor workflow](CONTRIBUTING.md) and submit a pull request |
+1. Read the complete package directory and both manifests.
+2. Keep scripts standalone and preserve the canonical package-relative paths.
+3. Update manifests when behavior, dependencies, configuration, risk, or runtime requirements change.
+4. Add or update tests under the appropriate `tests/packages/<Scenario>/` directory.
+5. Keep secrets, tenant-specific values, and production identifiers out of the repository.
+6. Run `Bootstrap`, `Validate`, `Analyze`, `Test`, and `CheckFormat` with Windows PowerShell 5.1.
+7. Include the test output and required endpoint evidence in the pull request.
 
-![Submit an idea](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/blob/main/assets/submitIdea.png)
+For an existing `PendingMigration` script, do not set `Test.Status = 'Covered'` based only on parsing, manifest, static-analysis, or path checks. Record the behavior work and evidence first. Coverage floors may stay the same or increase; they must not decrease.
 
-## Contributors
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for the complete package, manifest, testing, migration, and review rules.
 
-Thanks to everyone who has contributed to this project!
+## Safety boundaries
 
-<a href="https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=JayRHa/EndpointAnalyticsRemediationScripts" />
-</a>
+These scripts can change registry settings, services, security controls, network configuration, files, user experience, and reboot state. Before deployment:
 
-### Disclaimer
+- validate the package in a revertible environment;
+- confirm the run-as identity and PowerShell bitness;
+- review every configured path, URL, executable, and hash;
+- understand reboot, service interruption, user-session, and data-loss implications;
+- test the remediation failure and rollback path; and
+- use a limited Intune assignment ring when the manifest requires an Intune pilot.
 
-*This is a community repository. There is no guarantee for the scripts provided here.*
-*Please review and test thoroughly before deploying to production environments.*
-
-<br>
-
-**If this repo helps you, consider giving it a :star:**
+The repository is a maintained toolset, not a guarantee that every package is appropriate for every Windows environment. Package owners are responsible for reviewing behavior and operational impact before deployment.
 
 ## License
 
-This project is available under the terms in [LICENSE](LICENSE).
-
-<!-- jr-brand-footer:start -->
-
----
-
-<div align="center">
-  <p><sub>Built and maintained by <a href="https://jannikreinhard.com/">Jannik Reinhard</a> · Microsoft MVP for Security and AI Platform.</sub></p>
-  <p><a href="https://www.buymeacoffee.com/jannikreinf">Support the open-source work</a></p>
-  <p><strong>Stay healthy, Cheers Jannik</strong></p>
-</div>
-
-<!-- jr-brand-footer:end -->
+See [LICENSE](LICENSE).

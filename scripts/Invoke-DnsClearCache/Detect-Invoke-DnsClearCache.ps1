@@ -13,6 +13,23 @@ Run as: Admin
 Context: 64 Bit
 #>
 
-# Always trigger
-Write-Host "Script will always be triggered"
-exit 1
+# Detection for this package is intentionally unconditional.  The function is
+# import-safe so tests and callers can evaluate the decision without exiting.
+function Get-InvokeDnsClearCacheDetectionDecision {
+    [CmdletBinding()]
+    param()
+
+    [pscustomobject][ordered]@{
+        Compliant = $false
+        ExitCode = 1
+        Message = 'Script will always be triggered'
+        State = 'AlwaysRemediate'
+        Error = $null
+    }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $decision = Get-InvokeDnsClearCacheDetectionDecision
+    Write-Host $decision.Message
+    exit $decision.ExitCode
+}

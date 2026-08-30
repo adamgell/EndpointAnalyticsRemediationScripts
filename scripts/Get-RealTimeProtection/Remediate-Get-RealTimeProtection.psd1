@@ -31,6 +31,7 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-MpComputerStatus'
             'Set-MpPreference'
             'Write-Output'
         )

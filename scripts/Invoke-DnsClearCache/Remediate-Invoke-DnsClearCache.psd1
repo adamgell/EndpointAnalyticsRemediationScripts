@@ -32,6 +32,8 @@
         Modules = @()
         Cmdlets = @(
             'Clear-DnsClientCache'
+            'Write-Error'
+            'Write-Output'
         )
         Executables = @()
         Policies = @()

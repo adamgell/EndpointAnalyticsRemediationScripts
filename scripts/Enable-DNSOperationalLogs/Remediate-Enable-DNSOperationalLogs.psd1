@@ -28,6 +28,7 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-WinEvent'
             'New-Object'
             'Write-Error'
             'Write-Output'

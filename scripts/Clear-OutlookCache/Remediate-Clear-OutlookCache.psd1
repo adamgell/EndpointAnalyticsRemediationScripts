@@ -32,6 +32,7 @@
         Modules = @()
         Cmdlets = @(
             'Start-Process'
+            'Test-Path'
         )
         Executables = @(
             'OUTLOOK.EXE'

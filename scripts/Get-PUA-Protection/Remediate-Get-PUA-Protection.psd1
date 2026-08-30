@@ -31,6 +31,7 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-MpPreference'
             'Set-MpPreference'
             'Write-Output'
         )

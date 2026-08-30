@@ -32,7 +32,10 @@
     Dependencies = @{
         Modules = @()
         Cmdlets = @(
+            'Get-Service'
+            'Select-Object'
             'Set-Service'
+            'Write-Error'
         )
         Executables = @()
         Policies = @()

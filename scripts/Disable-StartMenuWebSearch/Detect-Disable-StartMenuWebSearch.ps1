@@ -9,20 +9,78 @@ Run as: Admin
 Context: 64 Bit
 #>
 
-$Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
-$Name = "BingSearchEnabled"
-$Value = 0
+$DisableStartMenuWebSearchPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
+$DisableStartMenuWebSearchName = "BingSearchEnabled"
+$DisableStartMenuWebSearchValue = 0
 
-Try {
-    $Registry = Get-ItemProperty -Path $Path -Name $Name -ErrorAction Stop | Select-Object -ExpandProperty $Name
-    If ($Registry -eq $Value) {
-        Write-Output "Compliant"
-        Exit 0
+function Get-DisableStartMenuWebSearchRegistryState {
+    [CmdletBinding()]
+    param()
+
+    $value = Get-ItemProperty `
+        -Path $DisableStartMenuWebSearchPath `
+        -Name $DisableStartMenuWebSearchName `
+        -ErrorAction Stop |
+        Select-Object -ExpandProperty $DisableStartMenuWebSearchName
+    [pscustomobject][ordered]@{
+        BingSearchEnabled = $value
     }
-    Write-Warning "Not Compliant"
-    Exit 1
 }
-Catch {
-    Write-Warning "Not Compliant"
-    Exit 1
+
+function Test-DisableStartMenuWebSearch {
+    [CmdletBinding()]
+    param(
+        [Alias('GetRegistry', 'GetSearchState')]
+        [scriptblock]$GetState = { Get-DisableStartMenuWebSearchRegistryState }
+    )
+    if ($null -eq $GetState) {
+        return [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'Not Compliant'
+            State = 'Unknown'
+            Error = [pscustomobject]@{
+                Type = 'MissingDependency'
+                Message = 'A registry state reader is required.'
+            }
+        }
+    }
+
+    try {
+        $state = & $GetState
+        $hasValue = $null -ne $state -and
+        ($state.PSObject.Properties.Name -contains $DisableStartMenuWebSearchName) -and
+        $null -ne $state.BingSearchEnabled
+        $compliant = $hasValue -and ([int]$state.BingSearchEnabled -eq $DisableStartMenuWebSearchValue)
+        [pscustomobject][ordered]@{
+            Compliant = $compliant
+            ExitCode = if ($compliant) { 0 } else { 1 }
+            Message = if ($compliant) { 'Compliant' } else { 'Not Compliant' }
+            State = if ($null -eq $state) { 'Unknown' } else { $state }
+            Error = $null
+        }
+    }
+    catch {
+        [pscustomobject][ordered]@{
+            Compliant = $false
+            ExitCode = 1
+            Message = 'Not Compliant'
+            State = 'Unknown'
+            Error = [pscustomobject]@{
+                Type = 'DependencyFailure'
+                Message = $_.Exception.Message
+            }
+        }
+    }
+}
+
+if ($MyInvocation.InvocationName -ne '.') {
+    $decision = Test-DisableStartMenuWebSearch
+    if ($decision.Compliant) {
+        Write-Output $decision.Message
+    }
+    else {
+        Write-Warning $decision.Message
+    }
+    exit $decision.ExitCode
 }

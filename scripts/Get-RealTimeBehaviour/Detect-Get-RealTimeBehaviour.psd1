@@ -32,6 +32,7 @@
         Modules = @()
         Cmdlets = @(
             'Get-MpComputerStatus'
+            'Write-Error'
             'Write-Output'
         )
         Executables = @()
