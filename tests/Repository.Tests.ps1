@@ -2256,9 +2256,10 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
             Get-FileHash -Algorithm SHA256 -LiteralPath $selectedFiles |
                 ForEach-Object { "$($_.Path):$($_.Hash)" }
         )
+        $files = Get-ChildItem -LiteralPath $fixture -Recurse -File
+        $files = @($files | Sort-Object -Property FullName)
         $beforeTree = @(
-            foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
-                    Sort-Object -Property FullName)) {
+            foreach ($file in $files) {
                 $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
                 "$($file.FullName):$($hash.Hash)"
             }
@@ -2270,9 +2271,10 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
             Get-FileHash -Algorithm SHA256 -LiteralPath $selectedFiles |
                 ForEach-Object { "$($_.Path):$($_.Hash)" }
         )
+        $files = Get-ChildItem -LiteralPath $fixture -Recurse -File
+        $files = @($files | Sort-Object -Property FullName)
         $afterTree = @(
-            foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
-                    Sort-Object -Property FullName)) {
+            foreach ($file in $files) {
                 $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
                 "$($file.FullName):$($hash.Hash)"
             }
