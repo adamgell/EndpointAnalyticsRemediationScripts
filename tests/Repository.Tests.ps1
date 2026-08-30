@@ -266,3 +266,188 @@ Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
         $emptySourceDirectories | Should -BeNullOrEmpty
     }
 }
+
+Describe 'Foundation mover dirty-tree preconditions' -Tag 'FoundationCutover' {
+    BeforeAll {
+        $foundationMover = [System.IO.Path]::GetFullPath(
+            (Join-Path $PSScriptRoot '../tools/Invoke-FoundationMove.ps1')
+        )
+
+        function Invoke-FixtureGit {
+            param(
+                [Parameter(Mandatory)]
+                [string] $Root,
+
+                [Parameter(Mandatory)]
+                [string[]] $Arguments
+            )
+
+            $output = @(& git -C $Root @Arguments 2>&1)
+            if ($LASTEXITCODE -ne 0) {
+                throw "git $($Arguments -join ' ') failed: $($output -join [Environment]::NewLine)"
+            }
+
+            return $output
+        }
+
+        function New-FoundationMoveFixture {
+            param(
+                [Parameter(Mandatory)]
+                [string] $Root,
+
+                [int] $UntrackedIndex = -1,
+
+                [byte[]] $UntrackedBytes = @()
+            )
+
+            $legacyDirectory = Join-Path $Root 'Legacy'
+            $mapDirectory = Join-Path $Root 'evidence/foundation'
+            [void] [System.IO.Directory]::CreateDirectory($legacyDirectory)
+            [void] [System.IO.Directory]::CreateDirectory($mapDirectory)
+
+            $mapLines = @(
+                '@{'
+                '    Paths = @('
+                for ($index = 0; $index -lt 271; $index++) {
+                    $fileName = 'Detect-Fixture-{0:D3}.ps1' -f $index
+                    $sourceRelativePath = "Legacy/$fileName"
+                    $destinationRelativePath = "Standard/$fileName"
+                    "        @{ BasePath = '$sourceRelativePath'; NewPath = '$destinationRelativePath' }"
+
+                    if ($index -ne $UntrackedIndex) {
+                        $sourcePath = Join-Path $Root $sourceRelativePath
+                        $sourceBytes = [System.Text.Encoding]::UTF8.GetBytes(
+                            "Write-Output '$index'`n"
+                        )
+                        [System.IO.File]::WriteAllBytes($sourcePath, $sourceBytes)
+                    }
+                }
+                '    )'
+                '}'
+            )
+
+            $mapPath = Join-Path $mapDirectory 'PathMap.psd1'
+            [System.IO.File]::WriteAllLines(
+                $mapPath,
+                $mapLines,
+                [System.Text.UTF8Encoding]::new($false)
+            )
+
+            [void] (Invoke-FixtureGit -Root $Root -Arguments @('init', '--quiet'))
+            [void] (Invoke-FixtureGit -Root $Root -Arguments @(
+                    'config', 'user.email', 'foundation-mover@example.invalid'
+                ))
+            [void] (Invoke-FixtureGit -Root $Root -Arguments @(
+                    'config', 'user.name', 'Foundation Mover Tests'
+                ))
+            [void] (Invoke-FixtureGit -Root $Root -Arguments @(
+                    'add', '--', 'evidence/foundation/PathMap.psd1', 'Legacy'
+                ))
+            [void] (Invoke-FixtureGit -Root $Root -Arguments @(
+                    'commit', '--quiet', '-m', 'fixture'
+                ))
+
+            $selectedIndex = if ($UntrackedIndex -ge 0) {
+                $UntrackedIndex
+            }
+            else {
+                0
+            }
+            $selectedFileName = 'Detect-Fixture-{0:D3}.ps1' -f $selectedIndex
+            $selectedSourceRelativePath = "Legacy/$selectedFileName"
+            $selectedDestinationRelativePath = "Standard/$selectedFileName"
+            $selectedSourcePath = Join-Path $Root $selectedSourceRelativePath
+            if ($UntrackedIndex -ge 0) {
+                [System.IO.File]::WriteAllBytes($selectedSourcePath, $UntrackedBytes)
+            }
+
+            return [pscustomobject]@{
+                Root = $Root
+                SourceRelativePath = $selectedSourceRelativePath
+                DestinationRelativePath = $selectedDestinationRelativePath
+                SourcePath = $selectedSourcePath
+                DestinationPath = Join-Path $Root $selectedDestinationRelativePath
+            }
+        }
+
+        function Invoke-FoundationMoveFixture {
+            param(
+                [Parameter(Mandatory)]
+                [string] $Root
+            )
+
+            Push-Location $Root
+            try {
+                & $foundationMover -PathMap './evidence/foundation/PathMap.psd1'
+            }
+            finally {
+                Pop-Location
+            }
+        }
+    }
+
+    It 'moves an approved untracked mapped source ordinarily and byte-identically' {
+        $expectedBytes = [byte[]] @(0, 10, 13, 65, 128, 254, 255)
+        $fixture = New-FoundationMoveFixture `
+            -Root (Join-Path $TestDrive 'approved-untracked') `
+            -UntrackedIndex 270 `
+            -UntrackedBytes $expectedBytes
+
+        $output = @(Invoke-FoundationMoveFixture -Root $fixture.Root)
+
+        $output | Should -BeExactly 'Moved 271 foundation scripts with byte-identical content.'
+        Test-Path -LiteralPath $fixture.SourcePath | Should -BeFalse
+        Test-Path -LiteralPath $fixture.DestinationPath -PathType Leaf | Should -BeTrue
+        [Convert]::ToBase64String(
+            [System.IO.File]::ReadAllBytes($fixture.DestinationPath)
+        ) | Should -BeExactly 'AAoNQYD+/w=='
+        @(Invoke-FixtureGit -Root $fixture.Root -Arguments @(
+                'ls-files', '--', $fixture.DestinationRelativePath
+            )) | Should -BeNullOrEmpty
+        @(Invoke-FixtureGit -Root $fixture.Root -Arguments @(
+                'status', '--short', '--untracked-files=all'
+            )) | Should -Contain "?? $($fixture.DestinationRelativePath)"
+    }
+
+    It 'rejects an unrelated untracked path' {
+        $fixture = New-FoundationMoveFixture `
+            -Root (Join-Path $TestDrive 'unrelated-untracked')
+        [System.IO.File]::WriteAllBytes(
+            (Join-Path $fixture.Root 'unrelated.bin'),
+            [byte[]] @(1, 2, 3)
+        )
+
+        {
+            Invoke-FoundationMoveFixture -Root $fixture.Root
+        } | Should -Throw '*unrelated.bin*'
+        Test-Path -LiteralPath $fixture.SourcePath -PathType Leaf | Should -BeTrue
+        Test-Path -LiteralPath $fixture.DestinationPath | Should -BeFalse
+    }
+
+    It 'rejects a modified mapped runtime source' {
+        $fixture = New-FoundationMoveFixture `
+            -Root (Join-Path $TestDrive 'modified-runtime')
+        [System.IO.File]::WriteAllBytes($fixture.SourcePath, [byte[]] @(4, 5, 6))
+
+        {
+            Invoke-FoundationMoveFixture -Root $fixture.Root
+        } | Should -Throw "*$($fixture.SourceRelativePath)*"
+        Test-Path -LiteralPath $fixture.SourcePath -PathType Leaf | Should -BeTrue
+        Test-Path -LiteralPath $fixture.DestinationPath | Should -BeFalse
+    }
+
+    It 'rejects a staged mapped runtime source' {
+        $fixture = New-FoundationMoveFixture `
+            -Root (Join-Path $TestDrive 'staged-runtime')
+        [System.IO.File]::WriteAllBytes($fixture.SourcePath, [byte[]] @(7, 8, 9))
+        [void] (Invoke-FixtureGit -Root $fixture.Root -Arguments @(
+                'add', '--', $fixture.SourceRelativePath
+            ))
+
+        {
+            Invoke-FoundationMoveFixture -Root $fixture.Root
+        } | Should -Throw "*$($fixture.SourceRelativePath)*"
+        Test-Path -LiteralPath $fixture.SourcePath -PathType Leaf | Should -BeTrue
+        Test-Path -LiteralPath $fixture.DestinationPath | Should -BeFalse
+    }
+}

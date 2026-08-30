@@ -48,20 +48,6 @@ if (-not (Test-Path -LiteralPath $approvedPathMap -PathType Leaf)) {
     throw "Approved path map does not exist: $approvedPathMap"
 }
 
-$allowedDirtyPaths = @(
-    'tests/Repository.Tests.ps1'
-    'tools/Invoke-FoundationMove.ps1'
-)
-$dirtyPaths = @(
-    Invoke-Git -RepositoryRoot $repositoryRoot -Arguments @('diff', '--name-only', '--')
-    Invoke-Git -RepositoryRoot $repositoryRoot -Arguments @('diff', '--cached', '--name-only', '--')
-    Invoke-Git -RepositoryRoot $repositoryRoot -Arguments @('ls-files', '--others', '--exclude-standard')
-) | Where-Object { $_ } | Sort-Object -Unique
-$unexpectedDirtyPaths = @($dirtyPaths | Where-Object { $_ -cnotin $allowedDirtyPaths })
-if ($unexpectedDirtyPaths.Count -ne 0) {
-    throw "Working tree contains changes outside the Task 6 foundation files: $($unexpectedDirtyPaths -join ', ')"
-}
-
 $map = Import-PowerShellDataFile -LiteralPath $approvedPathMap
 $paths = @($map.Paths)
 if ($paths.Count -ne 271) {
@@ -73,6 +59,9 @@ $sourcePaths = [System.Collections.Generic.HashSet[string]]::new(
 )
 $destinationPaths = [System.Collections.Generic.HashSet[string]]::new(
     [System.StringComparer]::OrdinalIgnoreCase
+)
+$exactMappedSourcePaths = [System.Collections.Generic.HashSet[string]]::new(
+    [System.StringComparer]::Ordinal
 )
 $sourceHashes = @{}
 $trackedPaths = [System.Collections.Generic.HashSet[string]]::new(
@@ -117,6 +106,7 @@ foreach ($entry in $paths) {
     if (-not $sourcePaths.Add($sourceRelativePath)) {
         throw "Duplicate source path in approved map: $sourceRelativePath"
     }
+    [void] $exactMappedSourcePaths.Add($sourceRelativePath)
     if (-not $destinationPaths.Add($destinationRelativePath)) {
         throw "Duplicate destination path in approved map: $destinationRelativePath"
     }
@@ -130,6 +120,30 @@ foreach ($entry in $paths) {
     $sourceHashes[$sourceRelativePath] = (
         Get-FileHash -LiteralPath $sourcePath -Algorithm SHA256
     ).Hash
+}
+
+$allowedDirtyPaths = @(
+    'tests/Repository.Tests.ps1'
+    'tools/Invoke-FoundationMove.ps1'
+)
+$modifiedOrStagedPaths = @(
+    Invoke-Git -RepositoryRoot $repositoryRoot -Arguments @('diff', '--name-only', '--')
+    Invoke-Git -RepositoryRoot $repositoryRoot -Arguments @('diff', '--cached', '--name-only', '--')
+) | Where-Object { $_ } | Sort-Object -Unique
+$untrackedPaths = @(
+    Invoke-Git -RepositoryRoot $repositoryRoot -Arguments @(
+        'ls-files', '--others', '--exclude-standard'
+    )
+) | Where-Object { $_ } | Sort-Object -Unique
+$unexpectedDirtyPaths = @(@(
+        $modifiedOrStagedPaths | Where-Object { $_ -cnotin $allowedDirtyPaths }
+        $untrackedPaths | Where-Object {
+            $_ -cnotin $allowedDirtyPaths -and
+                -not $exactMappedSourcePaths.Contains([string] $_)
+        }
+    ) | Sort-Object -Unique)
+if ($unexpectedDirtyPaths.Count -ne 0) {
+    throw "Working tree contains changes outside the Task 6 foundation files: $($unexpectedDirtyPaths -join ', ')"
 }
 
 $destinationDirectories = @($paths | ForEach-Object {
