@@ -18,14 +18,19 @@ function Resolve-FullGitRevision {
         [Parameter(Mandatory)] [string] $Revision
     )
 
-    $output = @(& git -C $RepositoryRoot rev-parse --verify "$Revision^{commit}" 2>&1)
+    if ($Revision -cnotmatch '^[0-9a-fA-F]{40}$') {
+        throw "Base revision '$Revision' must be exactly 40 hexadecimal characters."
+    }
+
+    $output = @(& git --no-replace-objects -C $RepositoryRoot rev-parse --verify "$Revision^{commit}" 2>&1)
     if ($LASTEXITCODE -ne 0) {
         throw "Could not resolve base revision '$Revision': $($output -join ' ')"
     }
 
     $fullRevision = ([string] $output[0]).Trim()
-    if ($fullRevision -cnotmatch '^[0-9a-f]{40}$') {
-        throw "Base revision '$Revision' did not resolve to a full 40-character SHA."
+    if ($fullRevision -cnotmatch '^[0-9a-fA-F]{40}$' -or
+        -not [string]::Equals($fullRevision, $Revision, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Base revision '$Revision' did not resolve to the supplied full 40-character SHA."
     }
     return $fullRevision
 }
@@ -42,7 +47,7 @@ function Get-GitBlobBytes {
     $escapedObject = ("$Revision`:$Path").Replace('"', '\"')
     $startInfo = New-Object System.Diagnostics.ProcessStartInfo
     $startInfo.FileName = 'git'
-    $startInfo.Arguments = "-C `"$escapedRoot`" cat-file blob `"$escapedObject`""
+    $startInfo.Arguments = "--no-replace-objects -C `"$escapedRoot`" cat-file blob `"$escapedObject`""
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $true
     $startInfo.RedirectStandardOutput = $true
@@ -224,7 +229,7 @@ try {
         '.git', '.github', '.superpowers', 'assets', 'docs', 'evidence', 'standards', 'tests', 'tools'
     )
 
-    $treeOutput = @(& git -C $repositoryRoot ls-tree -r --name-only $fullRevision 2>&1)
+    $treeOutput = @(& git --no-replace-objects -C $repositoryRoot ls-tree -r --name-only $fullRevision 2>&1)
     if ($LASTEXITCODE -ne 0) {
         throw "Could not enumerate base revision '$fullRevision': $($treeOutput -join ' ')"
     }

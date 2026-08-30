@@ -611,6 +611,109 @@ Describe 'PowerShell rewrite wrapper' {
         $unmatchedReport.Failures -join "`n" | Should -Match 'symbol map'
     }
 
+    It 'requires BaseRevision to be a full 40-character hexadecimal commit' {
+        $repo = Join-Path $TestDrive 'base-revision-shape'
+        $tools = Join-Path $repo 'tools'
+        $catalog = Join-Path $repo 'Catalog'
+        New-Item -ItemType Directory -Path $tools, $catalog -Force | Out-Null
+        Copy-Item -LiteralPath "$PSScriptRoot/../tools/RewriteEquivalence.psm1" -Destination $tools
+        Copy-Item -LiteralPath $wrapperPath -Destination $tools
+
+        $sourcePath = Join-Path $catalog 'Script.ps1'
+        "Write-Output 'baseline'" | Set-Content -LiteralPath $sourcePath -Encoding utf8
+        & git -C $repo init --quiet
+        & git -C $repo config core.autocrlf false
+        & git -C $repo config user.email 'rewrite-gate@example.invalid'
+        & git -C $repo config user.name 'Rewrite Gate Test'
+        & git -C $repo add Catalog
+        & git -C $repo commit --quiet -m baseline
+        $baseRevision = (& git -C $repo rev-parse HEAD).Trim()
+
+        $pathMap = Join-Path $repo 'PathMap.psd1'
+        "@{ Paths = @(@{ BasePath = 'Catalog/Script.ps1'; NewPath = 'Catalog/Script.ps1' }) }" |
+            Set-Content -LiteralPath $pathMap -Encoding ascii
+        $symbolMap = Join-Path $repo 'SymbolMap.psd1'
+        '@{ Commands = @(); Aliases = @(); Functions = @() }' |
+            Set-Content -LiteralPath $symbolMap -Encoding ascii
+        $reportPath = Join-Path $repo 'RewriteReport.json'
+
+        $uppercaseRevision = $baseRevision.ToUpperInvariant()
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+            -BaseRevision $uppercaseRevision `
+            -PathMap $pathMap `
+            -SymbolMap $symbolMap `
+            -ReportPath $reportPath
+        $uppercaseExitCode = $LASTEXITCODE
+        $uppercaseExitCode | Should -Be 0
+        $uppercaseReport = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        $uppercaseReport.BaseRevision | Should -Be $baseRevision
+        $uppercaseReport.Passed | Should -BeTrue
+
+        $abbreviatedRevision = $baseRevision.Substring(0, 12)
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+            -BaseRevision $abbreviatedRevision `
+            -PathMap $pathMap `
+            -SymbolMap $symbolMap `
+            -ReportPath $reportPath
+        $abbreviatedExitCode = $LASTEXITCODE
+        $abbreviatedExitCode | Should -Be 1
+        $abbreviatedReport = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        $abbreviatedReport.Passed | Should -BeFalse
+        $abbreviatedReport.Failures -join "`n" | Should -Match 'exactly 40 hexadecimal characters'
+    }
+
+    It 'ignores Git replacement refs when reading immutable baseline evidence' {
+        $repo = Join-Path $TestDrive 'replacement-ref'
+        $tools = Join-Path $repo 'tools'
+        $catalog = Join-Path $repo 'Catalog'
+        New-Item -ItemType Directory -Path $tools, $catalog -Force | Out-Null
+        Copy-Item -LiteralPath "$PSScriptRoot/../tools/RewriteEquivalence.psm1" -Destination $tools
+        Copy-Item -LiteralPath $wrapperPath -Destination $tools
+
+        $sourcePath = Join-Path $catalog 'Script.ps1'
+        "Write-Output 'baseline'" | Set-Content -LiteralPath $sourcePath -Encoding utf8
+        & git -C $repo init --quiet
+        & git -C $repo config core.autocrlf false
+        & git -C $repo config user.email 'rewrite-gate@example.invalid'
+        & git -C $repo config user.name 'Rewrite Gate Test'
+        & git -C $repo add Catalog
+        & git -C $repo commit --quiet -m baseline
+        $baseRevision = (& git -C $repo rev-parse HEAD).Trim()
+
+        "Write-Output 'replacement'" | Set-Content -LiteralPath $sourcePath -Encoding utf8
+        & git -C $repo add Catalog
+        & git -C $repo commit --quiet -m replacement
+        $replacementRevision = (& git -C $repo rev-parse HEAD).Trim()
+        "Write-Output 'baseline'" | Set-Content -LiteralPath $sourcePath -Encoding utf8
+
+        $pathMap = Join-Path $repo 'PathMap.psd1'
+        "@{ Paths = @(@{ BasePath = 'Catalog/Script.ps1'; NewPath = 'Catalog/Script.ps1' }) }" |
+            Set-Content -LiteralPath $pathMap -Encoding ascii
+        $symbolMap = Join-Path $repo 'SymbolMap.psd1'
+        '@{ Commands = @(); Aliases = @(); Functions = @() }' |
+            Set-Content -LiteralPath $symbolMap -Encoding ascii
+        $reportPath = Join-Path $repo 'RewriteReport.json'
+
+        & git -C $repo replace $baseRevision $replacementRevision
+        try {
+            & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+                -BaseRevision $baseRevision `
+                -PathMap $pathMap `
+                -SymbolMap $symbolMap `
+                -ReportPath $reportPath
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            & git -C $repo replace -d $baseRevision
+        }
+
+        $exitCode | Should -Be 0
+        $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        $report.BaseRevision | Should -Be $baseRevision
+        $report.Passed | Should -BeTrue
+        @($report.Rows).Count | Should -Be 1
+    }
+
     It 'compares an empty base Git blob instead of falling back to the working tree' {
         $repo = Join-Path $TestDrive 'empty-repo'
         $tools = Join-Path $repo 'tools'
