@@ -123,6 +123,39 @@ function Test-FunctionCommandName {
     $separator = $CommandName[$suffixStart - 1]
     return $separator -eq ':' -or $separator -eq '\'
 }
+function Get-ConstantStringExpressionValue {
+    param([Parameter(Mandatory)] $Expression)
+
+    if ($Expression -is [System.Management.Automation.Language.StringConstantExpressionAst]) {
+        return [string] $Expression.Value
+    }
+    if ($Expression -is [System.Management.Automation.Language.ExpandableStringExpressionAst]) {
+        if (@($Expression.NestedExpressions).Count -eq 0) {
+            return [string] $Expression.Value
+        }
+        return $null
+    }
+    if ($Expression -is [System.Management.Automation.Language.BinaryExpressionAst] -and
+        $Expression.Operator -eq [System.Management.Automation.Language.TokenKind]::Plus) {
+        $left = Get-ConstantStringExpressionValue -Expression $Expression.Left
+        $right = Get-ConstantStringExpressionValue -Expression $Expression.Right
+        if ($null -ne $left -and $null -ne $right) {
+            return $left + $right
+        }
+        return $null
+    }
+    if ($Expression -is [System.Management.Automation.Language.ParenExpressionAst]) {
+        $binaryExpressions = @($Expression.FindAll({
+                    param($node)
+                    $node -is [System.Management.Automation.Language.BinaryExpressionAst]
+                }, $true))
+        if ($binaryExpressions.Count -eq 1) {
+            return Get-ConstantStringExpressionValue -Expression $binaryExpressions[0]
+        }
+    }
+    return $null
+}
+
 
 function Test-PowerShellFunctionReference {
     param(
@@ -157,9 +190,13 @@ function Test-PowerShellFunctionReference {
             return $true
         }
         if ($command.InvocationOperator -ne [System.Management.Automation.Language.TokenKind]::Unknown -and
-            $command.CommandElements.Count -gt 0 -and
-            [regex]::IsMatch([string] $command.CommandElements[0].Extent.Text, $symbolPattern)) {
-            return $true
+            $command.CommandElements.Count -gt 0) {
+            $target = $command.CommandElements[0]
+            $constantTarget = Get-ConstantStringExpressionValue -Expression $target
+            if (($null -ne $constantTarget -and [regex]::IsMatch($constantTarget, $symbolPattern)) -or
+                [regex]::IsMatch([string] $target.Extent.Text, $symbolPattern)) {
+                return $true
+            }
         }
     }
 

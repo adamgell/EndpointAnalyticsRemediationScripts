@@ -195,6 +195,39 @@ function Get-CommandRecords {
     }
     return $records.ToArray()
 }
+function Get-ConstantStringExpressionValue {
+    param([Parameter(Mandatory)] $Expression)
+
+    if ($Expression -is [System.Management.Automation.Language.StringConstantExpressionAst]) {
+        return [string] $Expression.Value
+    }
+    if ($Expression -is [System.Management.Automation.Language.ExpandableStringExpressionAst]) {
+        if (@($Expression.NestedExpressions).Count -eq 0) {
+            return [string] $Expression.Value
+        }
+        return $null
+    }
+    if ($Expression -is [System.Management.Automation.Language.BinaryExpressionAst] -and
+        $Expression.Operator -eq [System.Management.Automation.Language.TokenKind]::Plus) {
+        $left = Get-ConstantStringExpressionValue -Expression $Expression.Left
+        $right = Get-ConstantStringExpressionValue -Expression $Expression.Right
+        if ($null -ne $left -and $null -ne $right) {
+            return $left + $right
+        }
+        return $null
+    }
+    if ($Expression -is [System.Management.Automation.Language.ParenExpressionAst]) {
+        $binaryExpressions = @($Expression.FindAll({
+                    param($node)
+                    $node -is [System.Management.Automation.Language.BinaryExpressionAst]
+                }, $true))
+        if ($binaryExpressions.Count -eq 1) {
+            return Get-ConstantStringExpressionValue -Expression $binaryExpressions[0]
+        }
+    }
+    return $null
+}
+
 
 function Get-FunctionNameOffset {
     param(
@@ -551,9 +584,35 @@ foreach ($mapping in @($packageDataContent.FunctionMappings)) {
     }
 
     $symbolPattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($oldName) + '(?![A-Za-z0-9_-])'
+    $memberOffsets = [System.Collections.Generic.HashSet[int]]::new()
+    foreach ($memberExpression in @($parsed.Ast.FindAll({
+                    param($node)
+                    $node -is [System.Management.Automation.Language.MemberExpressionAst]
+                }, $true))) {
+        if ($null -ne $memberExpression.Member) {
+            $null = $memberOffsets.Add([int] $memberExpression.Member.Extent.StartOffset)
+        }
+    }
+
+    foreach ($command in @($parsed.Ast.FindAll({
+                    param($node)
+                    $node -is [System.Management.Automation.Language.CommandAst]
+                }, $true))) {
+        if ($command.InvocationOperator -eq [System.Management.Automation.Language.TokenKind]::Unknown -or
+            $command.CommandElements.Count -eq 0 -or $null -ne $command.GetCommandName()) {
+            continue
+        }
+        $constantTarget = Get-ConstantStringExpressionValue `
+            -Expression $command.CommandElements[0]
+        if ($null -ne $constantTarget -and [regex]::IsMatch($constantTarget, $symbolPattern)) {
+            throw "Function mapping '$path|$oldName' has an ambiguous or non-static reference."
+        }
+    }
+
     foreach ($token in $parsed.Tokens) {
         if ($token.Kind -eq [System.Management.Automation.Language.TokenKind]::EndOfInput -or
-            $token.Kind -eq [System.Management.Automation.Language.TokenKind]::Variable) {
+            $token.Kind -eq [System.Management.Automation.Language.TokenKind]::Variable -or
+            $memberOffsets.Contains([int] $token.Extent.StartOffset)) {
             continue
         }
         if ([regex]::IsMatch([string] $token.Text, $symbolPattern) -and

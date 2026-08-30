@@ -220,7 +220,8 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
         function New-FoundationSymbolGitFixture {
             param(
                 [Parameter(Mandatory)] [string] $Root,
-                [Parameter(Mandatory)] [string] $ScriptContent
+                [Parameter(Mandatory)] [string] $ScriptContent,
+                [string] $MappedBasePath
             )
 
             [System.IO.Directory]::CreateDirectory($Root) | Out-Null
@@ -263,8 +264,13 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
             $null = Invoke-FoundationSymbolFixtureGit `
                 -IndexPath $indexPath `
                 -Arguments $readTreeArguments
-
             $firstPath = @($pathMap.Paths)[0]
+            $mappedPath = if ([string]::IsNullOrWhiteSpace($MappedBasePath)) {
+                [string] $firstPath.BasePath
+            }
+            else {
+                $MappedBasePath
+            }
             $updateIndexArguments = @(
                 "--git-dir=$gitDirectory"
                 'update-index'
@@ -272,7 +278,7 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
                 '--cacheinfo'
                 '100644'
                 ([string] $blob)
-                ([string] $firstPath.BasePath)
+                $mappedPath
             )
             $null = Invoke-FoundationSymbolFixtureGit `
                 -IndexPath $indexPath `
@@ -431,6 +437,29 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
         [System.IO.File]::Exists($sideEffectPath) | Should -BeFalse
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
             Should -BeExactly $expectedSymbolMapBytes
+    }
+
+    It 'rejects a stale function name composed in a dynamic invocation target' {
+        $scriptContent = @'
+function IsMember {
+    param([string] $Group)
+    return $Group -eq 'Administrators'
+}
+IsMember -Group 'Administrators'
+& ('Is' + 'Member') -Group 'Administrators'
+'@
+        $fixture = New-FoundationSymbolGitFixture `
+            -Root (Join-Path $TestDrive 'composed-dynamic-function') `
+            -ScriptContent $scriptContent `
+            -MappedBasePath 'Enable-RDP/detection_Enable-RDPDetection.ps1'
+        $outputPath = Join-Path $TestDrive 'composed-dynamic-function-SymbolRenames.psd1'
+
+        {
+            Invoke-FoundationSymbolFixtureGenerator `
+                -Fixture $fixture `
+                -MarkerPath $fixture.MarkerPath `
+                -OutputPath $outputPath
+        } | Should -Throw "*Function mapping 'Enable-RDP/Detect-Enable-RDP.ps1|IsMember' has an ambiguous or non-static reference.*"
     }
 
     It 'ignores repository-local Git replacement objects for the baseline revision' {

@@ -444,6 +444,27 @@ function Get-SecondValue { param([string] $Name) $Name }
                 -AfterPath "$fixtureRoot/Dynamic.After.ps1"
         ).Passed | Should -BeFalse
     }
+    It 'rejects a stale old function name composed in a dynamic invocation target' {
+        $after = Join-Path $TestDrive 'Function.ComposedDynamicCall.ps1'
+        @'
+function Test-GroupMembership {
+    param([string] $Group)
+
+    return $Group -eq 'Administrators'
+}
+Test-GroupMembership -Group 'Administrators'
+& ('Is' + 'Member') -Group 'Administrators'
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
+
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Function.Before.ps1" `
+            -AfterPath $after `
+            -SymbolMap $map
+        $result.Passed | Should -BeFalse
+        $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
+    }
+
 
     It 'rejects a path map that is not a total bijection' {
         $rows = @(
@@ -507,6 +528,28 @@ Describe 'PowerShell rewrite wrapper' {
             "Catalog file 'Catalog/Script.ps1' contains unresolved old function symbol 'IsMember'."
         )
     }
+    It 'reports a stale old function name composed in a dynamic invocation target' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'composed-dynamic-reference') `
+            -CandidateSource "& ('Is' + 'Member')"
+
+        $result.ExitCode | Should -Be 1
+        $result.Report.Passed | Should -BeFalse
+        @($result.Report.Failures) | Should -Be @(
+            "Catalog file 'Catalog/Script.ps1' contains unresolved old function symbol 'IsMember'."
+        )
+    }
+
+    It 'does not report an unknown dynamic target' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'unknown-dynamic-reference') `
+            -CandidateSource '$target = $false; & $target'
+
+        $result.ExitCode | Should -Be 0
+        $result.Report.Passed | Should -BeTrue
+        @($result.Report.Failures).Count | Should -Be 0
+    }
+
 
     It 'does not report an ordinary variable named after the old function' {
         $result = Invoke-CatalogFunctionReferenceGate `
