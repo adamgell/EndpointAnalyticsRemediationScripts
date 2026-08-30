@@ -21,7 +21,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bootstrap pinned modules
-        run: .\build.ps1 -Task Bootstrap
+        run: |
+          if (-not (Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) {
+              Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
+          }
+          .\build.ps1 -Task Bootstrap
       - name: Validate repository
         run: .\build.ps1 -Task Validate
       - name: Analyze PowerShell
@@ -51,7 +55,11 @@ jobs:
               Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding ascii
       - name: Bootstrap pinned modules
         if: steps.scope.outputs.run == 'true'
-        run: .\build.ps1 -Task Bootstrap
+        run: |
+          if (-not (Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) {
+              Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
+          }
+          .\build.ps1 -Task Bootstrap
       - name: Regenerate foundation rewrite evidence
         if: steps.scope.outputs.run == 'true'
         run: |
@@ -95,7 +103,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Bootstrap pinned modules
-        run: .\build.ps1 -Task Bootstrap
+        run: |
+          if (-not (Get-PackageProvider -Name NuGet -ListAvailable -ErrorAction SilentlyContinue)) {
+              Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
+          }
+          .\build.ps1 -Task Bootstrap
       - name: Validate newly declared formatting rewrites
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -198,9 +210,16 @@ jobs:
                       $expectedRows
                   )
               }
-              # Fingerprint serialization varies between Windows PowerShell and pwsh;
-              # ValidateRewrite still gates every regenerated row independently.
-              if ($generatedReport.BaseRevision -cne $committedReport.BaseRevision) {
-                  throw "Regenerated rewrite report for '$directory' has a different base revision."
+              $actualHash = (Get-FileHash -LiteralPath $generatedReportPath -Algorithm SHA256).Hash
+              $expectedHash = (Get-FileHash -LiteralPath $committedReportPath -Algorithm SHA256).Hash
+              if ($actualHash -cne $expectedHash) {
+                  throw "Committed rewrite report '$committedReportPath' does not match regenerated evidence."
               }
           }
+      - name: Upload generated declared rewrite evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: declared-rewrite-reports
+          path: ${{ runner.temp }}\declared-rewrite-*.json
+          if-no-files-found: warn
