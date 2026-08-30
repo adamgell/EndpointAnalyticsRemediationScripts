@@ -5,6 +5,16 @@
     $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
     $foundationSymbolMap = Import-PowerShellDataFile `
         -Path (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1')
+    $windowsPowerShellPath = ''
+    if (
+        [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+        -not [string]::IsNullOrEmpty($env:SystemRoot)
+    ) {
+        $candidatePath = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+        if ([System.IO.File]::Exists($candidatePath)) {
+            $windowsPowerShellPath = $candidatePath
+        }
+    }
 
     function Invoke-CatalogFunctionReferenceGate {
         param(
@@ -52,7 +62,7 @@ $CandidateSource
 "@ | Set-Content -LiteralPath $symbolMap -Encoding ascii
         $reportPath = Join-Path $Root 'RewriteReport.json'
 
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
             -BaseRevision $baseRevision `
             -PathMap $pathMap `
             -SymbolMap $symbolMap `
@@ -120,23 +130,36 @@ Describe 'PowerShell rewrite equivalence' {
     It 'resolves alias metadata case-insensitively while matching source occurrences case-sensitively' {
         $before = Join-Path $TestDrive 'AliasCase.Before.ps1'
         $after = Join-Path $TestDrive 'AliasCase.After.ps1'
-        @'
-start 'https://example.invalid/lowercase'
-Start 'https://example.invalid/source-exact'
-'@ | Set-Content -LiteralPath $before -Encoding utf8
-        @'
-start 'https://example.invalid/lowercase'
-Start-Process 'https://example.invalid/source-exact'
-'@ | Set-Content -LiteralPath $after -Encoding utf8
-        $startAliasMapping = @($foundationSymbolMap.Aliases |
-                Where-Object Path -CEQ 'Run-Browser/Remediate-Run-Browser.ps1')[0]
-        $map = @{
-            Aliases = @($startAliasMapping)
-            Functions = @()
-        }
+        $fixtureAliasName = 'rewrite-alias-fixture'
+        $sourceAliasName = 'Rewrite-Alias-Fixture'
+        Set-Alias -Name $fixtureAliasName -Value 'Write-Output' -Scope Global
 
-        $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map
-        $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
+        try {
+            @"
+$fixtureAliasName 'https://example.invalid/lowercase'
+$sourceAliasName 'https://example.invalid/source-exact'
+"@ | Set-Content -LiteralPath $before -Encoding utf8
+            @"
+$fixtureAliasName 'https://example.invalid/lowercase'
+Write-Output 'https://example.invalid/source-exact'
+"@ | Set-Content -LiteralPath $after -Encoding utf8
+            $map = @{
+                Aliases = @(
+                    @{
+                        OldName = $sourceAliasName
+                        NewName = 'Write-Output'
+                        Occurrence = 1
+                    }
+                )
+                Functions = @()
+            }
+
+            $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map
+            $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
+        }
+        finally {
+            Remove-Item -LiteralPath "Alias:$fixtureAliasName" -Force -ErrorAction SilentlyContinue
+        }
     }
 
     It 'accepts explicit canonical command casing only through its occurrence map' {
@@ -437,6 +460,12 @@ function Get-SecondValue { param([string] $Name) $Name }
 }
 
 Describe 'PowerShell rewrite wrapper' {
+    BeforeEach {
+        if ([string]::IsNullOrWhiteSpace($windowsPowerShellPath)) {
+            Set-ItResult -Skipped -Because 'This wrapper test requires Windows PowerShell 5.1 (powershell.exe).'
+        }
+    }
+
     AfterEach {
         Remove-Item Env:REWRITE_EXECUTION_MARKER -ErrorAction SilentlyContinue
     }
@@ -543,7 +572,7 @@ Describe 'PowerShell rewrite wrapper' {
             Set-Content -LiteralPath $symbolMap -Encoding ascii
         $reportPath = Join-Path $repo 'RewriteReport.json'
 
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
             -Task ValidateRewrite `
             -BaseRevision $baseRevision `
             -PathMap $pathMap `
@@ -568,7 +597,7 @@ Describe 'PowerShell rewrite wrapper' {
     Functions = @()
 }
 "@ | Set-Content -LiteralPath $symbolMap -Encoding ascii
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
             -Task ValidateRewrite `
             -BaseRevision $baseRevision `
             -PathMap $pathMap `
@@ -610,7 +639,7 @@ Describe 'PowerShell rewrite wrapper' {
 
         Push-Location $repo
         try {
-            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
+            & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
                 -Task ValidateRewrite `
                 -BaseRevision $baseRevision `
                 -PathMap $pathMap `
@@ -687,7 +716,7 @@ Test-GroupMembership -Group 'Administrators'
 "@ | Set-Content -LiteralPath $symbolMap -Encoding ascii
         $reportPath = Join-Path $repo 'RewriteReport.json'
 
-        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repo 'build.ps1') `
             -Task ValidateRewrite `
             -BaseRevision $baseRevision `
             -PathMap $pathMap `
