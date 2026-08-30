@@ -6,6 +6,8 @@
 
 Implementation commit `18395ce8ec7a7c5948dfdbdba61abf04f8ce3daf` adds the reviewed manifest registry, deterministic generator, focused tests, and all 271 same-basename sidecars.
 
+Focused test-quality follow-up commit `6f81d269113b548df570adc476c7abc3ffdb7d24` isolates the sentinel-description and quoted-Boolean generator failure paths.
+
 ## Scope
 
 - Created `tools/New-ScriptManifest.ps1`.
@@ -101,6 +103,23 @@ Tests Passed: 6, Failed: 13, Skipped: 0, Inconclusive: 0, NotRun: 0
 
 The failures were the intended missing catalog contract: zero manifests instead of 271, zero reviewed metadata records, and no generator.
 
+### Review-fix mutation RED
+
+The quoted-Boolean validation call was temporarily bypassed without changing any other generator behavior, then only the new quoted-scalar test was run:
+
+```text
+pwsh -NoProfile -Command "Invoke-Pester -Path tests/Manifest.Tests.ps1 -FullNameFilter '*quoted Boolean scalar*' -Output Detailed"
+```
+
+The test failed on its nonzero-exit assertion, proving that the fixture otherwise passed earlier validation and that removal of the Boolean type rejection is detected:
+
+```text
+Expected 0 to be different from the actual value, but got the same value.
+Tests Passed: 0, Failed: 1, Skipped: 0, Inconclusive: 0, NotRun: 20
+```
+
+The temporary generator mutation was then reverted; `tools/New-ScriptManifest.ps1` is unchanged by the follow-up commit.
+
 ### Final focused GREEN
 
 Command:
@@ -109,10 +128,10 @@ Command:
 pwsh -NoProfile -Command 'Invoke-Pester -Path tests/Manifest.Tests.ps1 -Output Detailed'
 ```
 
-Observed after final review corrections:
+Observed after the focused test-quality correction:
 
 ```text
-Tests Passed: 19, Failed: 0, Skipped: 1, Inconclusive: 0, NotRun: 0
+Tests Passed: 20, Failed: 0, Skipped: 1, Inconclusive: 0, NotRun: 0
 ```
 
 The one skipped test is the Windows PowerShell 5.1 real-generator test because the validation host is Darwin.
@@ -132,7 +151,7 @@ The focused suite proves:
 - 271 complete reviewed metadata records with no sentinel values.
 - Two independent generation roots and the curated catalog are byte-identical by SHA-256.
 - A malicious fixture deployment script is not executed.
-- Missing, sentinel, and wrongly typed metadata fail nonzero.
+- Missing metadata, sentinel descriptions, and quoted Boolean metadata each fail through independent inputs; the latter two assert their exact validation errors.
 
 ### Named Manifest and Repository validation
 
@@ -163,6 +182,8 @@ The expanded registry imports normally before those failures. Task 7 does not su
 ## Review
 
 CodeRabbit review found the Windows PowerShell 5.1 incompatibility before commit. The implementation replaced that approach with bounded JSON registry storage and plain data-file import.
+
+The subsequent Task 7 quality review found that one combined failure fixture could exit on the sentinel description before reaching the quoted Boolean. Commit `6f81d269113b548df570adc476c7abc3ffdb7d24` replaces it with independent sentinel-only and quoted-Boolean-only inputs and assertions. A temporary validation bypass produced the expected RED failure before the focused suite returned GREEN.
 
 A staged follow-up review covered all 274 Task 7 files. Nine valid findings were applied:
 
