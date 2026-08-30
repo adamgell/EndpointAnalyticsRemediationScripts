@@ -121,6 +121,36 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             }
             return $fixtureGenerator
         }
+
+        function Copy-FoundationSymbolTreeWithDirectoryCasing {
+            param(
+                [Parameter(Mandatory)] [string] $Root,
+                [Parameter(Mandatory)]
+                [ValidateSet('BasePath', 'NewPath')]
+                [string] $Layout,
+                [Parameter(Mandatory)] [string] $ApprovedDirectory,
+                [Parameter(Mandatory)] [string] $ActualDirectory
+            )
+
+            $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $Root
+            $approvedPrefix = "$ApprovedDirectory/"
+            foreach ($pathRow in @($pathMap.Paths)) {
+                $targetRelativePath = [string] $pathRow[$Layout]
+                if ($targetRelativePath.StartsWith(
+                    $approvedPrefix,
+                    [System.StringComparison]::Ordinal
+                )) {
+                    $targetRelativePath = $ActualDirectory + $targetRelativePath.Substring(
+                        $ApprovedDirectory.Length
+                    )
+                }
+                $null = Copy-FoundationMappedFile `
+                    -Root $Root `
+                    -SourceRelativePath ([string] $pathRow.NewPath) `
+                    -TargetRelativePath $targetRelativePath
+            }
+            return $fixtureGenerator
+        }
     }
 
     It 'records every canonical cmdlet-casing rewrite' {
@@ -180,6 +210,42 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
 
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
             Should -BeExactly $expectedSymbolMapBytes
+    }
+
+    It 'rejects wrong-case paths in a legacy-source tree' {
+        $fixtureRoot = Join-Path $TestDrive 'wrong-case-legacy-source-tree'
+        $fixtureGenerator = Copy-FoundationSymbolTreeWithDirectoryCasing `
+            -Root $fixtureRoot `
+            -Layout BasePath `
+            -ApprovedDirectory 'Profile-cleanup' `
+            -ActualDirectory 'Profile-Cleanup'
+        $approvedPath = 'Profile-cleanup/detection_detect-old-profiles.ps1'
+        $actualPath = 'Profile-Cleanup/detection_detect-old-profiles.ps1'
+
+        {
+            & $fixtureGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Mapped legacy source '$approvedPath' has incorrect repository-relative casing; found '$actualPath'.*"
+    }
+
+    It 'rejects wrong-case paths in a destination-only tree' {
+        $fixtureRoot = Join-Path $TestDrive 'wrong-case-destination-only-tree'
+        $fixtureGenerator = Copy-FoundationSymbolTreeWithDirectoryCasing `
+            -Root $fixtureRoot `
+            -Layout NewPath `
+            -ApprovedDirectory 'Profile-Cleanup' `
+            -ActualDirectory 'Profile-cleanup'
+        $approvedPath = 'Profile-Cleanup/Detect-Profile-Cleanup.ps1'
+        $actualPath = 'Profile-cleanup/Detect-Profile-Cleanup.ps1'
+
+        {
+            & $fixtureGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Mapped destination '$approvedPath' has incorrect repository-relative casing; found '$actualPath'.*"
     }
 
     It 'regenerates byte-identically when live command discovery is unavailable' {

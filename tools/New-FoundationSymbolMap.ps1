@@ -30,6 +30,80 @@ function Test-SafeRepositoryPath {
     return $true
 }
 
+function Resolve-RepositoryRelativeFile {
+    param(
+        [Parameter(Mandatory)] [string] $Root,
+        [Parameter(Mandatory)] [string] $RelativePath
+    )
+
+    $currentDirectory = New-Object System.IO.DirectoryInfo($Root)
+    $actualSegments = New-Object 'System.Collections.Generic.List[string]'
+    [string[]] $approvedSegments = $RelativePath.Split('/')
+    for ($segmentIndex = 0; $segmentIndex -lt $approvedSegments.Length; $segmentIndex++) {
+        $approvedSegment = $approvedSegments[$segmentIndex]
+        $matchingEntries = New-Object 'System.Collections.Generic.List[System.IO.FileSystemInfo]'
+        foreach ($entry in $currentDirectory.GetFileSystemInfos()) {
+            if ([System.StringComparer]::OrdinalIgnoreCase.Equals($entry.Name, $approvedSegment)) {
+                $matchingEntries.Add($entry)
+            }
+        }
+        if ($matchingEntries.Count -eq 0) {
+            return [pscustomobject]@{
+                Exists = $false
+                HasExactCasing = $false
+                FullPath = $null
+                RelativePath = $null
+            }
+        }
+
+        $matchingEntry = $null
+        foreach ($entry in $matchingEntries) {
+            if ([System.StringComparer]::Ordinal.Equals($entry.Name, $approvedSegment)) {
+                $matchingEntry = $entry
+                break
+            }
+        }
+        if ($null -eq $matchingEntry) {
+            if ($matchingEntries.Count -gt 1) {
+                throw "Repository path '$RelativePath' has multiple case-colliding matches for component '$approvedSegment'."
+            }
+            $matchingEntry = $matchingEntries[0]
+        }
+        $actualSegments.Add($matchingEntry.Name)
+
+        $isFinalSegment = $segmentIndex -eq ($approvedSegments.Length - 1)
+        if ($isFinalSegment) {
+            if ($matchingEntry -isnot [System.IO.FileInfo]) {
+                return [pscustomobject]@{
+                    Exists = $false
+                    HasExactCasing = $false
+                    FullPath = $null
+                    RelativePath = $null
+                }
+            }
+            $actualRelativePath = $actualSegments -join '/'
+            return [pscustomobject]@{
+                Exists = $true
+                HasExactCasing = [System.StringComparer]::Ordinal.Equals(
+                    $RelativePath,
+                    $actualRelativePath
+                )
+                FullPath = $matchingEntry.FullName
+                RelativePath = $actualRelativePath
+            }
+        }
+        if ($matchingEntry -isnot [System.IO.DirectoryInfo]) {
+            return [pscustomobject]@{
+                Exists = $false
+                HasExactCasing = $false
+                FullPath = $null
+                RelativePath = $null
+            }
+        }
+        $currentDirectory = $matchingEntry
+    }
+}
+
 function Get-CommandRecords {
     param([Parameter(Mandatory)] $Ast)
 
@@ -152,10 +226,18 @@ foreach ($pathRow in $pathRows) {
         throw "Path map destination '$newPath' is duplicated or case-colliding."
     }
 
-    $sourceFullPath = Join-Path $repositoryRoot $basePath.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
-    $destinationFullPath = Join-Path $repositoryRoot $newPath.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
-    $sourceExists = [System.IO.File]::Exists($sourceFullPath)
-    $destinationExists = [System.IO.File]::Exists($destinationFullPath)
+    $sourceResolution = Resolve-RepositoryRelativeFile -Root $repositoryRoot -RelativePath $basePath
+    if ($sourceResolution.Exists -and -not $sourceResolution.HasExactCasing) {
+        throw "Mapped legacy source '$basePath' has incorrect repository-relative casing; found '$($sourceResolution.RelativePath)'."
+    }
+    $destinationResolution = Resolve-RepositoryRelativeFile -Root $repositoryRoot -RelativePath $newPath
+    if ($destinationResolution.Exists -and -not $destinationResolution.HasExactCasing) {
+        throw "Mapped destination '$newPath' has incorrect repository-relative casing; found '$($destinationResolution.RelativePath)'."
+    }
+    $sourceExists = $sourceResolution.Exists
+    $destinationExists = $destinationResolution.Exists
+    $sourceFullPath = $sourceResolution.FullPath
+    $destinationFullPath = $destinationResolution.FullPath
     if ($sourceExists -and $destinationExists) {
         $sourceBytes = [System.IO.File]::ReadAllBytes($sourceFullPath)
         $destinationBytes = [System.IO.File]::ReadAllBytes($destinationFullPath)
@@ -174,7 +256,7 @@ foreach ($pathRow in $pathRows) {
         throw "Neither mapped source '$basePath' nor destination '$newPath' exists."
     }
 
-    $parseFullPath = if ($sourceExists) { $sourceFullPath } else { $destinationFullPath }
+    $parseFullPath = if ($sourceExists) { $sourceResolution.FullPath } else { $destinationResolution.FullPath }
     $parseRelativePath = if ($sourceExists) { $basePath } else { $newPath }
     $tokens = $null
     $parseErrors = $null
