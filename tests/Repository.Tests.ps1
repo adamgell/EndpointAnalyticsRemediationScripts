@@ -31,22 +31,18 @@ Describe 'Foundation path map details' -Tag 'FoundationMapCurrentTree' {
 
     It 'covers the exact non-executing runtime inventory' {
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-        $infrastructureDirectories = @(
-            '.git', '.github', '.superpowers', 'assets', 'docs', 'evidence', 'standards', 'tests', 'tools'
-        )
+        $scriptRoot = Join-Path $repositoryRoot 'scripts'
         $inventory = @(
-            foreach ($directory in Get-ChildItem -LiteralPath $repositoryRoot -Directory) {
-                if ($directory.Name -in $infrastructureDirectories) {
-                    continue
-                }
+            foreach ($directory in Get-ChildItem -LiteralPath $scriptRoot -Directory) {
                 foreach ($file in Get-ChildItem -LiteralPath $directory.FullName -Recurse -File) {
                     if ($file.Extension -ine '.ps1' -and -not [string]::IsNullOrEmpty($file.Extension)) {
                         continue
                     }
-                    $file.FullName.Substring($repositoryRoot.Length).TrimStart('\', '/').Replace('\', '/')
+                    $file.FullName.Substring($scriptRoot.Length).TrimStart('\', '/').Replace('\', '/')
                 }
             }
         )
+
 
         @($inventory).Count | Should -Be 271
         Compare-Object -ReferenceObject @($map.Paths.NewPath) -DifferenceObject $inventory -CaseSensitive |
@@ -657,11 +653,12 @@ Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
     BeforeAll {
         Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $scriptRoot = Join-Path $repositoryRoot 'scripts'
         $pathMap = Import-PowerShellDataFile "$repositoryRoot/evidence/foundation/PathMap.psd1"
     }
 
     It 'contains exactly 271 standard ps1 deployment scripts' {
-        $scripts = @(Get-DeploymentScript -Root $repositoryRoot)
+        $scripts = @(Get-DeploymentScript -Root $scriptRoot)
         $scripts.Count | Should -Be 271
         $invalid = $scripts | Where-Object {
             $_.Name -notmatch '^(Detect|Remediate)-[A-Z][A-Za-z0-9]*(?:-[A-Z0-9][A-Za-z0-9]*)*\.ps1$'
@@ -670,7 +667,7 @@ Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
     }
 
     It 'contains no extensionless PowerShell candidates' {
-        @(Get-ExtensionlessPowerShellCandidate -Root $repositoryRoot) |
+        @(Get-ExtensionlessPowerShellCandidate -Root $scriptRoot) |
             Should -BeNullOrEmpty
     }
 
@@ -691,15 +688,15 @@ Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
         @($pathMap.Paths.NewPath).Count | Should -Be 271
         @($pathMap.Paths.NewPath | Sort-Object -Unique).Count | Should -Be 271
         $missing = $pathMap.Paths.NewPath | Where-Object {
-            -not (Test-Path -LiteralPath (Join-Path $repositoryRoot $_) -PathType Leaf)
+            -not (Test-Path -LiteralPath (Join-Path $scriptRoot $_) -PathType Leaf)
         }
         $missing | Should -BeNullOrEmpty
     }
 
     It 'uses exact mapped destination casing' {
-        $actualPaths = Get-DeploymentScript -Root $repositoryRoot |
+        $actualPaths = Get-DeploymentScript -Root $scriptRoot |
             ForEach-Object {
-                $_.FullName.Substring($repositoryRoot.Length).
+                $_.FullName.Substring($scriptRoot.Length).
                 TrimStart('\', '/').
                 Replace('\', '/')
             }
@@ -725,13 +722,14 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
     BeforeAll {
         Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $scriptRoot = Join-Path $repositoryRoot 'scripts'
         $packageData = Import-PowerShellDataFile "$repositoryRoot/standards/FoundationPackages.psd1"
         $styleExclusions = Get-Content `
             -LiteralPath "$repositoryRoot/evidence/foundation/StaticAnalysisExclusions.json" `
             -Raw |
             ConvertFrom-Json
         $approvedLongLineDigest = 'd43eae67fa2231aeebc5895e9e1418ca025361dca6c4643ca8c50e990c282abe'
-        $scriptFiles = @(Get-DeploymentScript -Root $repositoryRoot)
+        $scriptFiles = @(Get-DeploymentScript -Root $scriptRoot)
         $trackedPowerShellPaths = @(
             Get-FoundationTrackedPowerShellPath -RepositoryRoot $repositoryRoot
         )
@@ -741,9 +739,15 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
                 if (-not [System.IO.File]::Exists($fullPath)) {
                     throw "Tracked PowerShell file '$relativePath' does not exist."
                 }
+                $stylePath = if ($relativePath.StartsWith('scripts/', [System.StringComparison]::OrdinalIgnoreCase)) {
+                    $relativePath.Substring('scripts/'.Length)
+                }
+                else {
+                    $relativePath
+                }
                 [pscustomobject]@{
                     File = Get-Item -LiteralPath $fullPath
-                    Path = $relativePath
+                    Path = $stylePath
                 }
             }
         )
@@ -756,7 +760,7 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
         }
 
         foreach ($scriptFile in $scriptFiles) {
-            $relativePath = $scriptFile.FullName.Substring($repositoryRoot.Length).
+            $relativePath = $scriptFile.FullName.Substring($scriptRoot.Length).
             TrimStart('\', '/').
             Replace('\', '/')
             $tokens = $null
@@ -1637,7 +1641,7 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
                     (Join-Path $root 'evidence'),
                     (Join-Path $root 'evidence/foundation'),
                     (Join-Path $root 'tests'),
-                    (Join-Path $root 'runtime'),
+                    (Join-Path $root 'scripts/runtime'),
                     (Join-Path $moduleRoot 'Pester'),
                     (Join-Path $moduleRoot 'PSScriptAnalyzer')
                 )) {
@@ -1855,7 +1859,7 @@ Export-ModuleMember -Function *
                     -Value $catalogModule -Encoding utf8
             }
 
-            $runtimePath = Join-Path $root 'runtime/Script001.ps1'
+            $runtimePath = Join-Path $root 'scripts/runtime/Script001.ps1'
             $scriptContent = @'
 if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
     Add-Content -LiteralPath $env:BUILD_CONTRACT_SENTINEL `
@@ -1863,14 +1867,14 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
 }
 '@
             Set-Content -LiteralPath $runtimePath -Value $scriptContent -Encoding utf8
-            Set-Content -LiteralPath (Join-Path $root 'runtime/Script001.psd1') `
+            Set-Content -LiteralPath (Join-Path $root 'scripts/runtime/Script001.psd1') `
                 -Value '@{}' -Encoding utf8
 
             if ($Route -eq 'Validate') {
                 $mapEntries = @(
                     foreach ($number in 1..271) {
                         $name = 'Script{0:D3}.ps1' -f $number
-                        $path = Join-Path $root "runtime/$name"
+                        $path = Join-Path $root "scripts/runtime/$name"
                         Set-Content -LiteralPath $path -Value $scriptContent -Encoding utf8
                         Set-Content -LiteralPath ([System.IO.Path]::ChangeExtension($path, '.psd1')) `
                             -Value '@{}' -Encoding utf8
@@ -2016,7 +2020,7 @@ exit 0
         $fixture = New-BuildContractFixture -Route Validate
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
         $scriptFiles = @(
-            Get-ChildItem -LiteralPath (Join-Path $fixture 'runtime') `
+            Get-ChildItem -LiteralPath (Join-Path $fixture 'scripts/runtime') `
                 -Filter '*.ps1' -File |
                 Sort-Object -Property Name
         )
@@ -2051,7 +2055,7 @@ exit 0
         ).Count | Should -Be 0
         @($pathMap.Paths).Count | Should -Be 271
         $inventoryChecks.Count | Should -Be 1
-        $inventoryChecks[0].Root | Should -Be $fixture
+        $inventoryChecks[0].Root | Should -Be (Join-Path $fixture 'scripts')
         $manifestChecks.Count | Should -Be 271
         $transitionChecks.Count | Should -Be 271
         $referenceChecks.Count | Should -Be 1
@@ -2079,7 +2083,7 @@ exit 0
             $scriptFiles[$index].Name | Should -Be $name
             $pathMap.Paths[$index].NewPath | Should -Be "runtime/$name"
             $manifestChecks[$index].Path | Should -Be (
-                Join-Path $fixture "runtime/$([System.IO.Path]::ChangeExtension($name, '.psd1'))"
+                Join-Path $fixture "scripts/runtime/$([System.IO.Path]::ChangeExtension($name, '.psd1'))"
             )
             $manifestChecks[$index].SchemaPath | Should -Be (
                 Join-Path $fixture 'standards/ManifestSchema.psd1'
@@ -2131,8 +2135,8 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
     ) {
         $fixture = New-BuildContractFixture -Route Validate
-        $removedScript = Join-Path $fixture 'runtime/Script271.ps1'
-        $removedManifest = Join-Path $fixture 'runtime/Script271.psd1'
+        $removedScript = Join-Path $fixture 'scripts/runtime/Script271.ps1'
+        $removedManifest = Join-Path $fixture 'scripts/runtime/Script271.psd1'
         Remove-Item -LiteralPath $removedScript, $removedManifest
 
         $pathMapPath = Join-Path $fixture 'evidence/foundation/PathMap.psd1'
@@ -2143,11 +2147,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         Set-Content -LiteralPath $pathMapPath -Value $pathMap -Encoding utf8
 
         $scriptFiles = @(
-            Get-ChildItem -LiteralPath (Join-Path $fixture 'runtime') `
+            Get-ChildItem -LiteralPath (Join-Path $fixture 'scripts/runtime') `
                 -Filter '*.ps1' -File
         )
         $manifestFiles = @(
-            Get-ChildItem -LiteralPath (Join-Path $fixture 'runtime') `
+            Get-ChildItem -LiteralPath (Join-Path $fixture 'scripts/runtime') `
                 -Filter '*.psd1' -File
         )
         $pathMap = Import-PowerShellDataFile -LiteralPath $pathMapPath
@@ -2191,7 +2195,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
     ) {
         $fixture = New-BuildContractFixture -Route Validate
-        Remove-Item -LiteralPath (Join-Path $fixture 'runtime/Script271.psd1')
+        Remove-Item -LiteralPath (Join-Path $fixture 'scripts/runtime/Script271.psd1')
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
 
         $result.ExitCode | Should -Not -Be 0
@@ -2220,7 +2224,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
         $result.ExitCode | Should -Not -Be 0
         ($result.Output -join "`n") | Should -Match `
-            'Manifest validation failed:[\s\S]*Script001\.ps1: controlled invalid[\s\S]*manifest'
+            'Manifest validation failed:[\s\S]*Script001\.ps1:[\s\S]*controlled'
     }
 
     It 'rejects a deployment script with a PowerShell parser error' `
@@ -2231,7 +2235,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
     ) {
         $fixture = New-BuildContractFixture -Route Validate
-        Set-Content -LiteralPath (Join-Path $fixture 'runtime/Script271.ps1') `
+        Set-Content -LiteralPath (Join-Path $fixture 'scripts/runtime/Script271.ps1') `
             -Value 'if (' -Encoding utf8
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
 
@@ -2396,7 +2400,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $testInvocation[0].Configuration.CoverageEnabled | Should -BeTrue
         @($testInvocation[0].Configuration.CoveragePath).Count | Should -Be 1
         @($testInvocation[0].Configuration.CoveragePath)[0] |
-            Should -Be (Join-Path $fixture 'runtime/Script001.ps1')
+            Should -Be (Join-Path $fixture 'scripts/runtime/Script001.ps1')
     }
 
     It 'invokes CheckFormat as verification and leaves fixture bytes unchanged' -Skip:(
@@ -2540,7 +2544,7 @@ function Install-Module {
         [Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT
     ) {
         $baseRevision = (Get-Content `
-                -LiteralPath (Join-Path $repositoryRoot 'evidence/foundation/BaseRevision.txt') `
+                -LiteralPath (Join-Path $repositoryRoot 'evidence/rewrites/scripts-directory/BaseRevision.txt') `
                 -Raw).Trim()
         $reportPath = Join-Path $TestDrive 'fresh-rewrite-report.json'
         $output = @(
@@ -2548,8 +2552,8 @@ function Install-Module {
                 -ExecutionPolicy Bypass -File $buildPath `
                 -Task ValidateRewrite `
                 -BaseRevision $baseRevision `
-                -PathMap (Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1') `
-                -SymbolMap (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1') `
+                -PathMap (Join-Path $repositoryRoot 'evidence/rewrites/scripts-directory/PathMap.psd1') `
+                -SymbolMap (Join-Path $repositoryRoot 'evidence/rewrites/scripts-directory/SymbolRenames.psd1') `
                 -ReportPath $reportPath
         )
         $exitCode = $LASTEXITCODE

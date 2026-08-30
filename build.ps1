@@ -19,6 +19,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = [System.IO.Path]::GetFullPath($PSScriptRoot)
+$scriptRoot = Join-Path $repositoryRoot 'scripts'
 $requiredModulesPath = Join-Path $repositoryRoot 'tools/RequiredModules.psd1'
 
 function Resolve-RepositoryPath {
@@ -135,9 +136,10 @@ function Get-RelativeRepositoryPath {
 function Invoke-RepositoryValidation {
     Import-Module (Join-Path $repositoryRoot 'tools/RepositoryCatalog.psm1') -Force
     $schemaPath = Join-Path $repositoryRoot 'standards/ManifestSchema.psd1'
-    $pathMapPath = Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1'
-    $pathMap = Import-PowerShellDataFile -LiteralPath $pathMapPath
-    $scripts = @(Get-DeploymentScript -Root $repositoryRoot)
+    $pathMap = Import-PowerShellDataFile -LiteralPath (
+        Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1'
+    )
+    $scripts = @(Get-DeploymentScript -Root $scriptRoot)
     if ($scripts.Count -ne 271) {
         throw "Expected 271 deployment scripts, found $($scripts.Count)."
     }
@@ -150,7 +152,10 @@ function Invoke-RepositoryValidation {
     $statuses = New-Object 'System.Collections.Generic.List[string]'
     foreach ($script in $scripts) {
         $relativePath = Get-RelativeRepositoryPath -Path $script.FullName
-        $null = $scriptPaths.Add($relativePath)
+        $scriptRelativePath = $script.FullName.Substring($scriptRoot.Length).
+        TrimStart('\', '/').
+        Replace('\', '/')
+        $null = $scriptPaths.Add($scriptRelativePath)
         $manifestPath = [System.IO.Path]::ChangeExtension($script.FullName, '.psd1')
         if (-not [System.IO.File]::Exists($manifestPath)) {
             $manifestFailures.Add("$relativePath is missing its manifest.")
@@ -191,7 +196,6 @@ function Invoke-RepositoryValidation {
     if ($parseFailures.Count -gt 0) {
         throw "PowerShell parsing failed: $($parseFailures -join '; ')"
     }
-
     $mappedPaths = [System.Collections.Generic.HashSet[string]]::new(
         [System.StringComparer]::Ordinal
     )
@@ -207,6 +211,7 @@ function Invoke-RepositoryValidation {
         ).Count -gt 0) {
         throw 'Current deployment inventory does not match the destination path map.'
     }
+
 
     $unresolvedReferences = @(
         Get-UnresolvedRepositoryReference -Root $repositoryRoot
@@ -249,7 +254,7 @@ function Get-CoveredScriptPaths {
     Import-Module (Join-Path $repositoryRoot 'tools/RepositoryCatalog.psm1') -Force
     $schemaPath = Join-Path $repositoryRoot 'standards/ManifestSchema.psd1'
     $paths = New-Object 'System.Collections.Generic.List[string]'
-    foreach ($script in @(Get-DeploymentScript -Root $repositoryRoot)) {
+    foreach ($script in @(Get-DeploymentScript -Root $scriptRoot)) {
         $manifestPath = [System.IO.Path]::ChangeExtension($script.FullName, '.psd1')
         $manifest = (Test-ScriptManifest `
                 -Path $manifestPath `
@@ -390,7 +395,7 @@ function Invoke-ManifestValidation {
         }
         foreach ($relativePath in $expectedPaths) {
             $generatedPath = Join-Path $tempRoot $relativePath
-            $expectedPath = Join-Path $repositoryRoot $relativePath
+            $expectedPath = Join-Path $scriptRoot $relativePath
             $generatedBytes = [System.IO.File]::ReadAllBytes($generatedPath)
             $expectedBytes = [System.IO.File]::ReadAllBytes($expectedPath)
             if (-not [System.Linq.Enumerable]::SequenceEqual(

@@ -3,6 +3,7 @@
     $fixtureRoot = "$PSScriptRoot/fixtures/rewrite"
     $wrapperPath = "$PSScriptRoot/../tools/Test-PowerShellRewrite.ps1"
     $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+    $scriptRoot = Join-Path $repositoryRoot 'scripts'
     $foundationSymbolMap = Import-PowerShellDataFile `
         -Path (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1')
     $windowsPowerShellPath = ''
@@ -290,7 +291,7 @@ global:IsMember
     }
 
     It 'ignores a variable whose name case-insensitively matches the renamed function' {
-        $source = Join-Path $repositoryRoot 'Enable-RDP/Detect-Enable-RDP.ps1'
+        $source = Join-Path $scriptRoot 'Enable-RDP/Detect-Enable-RDP.ps1'
         $before = Join-Path $TestDrive 'FunctionVariable.Before.ps1'
         $after = Join-Path $TestDrive 'FunctionVariable.After.ps1'
         $afterText = [System.IO.File]::ReadAllText($source)

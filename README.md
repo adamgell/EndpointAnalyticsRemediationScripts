@@ -24,7 +24,7 @@ Detect. Remediate. Automate.
 
 This repository provides a growing library of **production-ready** detection and remediation scripts for [Microsoft Intune Endpoint Analytics](https://learn.microsoft.com/en-us/mem/analytics/proactive-remediations). Each script package includes a detection script and (where applicable) a remediation script that you can deploy directly to your environment.
 
-> **Browse the folders above** to explore all available scripts -- from security hardening and Defender configuration to disk cleanup, Teams management, and more.
+> **Browse `scripts/`** to explore all available packages -- from security hardening and Defender configuration to disk cleanup, Teams management, and more.
 
 <!-- project-context:start -->
 ## Project Context
