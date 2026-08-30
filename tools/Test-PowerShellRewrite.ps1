@@ -100,6 +100,67 @@ function Get-OrdinalSortedPathRows {
     return ,($sortedRows.ToArray())
 }
 
+function Test-FunctionCommandName {
+    param(
+        [Parameter(Mandatory)] [string] $CommandName,
+        [Parameter(Mandatory)] [string] $FunctionName
+    )
+
+    $suffixStart = $CommandName.Length - $FunctionName.Length
+    if ($suffixStart -lt 0 -or
+        $CommandName.Substring($suffixStart) -ine $FunctionName) {
+        return $false
+    }
+    if ($suffixStart -eq 0) {
+        return $true
+    }
+
+    $separator = $CommandName[$suffixStart - 1]
+    return $separator -eq ':' -or $separator -eq '\'
+}
+
+function Test-PowerShellFunctionReference {
+    param(
+        [Parameter(Mandatory)] [string] $Path,
+        [Parameter(Mandatory)] [string] $FunctionName
+    )
+
+    $tokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput(
+        [System.IO.File]::ReadAllText($Path),
+        [ref] $tokens,
+        [ref] $parseErrors
+    )
+    $functions = @($ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+    }, $true))
+    if (@($functions | Where-Object { $_.Name -ieq $FunctionName }).Count -gt 0) {
+        return $true
+    }
+
+    $symbolPattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($FunctionName) + '(?![A-Za-z0-9_-])'
+    $commands = @($ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.CommandAst]
+    }, $true))
+    foreach ($command in $commands) {
+        $commandName = $command.GetCommandName()
+        if ($null -ne $commandName -and
+            (Test-FunctionCommandName -CommandName $commandName -FunctionName $FunctionName)) {
+            return $true
+        }
+        if ($command.InvocationOperator -ne [System.Management.Automation.Language.TokenKind]::Unknown -and
+            $command.CommandElements.Count -gt 0 -and
+            [regex]::IsMatch([string] $command.CommandElements[0].Extent.Text, $symbolPattern)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $fullRevision = ''
 $rows = @()
@@ -241,7 +302,18 @@ try {
             $oldName = [string] $mapping.OldName
             $pattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($oldName) + '(?![A-Za-z0-9_-])'
             foreach ($reference in $catalogReferences) {
-                if ([regex]::IsMatch([System.IO.File]::ReadAllText($reference.File.FullName), $pattern)) {
+                if ($reference.File.Extension -eq '.ps1') {
+                    $containsReference = Test-PowerShellFunctionReference `
+                        -Path $reference.File.FullName `
+                        -FunctionName $oldName
+                }
+                else {
+                    $containsReference = [regex]::IsMatch(
+                        [System.IO.File]::ReadAllText($reference.File.FullName),
+                        $pattern
+                    )
+                }
+                if ($containsReference) {
                     $gateFailures.Add("Catalog file '$($reference.RelativePath)' contains unresolved old function symbol '$oldName'.")
                 }
             }

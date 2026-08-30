@@ -569,7 +569,7 @@ function Add-CommandMapEntry {
         $matches = @($beforeRecords | Where-Object { $_.Name -ceq $oldName })
     }
     else {
-        $matches = @($beforeRecords | Where-Object { $_.Name -ieq $oldName })
+        $matches = @($beforeRecords | Where-Object { $_.Name -ceq $oldName })
     }
     if ($matches.Count -lt $occurrence) {
         $State.Failures.Add("$Type mapping '$oldName' occurrence $occurrence does not exist in the before source.")
@@ -588,7 +588,7 @@ function Add-CommandMapEntry {
     }
 
     if ($Type -eq 'Alias') {
-        $alias = @(Get-Alias -ErrorAction SilentlyContinue | Where-Object Name -CEQ $oldName)
+        $alias = @(Get-Alias -ErrorAction SilentlyContinue | Where-Object Name -IEQ $oldName)
         $replacement = @(Get-Command -ListImported -CommandType Cmdlet -ErrorAction SilentlyContinue |
             Where-Object Name -CEQ $newName)
         if ($alias.Count -ne 1 -or $replacement.Count -ne 1 -or
@@ -621,8 +621,18 @@ function Add-CommandMapEntry {
         return
     }
 
-    $State.Before[$beforeOffset] = $canonicalName
-    $State.After[$afterOffset] = $canonicalName
+    if ($Type -eq 'Alias') {
+        $normalization = [pscustomobject]@{
+            Kind = 'MappedAliasCall'
+            Flags = 'CommandName'
+            Value = $canonicalName
+        }
+    }
+    else {
+        $normalization = $canonicalName
+    }
+    $State.Before[$beforeOffset] = $normalization
+    $State.After[$afterOffset] = $normalization
     $State.Applied.Add([pscustomobject][ordered]@{
         Type = $Type
         OldName = $oldName
@@ -677,6 +687,52 @@ function Get-FunctionNameOffset {
     return -1
 }
 
+function Get-RenamedFunctionCommandName {
+    param(
+        [Parameter(Mandatory)] [string] $CommandName,
+        [Parameter(Mandatory)] [string] $OldName,
+        [Parameter(Mandatory)] [string] $NewName
+    )
+
+    $suffixStart = $CommandName.Length - $OldName.Length
+    if ($suffixStart -lt 0 -or
+        $CommandName.Substring($suffixStart) -ine $OldName) {
+        return $null
+    }
+    if ($suffixStart -gt 0) {
+        $separator = $CommandName[$suffixStart - 1]
+        if ($separator -ne ':' -and $separator -ne '\') {
+            return $null
+        }
+    }
+
+    return $CommandName.Substring(0, $suffixStart) + $NewName
+}
+
+function Test-HasUnresolvedDynamicFunctionReference {
+    param(
+        [Parameter(Mandatory)] $ParsedScript,
+        [Parameter(Mandatory)] [string] $FunctionName
+    )
+
+    $symbolPattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($FunctionName) + '(?![A-Za-z0-9_-])'
+    $commands = @($ParsedScript.Ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.CommandAst]
+    }, $true))
+    foreach ($command in $commands) {
+        if ($command.InvocationOperator -eq [System.Management.Automation.Language.TokenKind]::Unknown -or
+            $command.CommandElements.Count -eq 0 -or $null -ne $command.GetCommandName()) {
+            continue
+        }
+        if ([regex]::IsMatch([string] $command.CommandElements[0].Extent.Text, $symbolPattern)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Test-FunctionRenameMapping {
     [CmdletBinding()]
     param(
@@ -726,8 +782,12 @@ function Test-FunctionRenameMapping {
             continue
         }
 
-        $oldCalls = @($beforeCommands | Where-Object { $_.Name -ieq $oldName })
-        $newCalls = @($afterCommands | Where-Object { $_.Name -ieq $newName })
+        $oldCalls = @($beforeCommands | Where-Object {
+            $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $oldName -NewName $newName)
+        })
+        $newCalls = @($afterCommands | Where-Object {
+            $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $newName -NewName $newName)
+        })
         if ($oldCalls.Count -ne $newCalls.Count) {
             $State.Failures.Add("Function mapping '$oldName' to '$newName' does not preserve the static callsite count.")
             continue
@@ -736,8 +796,12 @@ function Test-FunctionRenameMapping {
         $validCallsites = $true
         for ($index = 0; $index -lt $oldCalls.Count; $index++) {
             $beforeCall = $oldCalls[$index]
+            $expectedAfterName = Get-RenamedFunctionCommandName `
+                -CommandName $beforeCall.Name `
+                -OldName $oldName `
+                -NewName $newName
             if ($beforeCall.Index -ge $afterCommands.Count -or
-                $afterCommands[$beforeCall.Index].Name -cne $newName) {
+                $afterCommands[$beforeCall.Index].Name -cne $expectedAfterName) {
                 $State.Failures.Add("Function mapping '$oldName' to '$newName' is not a static callsite bijection.")
                 $validCallsites = $false
                 break
@@ -773,18 +837,18 @@ function Test-FunctionRenameMapping {
         $State.BeforeFunctionNames[$oldName.ToLowerInvariant()] = $canonicalName
         $State.AfterFunctionNames[$newName.ToLowerInvariant()] = $canonicalName
 
-        $symbolPattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($oldName) + '(?![A-Za-z0-9_-])'
-        foreach ($token in $BeforeScript.Tokens) {
-            if ($token.Kind -eq [System.Management.Automation.Language.TokenKind]::EndOfInput) {
-                continue
-            }
-            if ([regex]::IsMatch([string] $token.Text, $symbolPattern) -and
-                -not $State.Before.ContainsKey([string] $token.Extent.StartOffset)) {
-                $State.Failures.Add("Function mapping '$oldName' has an ambiguous or dynamic reference in the before source.")
-                break
-            }
+        if (Test-HasUnresolvedDynamicFunctionReference -ParsedScript $BeforeScript -FunctionName $oldName) {
+            $State.Failures.Add("Function mapping '$oldName' has an ambiguous or dynamic reference in the before source.")
         }
-        if ([regex]::IsMatch($AfterScript.Text, $symbolPattern)) {
+
+        $hasUnresolvedDefinition = @($afterFunctions | Where-Object { $_.Name -ieq $oldName }).Count -gt 0
+        $hasUnresolvedCall = @($afterCommands | Where-Object {
+            $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $oldName -NewName $oldName)
+        }).Count -gt 0
+        $hasUnresolvedDynamicCall = Test-HasUnresolvedDynamicFunctionReference `
+            -ParsedScript $AfterScript `
+            -FunctionName $oldName
+        if ($hasUnresolvedDefinition -or $hasUnresolvedCall -or $hasUnresolvedDynamicCall) {
             $State.Failures.Add("After source contains unresolved old function symbol '$oldName'.")
         }
 

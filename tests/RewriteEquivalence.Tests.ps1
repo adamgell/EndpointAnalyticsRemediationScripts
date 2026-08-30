@@ -2,6 +2,8 @@ BeforeAll {
     Import-Module "$PSScriptRoot/../tools/RewriteEquivalence.psm1" -Force
     $fixtureRoot = "$PSScriptRoot/fixtures/rewrite"
     $wrapperPath = "$PSScriptRoot/../tools/Test-PowerShellRewrite.ps1"
+    $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+    $foundationSymbolMap = Import-PowerShellDataFile -Path (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1')
 }
 
 Describe 'PowerShell rewrite equivalence' {
@@ -41,6 +43,28 @@ Describe 'PowerShell rewrite equivalence' {
 
         (Compare-PowerShellSource -BeforePath "$fixtureRoot/Alias.Before.ps1" -AfterPath "$fixtureRoot/Alias.After.ps1").Passed |
             Should -BeFalse
+    }
+
+    It 'resolves alias metadata case-insensitively while matching source occurrences case-sensitively' {
+        $before = Join-Path $TestDrive 'AliasCase.Before.ps1'
+        $after = Join-Path $TestDrive 'AliasCase.After.ps1'
+        @'
+start 'https://example.invalid/lowercase'
+Start 'https://example.invalid/source-exact'
+'@ | Set-Content -LiteralPath $before -Encoding utf8
+        @'
+start 'https://example.invalid/lowercase'
+Start-Process 'https://example.invalid/source-exact'
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $startAliasMapping = @($foundationSymbolMap.Aliases |
+            Where-Object Path -CEQ 'Run-Browser/Remediate-Run-Browser.ps1')[0]
+        $map = @{
+            Aliases = @($startAliasMapping)
+            Functions = @()
+        }
+
+        $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map
+        $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
     }
 
     It 'accepts explicit canonical command casing only through its occurrence map' {
@@ -109,8 +133,59 @@ Export-ModuleMember -Function Invoke-AutoLoadProbe
         $result.Passed | Should -BeTrue
     }
 
-    It 'rejects a partial or unresolved function rename' {
-        $after = Join-Path $TestDrive 'Function.Unresolved.ps1'
+    It 'accepts a function rename in a scope-qualified static call' {
+        $before = Join-Path $TestDrive 'FunctionQualified.Before.ps1'
+        $after = Join-Path $TestDrive 'FunctionQualified.After.ps1'
+        @'
+function IsMember {}
+global:IsMember
+'@ | Set-Content -LiteralPath $before -Encoding utf8
+        @'
+function Test-GroupMembership {}
+global:Test-GroupMembership
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
+
+        $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map
+        $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
+    }
+
+    It 'rejects an unresolved old function in a scope-qualified static call' {
+        $before = Join-Path $TestDrive 'FunctionQualifiedUnresolved.Before.ps1'
+        $after = Join-Path $TestDrive 'FunctionQualifiedUnresolved.After.ps1'
+        @'
+function IsMember {}
+global:IsMember
+'@ | Set-Content -LiteralPath $before -Encoding utf8
+        @'
+function Test-GroupMembership {}
+global:Test-GroupMembership
+global:IsMember
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
+
+        $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map
+        $result.Passed | Should -BeFalse
+        $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
+    }
+
+    It 'ignores a variable whose name case-insensitively matches the renamed function' {
+        $before = Join-Path $repositoryRoot 'Enable-RDP/detection_Enable-RDPDetection.ps1'
+        $after = Join-Path $TestDrive 'FunctionVariable.After.ps1'
+        $afterText = [System.IO.File]::ReadAllText($before)
+        $afterText = $afterText.Replace('function IsMember', 'function Test-GroupMembership')
+        $afterText = $afterText.Replace('if(IsMember ', 'if(Test-GroupMembership ')
+        $afterText | Set-Content -LiteralPath $after -Encoding utf8
+        $functionMapping = @($foundationSymbolMap.Functions |
+            Where-Object Path -CEQ 'Enable-RDP/Detect-Enable-RDP.ps1')[0]
+        $map = @{ Aliases = @(); Functions = @($functionMapping) }
+
+        $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map
+        $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
+    }
+
+    It 'rejects an unresolved old function call' {
+        $after = Join-Path $TestDrive 'Function.UnresolvedCall.ps1'
         @'
 function Test-GroupMembership {
     param([string] $Group)
@@ -119,7 +194,48 @@ function Test-GroupMembership {
 }
 
 Test-GroupMembership -Group 'Administrators'
-$legacyReference = 'IsMember'
+IsMember -Group 'Administrators'
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
+
+        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Function.Before.ps1" -AfterPath $after -SymbolMap $map
+        $result.Passed | Should -BeFalse
+        $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
+    }
+
+    It 'rejects an unresolved old function definition' {
+        $after = Join-Path $TestDrive 'Function.UnresolvedDefinition.ps1'
+        @'
+function Test-GroupMembership {
+    param([string] $Group)
+
+    return $Group -eq 'Administrators'
+}
+function IsMember {
+    param([string] $Group)
+
+    return $Group -eq 'Administrators'
+}
+
+Test-GroupMembership -Group 'Administrators'
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
+
+        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Function.Before.ps1" -AfterPath $after -SymbolMap $map
+        $result.Passed | Should -BeFalse
+        $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
+    }
+
+    It 'rejects an unresolved old function used as a dynamic invocation target' {
+        $after = Join-Path $TestDrive 'Function.UnresolvedDynamicCall.ps1'
+        @'
+function Test-GroupMembership {
+    param([string] $Group)
+
+    return $Group -eq 'Administrators'
+}
+Test-GroupMembership -Group 'Administrators'
+& $IsMember -Group 'Administrators'
 '@ | Set-Content -LiteralPath $after -Encoding utf8
         $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
 
@@ -341,13 +457,16 @@ Describe 'PowerShell rewrite wrapper' {
         @'
 function IsMember {
     param([string] $Group)
+    $isMember = $false
     return $Group -eq 'Administrators'
 }
 IsMember -Group 'Administrators'
 '@ | Set-Content -LiteralPath (Join-Path $catalog 'A.ps1') -Encoding utf8
         "`$reference = 'IsMember'" | Set-Content -LiteralPath (Join-Path $catalog 'Zeta.md') -Encoding utf8
         "`$reference = 'IsMember'" | Set-Content -LiteralPath (Join-Path $catalog 'alpha.psd1') -Encoding utf8
-        "`$reference = 'IsMember'" | Set-Content -LiteralPath (Join-Path $catalog 'B.ps1') -Encoding utf8
+        'IsMember' | Set-Content -LiteralPath (Join-Path $catalog 'B.ps1') -Encoding utf8
+        'function IsMember {}' | Set-Content -LiteralPath (Join-Path $catalog 'C.ps1') -Encoding utf8
+        'global:IsMember' | Set-Content -LiteralPath (Join-Path $catalog 'D.ps1') -Encoding utf8
         & git -C $repo init --quiet
         & git -C $repo config core.autocrlf false
         & git -C $repo config user.email 'rewrite-gate@example.invalid'
@@ -359,6 +478,7 @@ IsMember -Group 'Administrators'
         @'
 function Test-GroupMembership {
     param([string] $Group)
+    $isMember = $false
     return $Group -eq 'Administrators'
 }
 Test-GroupMembership -Group 'Administrators'
@@ -369,6 +489,8 @@ Test-GroupMembership -Group 'Administrators'
     Paths = @(
         @{ BasePath = 'Catalog/A.ps1'; NewPath = 'Catalog/A.ps1' }
         @{ BasePath = 'Catalog/B.ps1'; NewPath = 'Catalog/B.ps1' }
+        @{ BasePath = 'Catalog/C.ps1'; NewPath = 'Catalog/C.ps1' }
+        @{ BasePath = 'Catalog/D.ps1'; NewPath = 'Catalog/D.ps1' }
     )
 }
 "@ | Set-Content -LiteralPath $pathMap -Encoding ascii
@@ -395,6 +517,8 @@ Test-GroupMembership -Group 'Administrators'
         $report.Passed | Should -BeFalse
         @($report.Failures) | Should -Be @(
             "Catalog file 'Catalog/B.ps1' contains unresolved old function symbol 'IsMember'."
+            "Catalog file 'Catalog/C.ps1' contains unresolved old function symbol 'IsMember'."
+            "Catalog file 'Catalog/D.ps1' contains unresolved old function symbol 'IsMember'."
             "Catalog file 'Catalog/Zeta.md' contains unresolved old function symbol 'IsMember'."
             "Catalog file 'Catalog/alpha.psd1' contains unresolved old function symbol 'IsMember'."
         )
