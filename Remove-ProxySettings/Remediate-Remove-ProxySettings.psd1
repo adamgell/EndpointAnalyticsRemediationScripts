@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Remove ProxySettings condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Remove-ProxySettings/remediation_Remove-ProxySettingsRemedaiton.ps1'
         Counterpart = 'Remove-ProxySettings/Detect-Remove-ProxySettings.ps1'
     }
@@ -17,15 +22,21 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Set-ItemProperty')
+        Cmdlets = @(
+            'Set-ItemProperty'
+        )
         Executables = @()
-        Policies = @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings')
+        Policies = @(
+            'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'Destructive')
+        Categories = @(
+            'Registry'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

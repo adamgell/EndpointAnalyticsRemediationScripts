@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Disable O365 from sharing telemetry.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-OfficeTelemetry/remediation_Remediate_Office_Telemetry.ps1'
         Counterpart = 'Get-OfficeTelemetry/Detect-Get-OfficeTelemetry.ps1'
     }
@@ -17,15 +22,23 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Item', 'New-ItemProperty')
+        Cmdlets = @(
+            'New-Item'
+            'New-ItemProperty'
+        )
         Executables = @()
-        Policies = @('HKCU:\Software\Policies\Microsoft\office\common\', 'HKCU:\Software\Policies\Microsoft\office\common\clienttelemetry')
+        Policies = @(
+            'HKCU:\Software\Policies\Microsoft\office\common\'
+            'HKCU:\Software\Policies\Microsoft\office\common\clienttelemetry'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +50,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Script detects the new Microsoft Outlook app on Windows 11 23H2.'
-        Authors = @('Jeroen Burgerhout')
+        Authors = @(
+            'Jeroen Burgerhout'
+        )
         Source = '0 - Template/detection_Get-TemplateDetection.ps1'
         Counterpart = 'Remove-New-Outlook/Remediate-Remove-New-Outlook.ps1'
     }
@@ -17,13 +19,18 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('Windows 11 23H2')
+        SupportedWindows = @(
+            'Windows 11 23H2'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'write-host')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'write-host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +44,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Appx')
+        Categories = @(
+            'Appx'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

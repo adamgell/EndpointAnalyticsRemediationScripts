@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Make Speedtest condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Make-Speedtest/remediation_Run-SpeedttestRemediation.ps1'
         Counterpart = 'Make-Speedtest/Detect-Make-Speedtest.ps1'
     }
@@ -17,16 +22,33 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ConvertTo-Json', 'Get-NetIPAddress', 'Invoke-WebRequest', 'Join-Path', 'Measure-Command', 'New-Object', 'Select-Object', 'Where-Object', 'Write-Host')
+        Cmdlets = @(
+            'ConvertTo-Json'
+            'Get-NetIPAddress'
+            'Invoke-WebRequest'
+            'Join-Path'
+            'Measure-Command'
+            'New-Object'
+            'Select-Object'
+            'Where-Object'
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('.ods.opinsights.azure.com', 'https://', 'https://github.com/........', 'https://ifconfig.me/ip')
+        Endpoints = @(
+            '.ods.opinsights.azure.com'
+            'https://'
+            'https://github.com/........'
+            'https://ifconfig.me/ip'
+        )
     }
     Configuration = @(
         @{
@@ -74,7 +96,11 @@
         DataHandling = 'Handles credential or token material at runtime; secret values are not stored in the manifest.'
     }
     Test = @{
-        Categories = @('Network', 'Rest', 'Native')
+        Categories = @(
+            'Network'
+            'Rest'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

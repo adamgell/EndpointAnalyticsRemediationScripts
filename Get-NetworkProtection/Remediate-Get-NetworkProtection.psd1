@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Get NetworkProtection condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-NetworkProtection/remediation_Remediate_NetworkProtection.ps1'
         Counterpart = 'Get-NetworkProtection/Detect-Get-NetworkProtection.ps1'
     }
@@ -17,13 +22,18 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Set-MpPreference', 'Write-Output')
+        Cmdlets = @(
+            'Set-MpPreference'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

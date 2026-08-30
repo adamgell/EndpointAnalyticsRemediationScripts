@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if there are pending Windows updates.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Install-WindowsUpdates/detection_Install-WindowsUpdatesDetection.ps1'
         Counterpart = 'Install-WindowsUpdates/Remediate-Install-WindowsUpdates.ps1'
     }
@@ -17,13 +19,20 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'New-Object', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'ForEach-Object'
+            'New-Object'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native', 'Network')
+        Categories = @(
+            'Native'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

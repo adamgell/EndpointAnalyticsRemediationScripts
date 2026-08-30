@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Runs TRIM on SSDs or defrag on HDDs and enables scheduled optimization.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Defrag-SSD-Trim/remediation_optimize-disk.ps1'
         Counterpart = 'Defrag-SSD-Trim/Detect-Defrag-SSD-Trim.ps1'
     }
@@ -17,13 +19,25 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Enable-ScheduledTask', 'Get-Partition', 'Get-PhysicalDisk', 'Get-ScheduledTask', 'Get-Volume', 'Optimize-Volume', 'Where-Object', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Enable-ScheduledTask'
+            'Get-Partition'
+            'Get-PhysicalDisk'
+            'Get-ScheduledTask'
+            'Get-Volume'
+            'Optimize-Volume'
+            'Where-Object'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +51,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Service', 'Native')
+        Categories = @(
+            'Service'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

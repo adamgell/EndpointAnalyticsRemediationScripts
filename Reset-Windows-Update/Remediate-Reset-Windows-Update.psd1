@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Reset Windows Update condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Reset Windows Update/remediation_ResetWindowsUpdateRemediation.ps1'
         Counterpart = 'Reset-Windows-Update/Detect-Reset-Windows-Update.ps1'
     }
@@ -17,14 +19,26 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Service', 'Remove-Item', 'Rename-Item', 'Start-Service', 'Stop-Service', 'Test-Path', 'Where-Object')
-        Executables = @('wuauclt.exe')
+        Cmdlets = @(
+            'Get-Service'
+            'Remove-Item'
+            'Rename-Item'
+            'Start-Service'
+            'Stop-Service'
+            'Test-Path'
+            'Where-Object'
+        )
+        Executables = @(
+            'wuauclt.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +51,12 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Service', 'File', 'Native', 'Destructive')
+        Categories = @(
+            'Service'
+            'File'
+            'Native'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

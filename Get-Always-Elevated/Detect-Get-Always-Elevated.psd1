@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Get Always Elevated condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-Always_Elevated/detection_Detect_Always_Elevated.ps1'
         Counterpart = 'Get-Always-Elevated/Remediate-Get-Always-Elevated.ps1'
     }
@@ -17,15 +22,24 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Select-Object', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Select-Object'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer')
+        Policies = @(
+            'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

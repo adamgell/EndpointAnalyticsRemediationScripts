@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Remove ConsumerApps condition.'
-        Authors = @('Marius Wyss')
+        Authors = @(
+            'Marius Wyss'
+        )
         Source = 'Remove-ConsumerApps/detection_Remove-ConsumerAppsDetection.ps1'
         Counterpart = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'
     }
@@ -17,13 +19,19 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Where-Object', 'Write-Output')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Where-Object'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +52,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Appx')
+        Categories = @(
+            'Appx'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

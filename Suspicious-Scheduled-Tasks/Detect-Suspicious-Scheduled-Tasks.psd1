@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects suspicious scheduled tasks not created by known vendors.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-SuspiciousScheduledTasks/detection_detect-suspiciousscheduledtasks.ps1'
         Counterpart = 'Suspicious-Scheduled-Tasks/Remediate-Suspicious-Scheduled-Tasks.ps1'
     }
@@ -17,13 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Get-ScheduledTask', 'Where-Object', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Get-ScheduledTask'
+            'Where-Object'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Service')
+        Categories = @(
+            'Service'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

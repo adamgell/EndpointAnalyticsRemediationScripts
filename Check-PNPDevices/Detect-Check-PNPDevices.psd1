@@ -7,7 +7,13 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Check PNPDevices condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Marius Wyss')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Marius Wyss'
+        )
         Source = 'Check-PNPDevices/detection_Check-PNPDevicesDetection.ps1'
         Counterpart = 'Check-PNPDevices/Remediate-Check-PNPDevices.ps1'
     }
@@ -17,13 +23,20 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-PnpDevice', 'Where-Object', 'Write-Host', 'Write-Verbose')
+        Cmdlets = @(
+            'Get-PnpDevice'
+            'Where-Object'
+            'Write-Host'
+            'Write-Verbose'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -62,7 +75,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

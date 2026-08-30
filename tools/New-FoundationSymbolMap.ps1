@@ -57,7 +57,10 @@ function Resolve-RepositoryRelativeFile {
         }
 
         if ($matchingEntries.Count -gt 1) {
-            throw "Repository path '$RelativePath' has multiple case-colliding matches for component '$approvedSegment'."
+            throw (
+                "Repository path '$RelativePath' has multiple case-colliding matches " +
+                "for component '$approvedSegment'."
+            )
         }
 
         $matchingEntry = $null
@@ -153,12 +156,14 @@ function Add-SymbolMapLine {
     $path = ([string] $Row.Path).Replace("'", "''")
     $oldName = ([string] $Row.OldName).Replace("'", "''")
     $newName = ([string] $Row.NewName).Replace("'", "''")
+    $Lines.Add('        @{')
+    $Lines.Add("            Path = '$path'")
+    $Lines.Add("            OldName = '$oldName'")
+    $Lines.Add("            NewName = '$newName'")
     if ($IncludeOccurrence) {
-        $Lines.Add("        @{ Path = '$path'; OldName = '$oldName'; NewName = '$newName'; Occurrence = $($Row.Occurrence) }")
+        $Lines.Add("            Occurrence = $($Row.Occurrence)")
     }
-    else {
-        $Lines.Add("        @{ Path = '$path'; OldName = '$oldName'; NewName = '$newName' }")
-    }
+    $Lines.Add('        }')
 }
 
 function Set-SymbolRowOrder {
@@ -229,11 +234,19 @@ foreach ($pathRow in $pathRows) {
 
     $sourceResolution = Resolve-RepositoryRelativeFile -Root $repositoryRoot -RelativePath $basePath
     if ($sourceResolution.Exists -and -not $sourceResolution.HasExactCasing) {
-        throw "Mapped legacy source '$basePath' has incorrect repository-relative casing; found '$($sourceResolution.RelativePath)'."
+        throw (
+            "Mapped legacy source '$basePath' has incorrect repository-relative casing; " +
+            "found '$($sourceResolution.RelativePath)'."
+        )
     }
-    $destinationResolution = Resolve-RepositoryRelativeFile -Root $repositoryRoot -RelativePath $newPath
+    $destinationResolution = Resolve-RepositoryRelativeFile `
+        -Root $repositoryRoot `
+        -RelativePath $newPath
     if ($destinationResolution.Exists -and -not $destinationResolution.HasExactCasing) {
-        throw "Mapped destination '$newPath' has incorrect repository-relative casing; found '$($destinationResolution.RelativePath)'."
+        throw (
+            "Mapped destination '$newPath' has incorrect repository-relative casing; " +
+            "found '$($destinationResolution.RelativePath)'."
+        )
     }
     $sourceExists = $sourceResolution.Exists
     $destinationExists = $destinationResolution.Exists
@@ -426,8 +439,14 @@ foreach ($key in $configuredAliases.Keys) {
     }
     $configured = $configuredAliases[$key]
     $discovered = $discoveredAliases[$key]
-    if ($discovered.OldName -cne $configured.OldName -or $discovered.NewName -cne $configured.NewName) {
-        throw "Alias occurrence '$($configured.Path)|$($configured.OldName)|$($configured.Occurrence)' differs from the reviewed mapping."
+    if (
+        $discovered.OldName -cne $configured.OldName -or
+        $discovered.NewName -cne $configured.NewName
+    ) {
+        throw (
+            "Alias occurrence '$($configured.Path)|$($configured.OldName)|" +
+            "$($configured.Occurrence)' differs from the reviewed mapping."
+        )
     }
 }
 $aliasRows.Clear()
@@ -532,4 +551,9 @@ if (-not [string]::IsNullOrEmpty($outputDirectory)) {
 }
 $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($outputFullPath, (($lines -join "`n") + "`n"), $utf8WithoutBom)
-Write-Output "Generated $($commandRows.Count) command, $($aliasRows.Count) alias, and $($functionRows.Count) function mappings."
+Write-Output (
+    'Generated {0} command, {1} alias, and {2} function mappings.' -f
+    $commandRows.Count,
+    $aliasRows.Count,
+    $functionRows.Count
+)

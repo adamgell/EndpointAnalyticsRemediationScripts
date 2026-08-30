@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Invoke CurrentUserLoggedOff condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Invoke-CurrentUserLoggedOff/remediation_Get-CurrentUserLoggedOffRemedaiton.ps1'
         Counterpart = 'Invoke-CurrentUserLoggedOff/Detect-Invoke-CurrentUserLoggedOff.ps1'
     }
@@ -17,14 +22,20 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-Type')
-        Executables = @('shutdown')
+        Cmdlets = @(
+            'Add-Type'
+        )
+        Executables = @(
+            'shutdown'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +48,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Ui', 'Destructive', 'Native')
+        Categories = @(
+            'Ui'
+            'Destructive'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

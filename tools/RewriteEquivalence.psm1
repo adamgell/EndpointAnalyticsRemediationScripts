@@ -584,7 +584,9 @@ function Add-CommandMapEntry {
     }
     $afterRecord = $matchingAfterRecords[0]
     if ($afterRecord.Name -cne $newName) {
-        $State.Failures.Add("$Type mapping '$oldName' occurrence $occurrence does not map to '$newName' at the same callsite.")
+        $State.Failures.Add(
+            "$Type mapping '$oldName' occurrence $occurrence does not map to '$newName' at the same callsite."
+        )
         return
     }
 
@@ -765,7 +767,9 @@ function Test-FunctionRenameMapping {
         $oldDefinitions = @($beforeFunctions | Where-Object { $_.Name -ieq $oldName })
         $newDefinitions = @($afterFunctions | Where-Object { $_.Name -ieq $newName })
         if ($oldDefinitions.Count -ne 1 -or $newDefinitions.Count -ne 1) {
-            $State.Failures.Add("Function mapping '$oldName' to '$newName' requires exactly one definition on each side.")
+            $State.Failures.Add(
+                "Function mapping '$oldName' to '$newName' requires exactly one definition on each side."
+            )
             continue
         }
 
@@ -790,7 +794,9 @@ function Test-FunctionRenameMapping {
                 $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $newName -NewName $newName)
             })
         if ($oldCalls.Count -ne $newCalls.Count) {
-            $State.Failures.Add("Function mapping '$oldName' to '$newName' does not preserve the static callsite count.")
+            $State.Failures.Add(
+                "Function mapping '$oldName' to '$newName' does not preserve the static callsite count."
+            )
             continue
         }
 
@@ -839,7 +845,9 @@ function Test-FunctionRenameMapping {
         $State.AfterFunctionNames[$newName.ToLowerInvariant()] = $canonicalName
 
         if (Test-HasUnresolvedDynamicFunctionReference -ParsedScript $BeforeScript -FunctionName $oldName) {
-            $State.Failures.Add("Function mapping '$oldName' has an ambiguous or dynamic reference in the before source.")
+            $State.Failures.Add(
+                "Function mapping '$oldName' has an ambiguous or dynamic reference in the before source."
+            )
         }
 
         $hasUnresolvedDefinition = @($afterFunctions | Where-Object { $_.Name -ieq $oldName }).Count -gt 0

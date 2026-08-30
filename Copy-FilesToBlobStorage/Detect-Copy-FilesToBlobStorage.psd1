@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if specified files exist locally and need to be uploaded to Azure Blob Storage.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Copy-FilesToBlobStorage/detection_Copy-FilesToBlobStorageDetection.ps1'
         Counterpart = 'Copy-FilesToBlobStorage/Remediate-Copy-FilesToBlobStorage.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-Item', 'Select-Object', 'Test-Path', 'Where-Object', 'Write-Output')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-Item'
+            'Select-Object'
+            'Test-Path'
+            'Where-Object'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -50,7 +61,9 @@
         DataHandling = 'Reads local file metadata and the upload marker; detection does not transfer files.'
     }
     Test = @{
-        Categories = @('File')
+        Categories = @(
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

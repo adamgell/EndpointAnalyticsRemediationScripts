@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if there is a message to display to the user (via a centrally managed message file).'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Show-MessageCenterMessage/detection_Show-MessageCenterMessageDetection.ps1'
         Counterpart = 'Show-MessageCenterMessage/Remediate-Show-MessageCenterMessage.ps1'
     }
@@ -17,16 +19,25 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Content', 'Invoke-RestMethod', 'Test-Path', 'Write-Output')
+        Cmdlets = @(
+            'Get-Content'
+            'Invoke-RestMethod'
+            'Test-Path'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('https://yourstorageaccount.blob.core.windows.net/messages/current-message.json')
+        Endpoints = @(
+            'https://yourstorageaccount.blob.core.windows.net/messages/current-message.json'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +55,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Network', 'Rest')
+        Categories = @(
+            'File'
+            'Network'
+            'Rest'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

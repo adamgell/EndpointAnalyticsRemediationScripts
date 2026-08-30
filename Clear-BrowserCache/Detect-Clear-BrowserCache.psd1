@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if Chrome or Edge browser cache exceeds a specified size threshold.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Clear-BrowserCache/detection_Clear-BrowserCacheDetection.ps1'
         Counterpart = 'Clear-BrowserCache/Remediate-Clear-BrowserCache.ps1'
     }
@@ -17,13 +19,20 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Measure-Object', 'Test-Path', 'Write-Output')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Measure-Object'
+            'Test-Path'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +53,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File')
+        Categories = @(
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

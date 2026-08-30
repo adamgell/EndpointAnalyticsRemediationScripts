@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Uninstall Visual Cpp 2010 condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Uninstall-C++2010/detection_Detect_C++2010.ps1'
         Counterpart = 'Uninstall-Visual-Cpp-2010/Remediate-Uninstall-Visual-Cpp-2010.ps1'
     }
@@ -17,13 +19,18 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Write-Host')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +44,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Appx')
+        Categories = @(
+            'Appx'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

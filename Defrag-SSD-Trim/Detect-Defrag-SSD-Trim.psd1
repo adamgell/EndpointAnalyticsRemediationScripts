@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if scheduled disk optimization is enabled.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Defrag-SSD-Trim/detection_detect-diskoptimization.ps1'
         Counterpart = 'Defrag-SSD-Trim/Remediate-Defrag-SSD-Trim.ps1'
     }
@@ -17,13 +19,19 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ScheduledTask', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ScheduledTask'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +45,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Service')
+        Categories = @(
+            'Service'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

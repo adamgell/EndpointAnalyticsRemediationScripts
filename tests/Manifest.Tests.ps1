@@ -453,6 +453,36 @@ Describe 'Deterministic manifest generation' {
         }
     }
 
+    It 'emits generated sidecars at 120 columns except URLs and integrity hashes' {
+        $outputRoot = Join-Path $TestDrive 'line-width'
+        $run = Invoke-TestManifestGenerator `
+            -TestPathMap $pathMapPath `
+            -TestMetadata $metadataPath `
+            -OutputRoot $outputRoot
+
+        $run.ExitCode | Should -Be 0 -Because $run.Output
+        $overlong = @(
+            foreach ($file in Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*.psd1') {
+                $lineNumber = 0
+                foreach ($line in [System.IO.File]::ReadAllLines($file.FullName)) {
+                    $lineNumber++
+                    if (
+                        $line.Length -gt 120 -and
+                        $line -notmatch 'https?://' -and
+                        $line -notmatch '(?i)\b[0-9a-f]{64,}\b'
+                    ) {
+                        '{0}:{1}:{2}' -f `
+                            $file.FullName.Substring($outputRoot.Length + 1).Replace('\', '/'),
+                        $lineNumber,
+                        $line.Length
+                    }
+                }
+            }
+        )
+
+        $overlong | Should -BeNullOrEmpty
+    }
+
     It 'does not execute catalog scripts while generating manifests' {
         $fixtureRoot = Join-Path $TestDrive 'no-execution'
         $markerPath = Join-Path $fixtureRoot 'catalog-executed.txt'

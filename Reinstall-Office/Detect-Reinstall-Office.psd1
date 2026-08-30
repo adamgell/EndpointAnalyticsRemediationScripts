@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if Microsoft 365 Apps (Office) installation is broken or missing.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reinstall-Office/detection_Reinstall-OfficeDetection.ps1'
         Counterpart = 'Reinstall-Office/Remediate-Reinstall-Office.ps1'
     }
@@ -17,15 +19,30 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Join-Path', 'Test-Path', 'Write-Error', 'Write-Output')
-        Executables = @('EXCEL.EXE', 'OUTLOOK.EXE', 'POWERPNT.EXE', 'WINWORD.EXE')
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Join-Path'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'EXCEL.EXE'
+            'OUTLOOK.EXE'
+            'POWERPNT.EXE'
+            'WINWORD.EXE'
+        )
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +54,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

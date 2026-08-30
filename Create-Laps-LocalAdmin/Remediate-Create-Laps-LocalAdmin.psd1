@@ -6,8 +6,15 @@
         ScriptName = 'Remediate-Create-Laps-LocalAdmin'
         Role = 'Remediation'
         Version = '1.0.0'
-        Description = 'Add a local admin with a randomized password, ensuring that we do not have an account with a static password across all devices before Windows LAPS takes effect.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Simon Skotheimsvik', 'Simon')
+        Description = 'Creates a local administrator with a random password before Windows LAPS manages the account.'
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Simon Skotheimsvik'
+            'Simon'
+        )
         Source = 'Create-LocalAdmin/remediation_Create-LocalAdminLAPSRemediation.ps1'
         Counterpart = 'Create-Laps-LocalAdmin/Detect-Create-Laps-LocalAdmin.ps1'
     }
@@ -17,13 +24,22 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-LocalGroupMember', 'ConvertTo-SecureString', 'ForEach-Object', 'Get-LocalGroup', 'New-LocalUser', 'New-Object')
+        Cmdlets = @(
+            'Add-LocalGroupMember'
+            'ConvertTo-SecureString'
+            'ForEach-Object'
+            'Get-LocalGroup'
+            'New-LocalUser'
+            'New-Object'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +60,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

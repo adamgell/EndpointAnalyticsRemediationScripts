@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Resets the Start Menu layout and database.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-StartMenu/remediation_reset-startmenu.ps1'
         Counterpart = 'Reset-StartMenu/Detect-Reset-StartMenu.ps1'
     }
@@ -17,13 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-AppxPackage', 'ForEach-Object', 'Get-AppxPackage', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Add-AppxPackage'
+            'ForEach-Object'
+            'Get-AppxPackage'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Appx', 'Destructive')
+        Categories = @(
+            'Appx'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

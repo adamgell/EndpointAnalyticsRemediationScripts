@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Get LSA Protection condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-LSA-Protection/detection_Detect_LSA_Protection.ps1'
         Counterpart = 'Get-LSA-Protection/Remediate-Get-LSA-Protection.ps1'
     }
@@ -17,15 +22,24 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Select-Object', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Select-Object'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
-        Policies = @('HKLM:\SYSTEM\CurrentControlSet\Control\Lsa')
+        Policies = @(
+            'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

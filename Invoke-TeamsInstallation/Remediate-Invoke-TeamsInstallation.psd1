@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Invoke TeamsInstallation condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Invoke-TeamsInstallation/remediation_Invoke-TeamsInstallationRemedaiton.ps1'
         Counterpart = 'Invoke-TeamsInstallation/Detect-Invoke-TeamsInstallation.ps1'
     }
@@ -17,16 +22,26 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('new-object', 'Start-Process')
-        Executables = @('msiexec.exe')
+        Cmdlets = @(
+            'new-object'
+            'Start-Process'
+        )
+        Executables = @(
+            'msiexec.exe'
+        )
         Policies = @()
-        Endpoints = @('https://aka.ms/teams64bitmsi', 'System.Net.WebClient')
+        Endpoints = @(
+            'https://aka.ms/teams64bitmsi'
+            'System.Net.WebClient'
+        )
     }
     Configuration = @()
     Risk = @{
@@ -37,7 +52,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Network', 'Process')
+        Categories = @(
+            'Network'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

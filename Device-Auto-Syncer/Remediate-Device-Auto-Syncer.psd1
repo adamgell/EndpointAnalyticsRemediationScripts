@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Device Auto Syncer condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Device Auto-Syncer/remediation_AutoSyncRemediate.ps1'
         Counterpart = 'Device-Auto-Syncer/Detect-Device-Auto-Syncer.ps1'
     }
@@ -17,13 +19,20 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ScheduledTask', 'Start-ScheduledTask', 'Where-Object', 'Write-Error')
+        Cmdlets = @(
+            'Get-ScheduledTask'
+            'Start-ScheduledTask'
+            'Where-Object'
+            'Write-Error'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Service')
+        Categories = @(
+            'Service'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

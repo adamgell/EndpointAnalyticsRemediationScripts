@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Script removes the new Microsoft Outlook app on Windows 11 23H2.'
-        Authors = @('Jeroen Burgerhout')
+        Authors = @(
+            'Jeroen Burgerhout'
+        )
         Source = '0 - Template/remediation_Get-TemplateRemediaton.ps1'
         Counterpart = 'Remove-New-Outlook/Detect-Remove-New-Outlook.ps1'
     }
@@ -17,13 +19,20 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('Windows 11 23H2')
+        SupportedWindows = @(
+            'Windows 11 23H2'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Remove-AppxPackage', 'Write-Error', 'Write-Host')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Remove-AppxPackage'
+            'Write-Error'
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Appx', 'Destructive')
+        Categories = @(
+            'Appx'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

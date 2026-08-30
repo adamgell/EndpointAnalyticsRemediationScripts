@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Remove ProxySettings condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Remove-ProxySettings/detection_Remove-ProxySettingsDetection.ps1'
         Counterpart = 'Remove-ProxySettings/Remediate-Remove-ProxySettings.ps1'
     }
@@ -17,15 +22,24 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Write-Host')
-        Executables = @('findstr.exe')
-        Policies = @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Write-Host'
+        )
+        Executables = @(
+            'findstr.exe'
+        )
+        Policies = @(
+            'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'Native')
+        Categories = @(
+            'Registry'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

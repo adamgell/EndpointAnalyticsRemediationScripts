@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Script detects if common Browsers have passwords stored locally.'
-        Authors = @('Sven Wick')
+        Authors = @(
+            'Sven Wick'
+        )
         Source = 'Detect-Browser-Passwords/Detect-Browser-Passwords.ps1'
         Counterpart = ''
     }
@@ -17,15 +19,32 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ConvertFrom-Json', 'Copy-Item', 'Get-ChildItem', 'Get-Content', 'Get-Item', 'Remove-Item', 'Test-Path', 'Where-Object', 'Write-Output')
-        Executables = @('sqlite3.exe')
-        Policies = @('$env:APPDATA\Opera Software\Opera Stable\', '$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\')
+        Cmdlets = @(
+            'ConvertFrom-Json'
+            'Copy-Item'
+            'Get-ChildItem'
+            'Get-Content'
+            'Get-Item'
+            'Remove-Item'
+            'Test-Path'
+            'Where-Object'
+            'Write-Output'
+        )
+        Executables = @(
+            'sqlite3.exe'
+        )
+        Policies = @(
+            '$env:APPDATA\Opera Software\Opera Stable\'
+            '$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +63,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

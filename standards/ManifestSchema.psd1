@@ -10,7 +10,18 @@
         RiskLevel = @('Low', 'Medium', 'High', 'Critical')
         TestStatus = @('PendingMigration', 'Covered')
         IntegrationLevel = @('None', 'WindowsVm', 'InteractiveWindows', 'IntunePilot')
-        TestCategory = @('Registry', 'Service', 'File', 'Process', 'Network', 'Rest', 'Native', 'Appx', 'Ui', 'Destructive')
+        TestCategory = @(
+            'Registry'
+            'Service'
+            'File'
+            'Process'
+            'Network'
+            'Rest'
+            'Native'
+            'Appx'
+            'Ui'
+            'Destructive'
+        )
     }
     BooleanPaths = @(
         'Runtime.RequiresElevation'

@@ -7,7 +7,13 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if service exists and is configured as expected.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Sascha Stumpler')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Sascha Stumpler'
+        )
         Source = 'Set-Service-Generic/detection_detect-service.ps1'
         Counterpart = 'Set-Service-Generic/Remediate-Set-Service-Generic.ps1'
     }
@@ -17,13 +23,18 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Service', 'Write-Host')
+        Cmdlets = @(
+            'Get-Service'
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -56,7 +67,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Service')
+        Categories = @(
+            'Service'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

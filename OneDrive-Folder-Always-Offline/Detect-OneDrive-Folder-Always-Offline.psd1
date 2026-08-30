@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the OneDrive Folder Always Offline condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'OneDrive Folder - Always Offline/detection_detection-ODFolderOffline.ps1'
         Counterpart = 'OneDrive-Folder-Always-Offline/Remediate-OneDrive-Folder-Always-Offline.ps1'
     }
@@ -17,14 +22,22 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Error', 'Write-Output', 'Write-Warning')
-        Executables = @('attrib.exe')
+        Cmdlets = @(
+            'Write-Error'
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'attrib.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -50,7 +63,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Native')
+        Categories = @(
+            'File'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

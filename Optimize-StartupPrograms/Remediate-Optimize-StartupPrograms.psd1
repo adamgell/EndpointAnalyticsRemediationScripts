@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Disables known unnecessary startup programs.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Optimize-StartupPrograms/remediation_optimize-startupprograms.ps1'
         Counterpart = 'Optimize-StartupPrograms/Detect-Optimize-StartupPrograms.ps1'
     }
@@ -17,15 +19,26 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Remove-ItemProperty', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Remove-ItemProperty'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run'
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Run'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +57,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'Destructive')
+        Categories = @(
+            'Registry'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Repairs Office activation by clearing license cache.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Fix-OfficeActivation/remediation_fix-officeactivation.ps1'
         Counterpart = 'Fix-OfficeActivation/Detect-Fix-OfficeActivation.ps1'
     }
@@ -17,14 +19,27 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Process', 'Remove-Item', 'Start-Process', 'Start-Sleep', 'Stop-Process', 'Test-Path', 'Write-Error', 'Write-Output')
-        Executables = @('OfficeC2RClient.exe')
+        Cmdlets = @(
+            'Get-Process'
+            'Remove-Item'
+            'Start-Process'
+            'Start-Sleep'
+            'Stop-Process'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'OfficeC2RClient.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +52,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('File', 'Process', 'Destructive')
+        Categories = @(
+            'File'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

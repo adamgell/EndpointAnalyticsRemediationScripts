@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects network connectivity issues.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-NetworkStack/detection_detect-networkstack.ps1'
         Counterpart = 'Reset-NetworkStack/Remediate-Reset-NetworkStack.ps1'
     }
@@ -17,16 +19,25 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Resolve-DnsName', 'Test-Connection', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Resolve-DnsName'
+            'Test-Connection'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('microsoft.com')
+        Endpoints = @(
+            'microsoft.com'
+        )
     }
     Configuration = @()
     Risk = @{
@@ -37,7 +48,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Network')
+        Categories = @(
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

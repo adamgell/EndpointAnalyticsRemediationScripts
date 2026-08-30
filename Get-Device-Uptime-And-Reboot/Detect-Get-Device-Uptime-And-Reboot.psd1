@@ -6,8 +6,13 @@
         ScriptName = 'Detect-Get-Device-Uptime-And-Reboot'
         Role = 'Detection'
         Version = '1.0.0'
-        Description = 'Checks the device uptime days. If its 7 days or more it shows a windows notification to the user that he should reboot.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Description = 'Reports device uptime and prompts the user to restart after seven days.'
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-DeviceUptime_and_Reboot/detection_Detect_DeviceUptime7.ps1'
         Counterpart = 'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1'
     }
@@ -17,13 +22,19 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('get-computerinfo', 'Select-Object', 'Write-Output')
+        Cmdlets = @(
+            'get-computerinfo'
+            'Select-Object'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

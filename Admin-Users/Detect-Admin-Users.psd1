@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects unauthorized local administrator accounts.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-AdminUsers/detection_detect-adminusers.ps1'
         Counterpart = 'Admin-Users/Remediate-Admin-Users.ps1'
     }
@@ -17,13 +19,20 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Get-LocalGroupMember', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Get-LocalGroupMember'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +53,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

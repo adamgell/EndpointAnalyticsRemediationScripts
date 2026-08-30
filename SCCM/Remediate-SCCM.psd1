@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the SCCM condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Detect-SCCM/remediation_RemoveSCCM.ps1'
         Counterpart = 'SCCM/Detect-SCCM.ps1'
     }
@@ -17,14 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Start-Process', 'Test-Path', 'Write-Output')
-        Executables = @('ccmsetup.exe')
+        Cmdlets = @(
+            'Start-Process'
+            'Test-Path'
+            'Write-Output'
+        )
+        Executables = @(
+            'ccmsetup.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +47,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('File', 'Process', 'Destructive')
+        Categories = @(
+            'File'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

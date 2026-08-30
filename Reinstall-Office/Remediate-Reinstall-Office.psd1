@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Repairs Microsoft 365 Apps (Office) installation using online repair.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reinstall-Office/remediation_Reinstall-OfficeRemediation.ps1'
         Counterpart = 'Reinstall-Office/Detect-Reinstall-Office.ps1'
     }
@@ -17,15 +19,27 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Possible'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Join-Path', 'Start-Process', 'Test-Path', 'Write-Error', 'Write-Output')
-        Executables = @('OfficeC2RClient.exe')
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration')
+        Cmdlets = @(
+            'Join-Path'
+            'Start-Process'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'OfficeC2RClient.exe'
+        )
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Office\ClickToRun\Configuration'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process')
+        Categories = @(
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

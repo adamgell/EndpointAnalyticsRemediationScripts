@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the BlockAADWorkplaceJoin condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'BlockAADWorkplaceJoin/remediation_Remediation-BlockAADWorkplaceJoin.ps1'
         Counterpart = 'BlockAADWorkplaceJoin/Detect-BlockAADWorkplaceJoin.ps1'
     }
@@ -17,15 +19,24 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Item', 'New-ItemProperty', 'Out-Null', 'Test-Path')
+        Cmdlets = @(
+            'New-Item'
+            'New-ItemProperty'
+            'Out-Null'
+            'Test-Path'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin')
+        Policies = @(
+            'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

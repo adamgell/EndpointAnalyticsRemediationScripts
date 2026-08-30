@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Get CleanUpDisk condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-CleanUpDisk/detection_Get-CleanUpDiskDetection.ps1'
         Counterpart = 'Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1'
     }
@@ -17,13 +22,18 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-PSDrive', 'Where-Object')
+        Cmdlets = @(
+            'Get-PSDrive'
+            'Where-Object'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +54,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

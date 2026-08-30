@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Invoke TeamsReinstallation condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Invoke-TeamsReinstallation/detection_Invoke-TeamsReinstallationDetection.ps1'
         Counterpart = 'Invoke-TeamsReinstallation/Remediate-Invoke-TeamsReinstallation.ps1'
     }
@@ -17,13 +22,18 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-WmiObject', 'Where-Object')
+        Cmdlets = @(
+            'Get-WmiObject'
+            'Where-Object'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process', 'Native')
+        Categories = @(
+            'Process'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

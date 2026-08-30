@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Enable RDP condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Enable-RDP/remediation_Enable-RDPRemedaiton.ps1'
         Counterpart = 'Enable-RDP/Detect-Enable-RDP.ps1'
     }
@@ -17,15 +22,24 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-LocalGroupMember', 'Get-LocalGroupMember', 'Get-WmiObject', 'Set-ItemProperty')
+        Cmdlets = @(
+            'Add-LocalGroupMember'
+            'Get-LocalGroupMember'
+            'Get-WmiObject'
+            'Set-ItemProperty'
+        )
         Executables = @()
-        Policies = @('HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\')
+        Policies = @(
+            'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'Native')
+        Categories = @(
+            'Registry'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

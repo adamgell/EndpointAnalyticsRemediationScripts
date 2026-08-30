@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Clear DownloadFolder condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Clear-DownloadFolder/detection_Clear-DownloadFolderDetection.ps1'
         Counterpart = 'Clear-DownloadFolder/Remediate-Clear-DownloadFolder.ps1'
     }
@@ -17,13 +22,17 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'AlwaysRemediate' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Host')
+        Cmdlets = @(
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

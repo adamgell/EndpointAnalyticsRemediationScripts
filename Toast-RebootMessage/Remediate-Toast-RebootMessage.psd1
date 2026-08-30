@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Provides a notification to the user to reboot their machine.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Toast-RebootMessage/remediation_remediate-reboot.ps1'
         Counterpart = 'Toast-RebootMessage/Detect-Toast-RebootMessage.ps1'
     }
@@ -17,13 +22,18 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Object', 'Where-Object')
+        Cmdlets = @(
+            'New-Object'
+            'Where-Object'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Ui')
+        Categories = @(
+            'Ui'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

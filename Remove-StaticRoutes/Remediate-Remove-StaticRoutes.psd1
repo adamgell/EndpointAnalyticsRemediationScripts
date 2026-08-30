@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Removes orphaned static routes with unreachable gateways.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Remove-StaticRoutes/remediation_remove-staticroutes.ps1'
         Counterpart = 'Remove-StaticRoutes/Detect-Remove-StaticRoutes.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-NetRoute', 'Remove-NetRoute', 'Test-Connection', 'Where-Object', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Get-NetRoute'
+            'Remove-NetRoute'
+            'Test-Connection'
+            'Where-Object'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Network', 'Destructive')
+        Categories = @(
+            'Network'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

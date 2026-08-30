@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Enables DNS Client Operational logs.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Enable-DNSOperationalLogs/remediation_Enable-DNSOperationalLogsRemediation.ps1'
         Counterpart = 'Enable-DNSOperationalLogs/Detect-Enable-DNSOperationalLogs.ps1'
     }
@@ -17,15 +19,23 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Object', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'New-Object'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('Microsoft-Windows-DNS-Client/Operational')
+        Policies = @(
+            'Microsoft-Windows-DNS-Client/Operational'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +47,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'Service', 'Network')
+        Categories = @(
+            'Registry'
+            'Service'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Run Browser condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Run-Browser/remediation_Get-TemplateRemedaiton.ps1'
         Counterpart = 'Run-Browser/Detect-Run-Browser.ps1'
     }
@@ -17,16 +22,22 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Start-Process')
+        Cmdlets = @(
+            'Start-Process'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('https://www.bing.com')
+        Endpoints = @(
+            'https://www.bing.com'
+        )
     }
     Configuration = @()
     Risk = @{
@@ -37,7 +48,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Network', 'Ui')
+        Categories = @(
+            'Network'
+            'Ui'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

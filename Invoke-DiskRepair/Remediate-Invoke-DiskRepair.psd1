@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Invoke DiskRepair condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Invoke-DiskRepair/remediation_Get-TemplateRemedaiton.ps1'
         Counterpart = 'Invoke-DiskRepair/Detect-Invoke-DiskRepair.ps1'
     }
@@ -17,13 +22,17 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Possible'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Repair-Volume')
+        Cmdlets = @(
+            'Repair-Volume'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Destructive', 'Native')
+        Categories = @(
+            'Destructive'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

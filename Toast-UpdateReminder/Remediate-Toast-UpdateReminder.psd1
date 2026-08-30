@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Shows a toast notification reminding the user to install pending updates.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Toast-UpdateReminder/remediation_toast-updatereminder.ps1'
         Counterpart = 'Toast-UpdateReminder/Detect-Toast-UpdateReminder.ps1'
     }
@@ -17,14 +19,22 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Out-Null', 'Write-Error', 'Write-Output')
-        Executables = @('powershell.exe')
+        Cmdlets = @(
+            'Out-Null'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'powershell.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +47,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process', 'Ui')
+        Categories = @(
+            'Process'
+            'Ui'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

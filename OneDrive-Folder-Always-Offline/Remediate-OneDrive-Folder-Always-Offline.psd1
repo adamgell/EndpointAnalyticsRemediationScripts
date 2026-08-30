@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the OneDrive Folder Always Offline condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'OneDrive Folder - Always Offline/remediation_remediation-ODFolderOffline.ps1'
         Counterpart = 'OneDrive-Folder-Always-Offline/Detect-OneDrive-Folder-Always-Offline.ps1'
     }
@@ -17,14 +22,23 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Get-ChildItem', 'Select-Object', 'Write-Error')
-        Executables = @('attrib.exe')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Get-ChildItem'
+            'Select-Object'
+            'Write-Error'
+        )
+        Executables = @(
+            'attrib.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -45,12 +59,16 @@
     Risk = @{
         Level = 'Medium'
         Destructive = $false
-        UserImpact = 'The script changes the OneDrive Folder Always Offline state and can briefly affect users or services.'
+        UserImpact =
+        'The script changes the OneDrive Folder Always Offline state and can briefly affect users or services.'
         Rollback = 'Restore the prior endpoint configuration; the script does not automate rollback.'
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Native')
+        Categories = @(
+            'File'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

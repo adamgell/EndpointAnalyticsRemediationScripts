@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Disables suspicious scheduled tasks not created by known vendors.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-SuspiciousScheduledTasks/remediation_remove-suspiciousscheduledtasks.ps1'
         Counterpart = 'Suspicious-Scheduled-Tasks/Detect-Suspicious-Scheduled-Tasks.ps1'
     }
@@ -17,13 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Disable-ScheduledTask', 'Get-ScheduledTask', 'Where-Object', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Disable-ScheduledTask'
+            'Get-ScheduledTask'
+            'Where-Object'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Service')
+        Categories = @(
+            'Service'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

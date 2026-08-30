@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if there are profiles older than 30 days.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Profile-cleanup/detection_detect-old-profiles.ps1'
         Counterpart = 'Profile-Cleanup/Remediate-Profile-Cleanup.ps1'
     }
@@ -17,13 +22,20 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('get-CimInstance', 'Get-Date', 'Where-Object', 'write-host')
+        Cmdlets = @(
+            'get-CimInstance'
+            'Get-Date'
+            'Where-Object'
+            'write-host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +56,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

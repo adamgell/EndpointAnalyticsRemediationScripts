@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if DNS over HTTPS (DoH) is enabled.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Enforce-DOH/detection_detect-doh.ps1'
         Counterpart = 'Enforce-DOH/Remediate-Enforce-DOH.ps1'
     }
@@ -17,15 +19,23 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
-        Policies = @('HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters')
+        Policies = @(
+            'HKLM:\SYSTEM\CurrentControlSet\Services\Dnscache\Parameters'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +47,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'Network')
+        Categories = @(
+            'Registry'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

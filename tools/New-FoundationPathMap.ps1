@@ -31,6 +31,23 @@ function Get-OrdinalSortedStrings {
     return $sorted
 }
 
+function Add-PathMapProperty {
+    param(
+        [Parameter(Mandatory)] [System.Collections.Generic.List[string]] $Lines,
+        [Parameter(Mandatory)] [string] $Name,
+        [Parameter(Mandatory)] [string] $Value
+    )
+
+    $line = "            $Name = '$Value'"
+    if ($line.Length -le 120) {
+        $Lines.Add($line)
+        return
+    }
+
+    $Lines.Add("            $Name =")
+    $Lines.Add("            '$Value'")
+}
+
 function Add-PathRow {
     param(
         [Parameter(Mandatory)] [AllowEmptyCollection()]
@@ -239,8 +256,16 @@ foreach ($sourcePackage in $packageRenames.Keys) {
         throw "Package mapping '$sourcePackage' does not match a runtime package."
     }
 }
-if ($classified.Count -ne $candidates.Count -or $rows.Count -ne $expectedPathCount) {
-    throw "Path generation classified $($classified.Count) candidates and produced $($rows.Count) rows; expected $expectedPathCount."
+if (
+    $classified.Count -ne $candidates.Count -or
+    $rows.Count -ne $expectedPathCount
+) {
+    throw (
+        'Path generation classified {0} candidates and produced {1} rows; expected {2}.' -f
+        $classified.Count,
+        $rows.Count,
+        $expectedPathCount
+    )
 }
 
 $rowComparison = [System.Comparison[object]] {
@@ -266,7 +291,10 @@ $lines.Add('    Paths = @(')
 foreach ($row in $rows) {
     $basePath = ([string] $row.BasePath).Replace("'", "''")
     $newPath = ([string] $row.NewPath).Replace("'", "''")
-    $lines.Add("        @{ BasePath = '$basePath'; NewPath = '$newPath' }")
+    $lines.Add('        @{')
+    Add-PathMapProperty -Lines $lines -Name 'BasePath' -Value $basePath
+    Add-PathMapProperty -Lines $lines -Name 'NewPath' -Value $newPath
+    $lines.Add('        }')
 }
 $lines.Add('    )')
 $lines.Add('}')

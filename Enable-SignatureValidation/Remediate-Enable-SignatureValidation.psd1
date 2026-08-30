@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Written to resolve this https://msrc.microsoft.com/update-guide/vulnerability/CVE-2013-3900.'
-        Authors = @('Tom Coleman')
+        Authors = @(
+            'Tom Coleman'
+        )
         Source = 'Enable-SignatureValidation/remediation_Remediate_Signature_Validation.ps1'
         Counterpart = 'Enable-SignatureValidation/Detect-Enable-SignatureValidation.ps1'
     }
@@ -17,15 +19,27 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Required'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Item', 'new-itemproperty', 'Out-null', 'Test-Path')
-        Executables = @('shutdown.exe')
-        Policies = @('Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Cryptography\Wintrust\Config', 'Registry::HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config')
+        Cmdlets = @(
+            'New-Item'
+            'new-itemproperty'
+            'Out-null'
+            'Test-Path'
+        )
+        Executables = @(
+            'shutdown.exe'
+        )
+        Policies = @(
+            'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Cryptography\Wintrust\Config'
+            'Registry::HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects broken file associations for common file types.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Fix-FileAssociations/detection_detect-fileassociations.ps1'
         Counterpart = 'Fix-FileAssociations/Remediate-Fix-FileAssociations.ps1'
     }
@@ -17,14 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Output', 'Write-Warning')
-        Executables = @('cmd')
+        Cmdlets = @(
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'cmd'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +46,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process')
+        Categories = @(
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

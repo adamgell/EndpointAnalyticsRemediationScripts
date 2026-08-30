@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Generates a battery health report and applies power optimizations.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Get-BatteryHealth/remediation_generate-batteryreport.ps1'
         Counterpart = 'Get-BatteryHealth/Detect-Get-BatteryHealth.ps1'
     }
@@ -17,14 +19,26 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Date', 'Join-Path', 'New-Item', 'Out-Null', 'Test-Path', 'Write-Error', 'Write-Output')
-        Executables = @('powercfg')
+        Cmdlets = @(
+            'Get-Date'
+            'Join-Path'
+            'New-Item'
+            'Out-Null'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'powercfg'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -44,7 +58,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Process')
+        Categories = @(
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

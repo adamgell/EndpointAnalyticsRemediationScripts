@@ -3,7 +3,8 @@
     $fixtureRoot = "$PSScriptRoot/fixtures/rewrite"
     $wrapperPath = "$PSScriptRoot/../tools/Test-PowerShellRewrite.ps1"
     $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-    $foundationSymbolMap = Import-PowerShellDataFile -Path (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1')
+    $foundationSymbolMap = Import-PowerShellDataFile `
+        -Path (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1')
 
     function Invoke-CatalogFunctionReferenceGate {
         param(
@@ -67,7 +68,9 @@ $CandidateSource
 
 Describe 'PowerShell rewrite equivalence' {
     It 'accepts trivia-only formatting with identical AST and semantic tokens' {
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Trivia.Before.ps1" -AfterPath "$fixtureRoot/Trivia.After.ps1"
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Trivia.Before.ps1" `
+            -AfterPath "$fixtureRoot/Trivia.After.ps1"
         $result.Passed | Should -BeTrue
     }
 
@@ -86,22 +89,32 @@ Describe 'PowerShell rewrite equivalence' {
     }
 
     It 'rejects a parser error on either side' {
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/ParserError.Before.ps1" -AfterPath "$fixtureRoot/ParserError.After.ps1"
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/ParserError.Before.ps1" `
+            -AfterPath "$fixtureRoot/ParserError.After.ps1"
         $result.Passed | Should -BeFalse
         $result.Failures | Should -Contain 'After source contains parser errors.'
 
-        $reverse = Compare-PowerShellSource -BeforePath "$fixtureRoot/ParserError.After.ps1" -AfterPath "$fixtureRoot/ParserError.Before.ps1"
+        $reverse = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/ParserError.After.ps1" `
+            -AfterPath "$fixtureRoot/ParserError.Before.ps1"
         $reverse.Passed | Should -BeFalse
         $reverse.Failures | Should -Contain 'Before source contains parser errors.'
     }
 
     It 'accepts an alias only through an explicit canonical-command map' {
         $map = @{ Aliases = @(@{ OldName = '?'; NewName = 'Where-Object'; Occurrence = 1 }); Functions = @() }
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Alias.Before.ps1" -AfterPath "$fixtureRoot/Alias.After.ps1" -SymbolMap $map
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Alias.Before.ps1" `
+            -AfterPath "$fixtureRoot/Alias.After.ps1" `
+            -SymbolMap $map
         $result.Passed | Should -BeTrue
 
-        (Compare-PowerShellSource -BeforePath "$fixtureRoot/Alias.Before.ps1" -AfterPath "$fixtureRoot/Alias.After.ps1").Passed |
-            Should -BeFalse
+        (
+            Compare-PowerShellSource `
+                -BeforePath "$fixtureRoot/Alias.Before.ps1" `
+                -AfterPath "$fixtureRoot/Alias.After.ps1"
+        ).Passed | Should -BeFalse
     }
 
     It 'resolves alias metadata case-insensitively while matching source occurrences case-sensitively' {
@@ -208,7 +221,10 @@ Export-ModuleMember -Function Invoke-AutoLoadProbe
 
     It 'accepts a function rename only when definition and all static callsites map' {
         $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Function.Before.ps1" -AfterPath "$fixtureRoot/Function.After.ps1" -SymbolMap $map
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Function.Before.ps1" `
+            -AfterPath "$fixtureRoot/Function.After.ps1" `
+            -SymbolMap $map
         $result.Passed | Should -BeTrue
     }
 
@@ -278,7 +294,10 @@ IsMember -Group 'Administrators'
 '@ | Set-Content -LiteralPath $after -Encoding utf8
         $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
 
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Function.Before.ps1" -AfterPath $after -SymbolMap $map
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Function.Before.ps1" `
+            -AfterPath $after `
+            -SymbolMap $map
         $result.Passed | Should -BeFalse
         $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
     }
@@ -301,7 +320,10 @@ Test-GroupMembership -Group 'Administrators'
 '@ | Set-Content -LiteralPath $after -Encoding utf8
         $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
 
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Function.Before.ps1" -AfterPath $after -SymbolMap $map
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Function.Before.ps1" `
+            -AfterPath $after `
+            -SymbolMap $map
         $result.Passed | Should -BeFalse
         $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
     }
@@ -319,17 +341,28 @@ Test-GroupMembership -Group 'Administrators'
 '@ | Set-Content -LiteralPath $after -Encoding utf8
         $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
 
-        $result = Compare-PowerShellSource -BeforePath "$fixtureRoot/Function.Before.ps1" -AfterPath $after -SymbolMap $map
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Function.Before.ps1" `
+            -AfterPath $after `
+            -SymbolMap $map
         $result.Passed | Should -BeFalse
         $result.Failures -join "`n" | Should -Match 'unresolved old function symbol'
     }
 
     It 'rejects a changed backtick continuation neighbor' {
-        (Compare-PowerShellSource -BeforePath "$fixtureRoot/Backtick.Before.ps1" -AfterPath "$fixtureRoot/Backtick.After.ps1").Passed | Should -BeFalse
+        (
+            Compare-PowerShellSource `
+                -BeforePath "$fixtureRoot/Backtick.Before.ps1" `
+                -AfterPath "$fixtureRoot/Backtick.After.ps1"
+        ).Passed | Should -BeFalse
     }
 
     It 'rejects movement of a pipeline-adjacent comment' {
-        (Compare-PowerShellSource -BeforePath "$fixtureRoot/Comment.Before.ps1" -AfterPath "$fixtureRoot/Comment.After.ps1").Passed | Should -BeFalse
+        (
+            Compare-PowerShellSource `
+                -BeforePath "$fixtureRoot/Comment.Before.ps1" `
+                -AfterPath "$fixtureRoot/Comment.After.ps1"
+        ).Passed | Should -BeFalse
     }
 
     It 'rejects changed help association even when help text is unchanged' {
@@ -360,7 +393,11 @@ function Get-SecondValue { param([string] $Name) $Name }
     }
 
     It 'rejects a changed here-string value' {
-        (Compare-PowerShellSource -BeforePath "$fixtureRoot/HereString.Before.ps1" -AfterPath "$fixtureRoot/HereString.After.ps1").Passed | Should -BeFalse
+        (
+            Compare-PowerShellSource `
+                -BeforePath "$fixtureRoot/HereString.Before.ps1" `
+                -AfterPath "$fixtureRoot/HereString.After.ps1"
+        ).Passed | Should -BeFalse
     }
 
     It 'rejects a line-ending change inside a here-string value' {
@@ -376,7 +413,11 @@ function Get-SecondValue { param([string] $Name) $Name }
     }
 
     It 'rejects a changed dynamic invocation target' {
-        (Compare-PowerShellSource -BeforePath "$fixtureRoot/Dynamic.Before.ps1" -AfterPath "$fixtureRoot/Dynamic.After.ps1").Passed | Should -BeFalse
+        (
+            Compare-PowerShellSource `
+                -BeforePath "$fixtureRoot/Dynamic.Before.ps1" `
+                -AfterPath "$fixtureRoot/Dynamic.After.ps1"
+        ).Passed | Should -BeFalse
     }
 
     It 'rejects a path map that is not a total bijection' {
@@ -385,8 +426,12 @@ function Get-SecondValue { param([string] $Name) $Name }
             @{ BasePath = 'B.ps1'; NewPath = 'One.ps1' }
         )
         Test-PathMapBijection -Rows $rows -ExpectedCount 2 | Should -BeFalse
-        Test-PathMapBijection -Rows @(@{ BasePath = '../A.ps1'; NewPath = 'One.ps1' }) -ExpectedCount 1 | Should -BeFalse
-        Test-PathMapBijection -Rows @(@{ BasePath = 'A.ps1'; NewPath = '/absolute.ps1' }) -ExpectedCount 1 | Should -BeFalse
+        Test-PathMapBijection `
+            -Rows @(@{ BasePath = '../A.ps1'; NewPath = 'One.ps1' }) `
+            -ExpectedCount 1 | Should -BeFalse
+        Test-PathMapBijection `
+            -Rows @(@{ BasePath = 'A.ps1'; NewPath = '/absolute.ps1' }) `
+            -ExpectedCount 1 | Should -BeFalse
         Test-PathMapBijection -Rows @(@{ BasePath = 'A.ps1'; NewPath = 'One.ps1' }) -ExpectedCount 2 | Should -BeFalse
     }
 }

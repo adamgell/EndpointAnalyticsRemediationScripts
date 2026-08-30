@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Disables Fastboot via registry key.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Disable-Fastboot/remediation_remediate-fastboot.ps1'
         Counterpart = 'Disable-Fastboot/Detect-Disable-Fastboot.ps1'
     }
@@ -17,15 +22,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-ItemProperty')
+        Cmdlets = @(
+            'New-ItemProperty'
+        )
         Executables = @()
-        Policies = @('HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power')
+        Policies = @(
+            'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +48,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

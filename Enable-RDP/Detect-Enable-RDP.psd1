@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Enable RDP condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Enable-RDP/detection_Enable-RDPDetection.ps1'
         Counterpart = 'Enable-RDP/Remediate-Enable-RDP.ps1'
     }
@@ -17,15 +22,23 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'AlwaysRemediate' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Get-LocalGroupMember', 'Write-Host')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Get-LocalGroupMember'
+            'Write-Host'
+        )
         Executables = @()
-        Policies = @('HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\')
+        Policies = @(
+            'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +50,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

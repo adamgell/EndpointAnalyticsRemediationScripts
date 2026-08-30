@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if the WMI repository is corrupted.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Fix-WMI-Repository/detection_detect-wmirepository.ps1'
         Counterpart = 'Fix-WMI-Repository/Remediate-Fix-WMI-Repository.ps1'
     }
@@ -17,14 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Output', 'Write-Warning')
-        Executables = @('winmgmt')
+        Cmdlets = @(
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'winmgmt'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +46,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process')
+        Categories = @(
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

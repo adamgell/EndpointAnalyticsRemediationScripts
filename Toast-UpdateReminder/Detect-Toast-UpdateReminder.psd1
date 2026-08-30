@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if there are pending Windows updates or reboot required.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Toast-UpdateReminder/detection_detect-pendingupdates.ps1'
         Counterpart = 'Toast-UpdateReminder/Remediate-Toast-UpdateReminder.ps1'
     }
@@ -17,15 +19,27 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Required'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Date', 'Get-HotFix', 'Select-Object', 'Sort-Object', 'Test-Path', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-Date'
+            'Get-HotFix'
+            'Select-Object'
+            'Sort-Object'
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

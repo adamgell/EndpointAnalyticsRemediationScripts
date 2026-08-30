@@ -7,7 +7,11 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects whether the configured registry value matches the required value.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Jannik Reinhard'
+        )
         Source = 'Change-Registry-Key-Generic/detection_detect-regkey.ps1'
         Counterpart = 'Change-Registry-Key-Generic/Remediate-Change-Registry-Key-Generic.ps1'
     }
@@ -17,13 +21,20 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Select-Object', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Select-Object'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -56,7 +67,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

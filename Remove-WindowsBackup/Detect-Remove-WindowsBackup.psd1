@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Remove WindowsBackup condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Remove-WindowsBackup/detection_detect-backup.ps1'
         Counterpart = 'Remove-WindowsBackup/Remediate-Remove-WindowsBackup.ps1'
     }
@@ -17,13 +19,18 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Test-Path', 'write-host')
+        Cmdlets = @(
+            'Test-Path'
+            'write-host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +44,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File')
+        Categories = @(
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

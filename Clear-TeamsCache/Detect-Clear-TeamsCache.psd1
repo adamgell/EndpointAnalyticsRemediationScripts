@@ -7,7 +7,13 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Clear TeamsCache condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Michael Oliveri')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Michael Oliveri'
+        )
         Source = 'Clear-TeamsCache/detection_Clear-TeamsCacheDetection.ps1'
         Counterpart = 'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1'
     }
@@ -17,13 +23,17 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Test-Path')
+        Cmdlets = @(
+            'Test-Path'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File')
+        Categories = @(
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

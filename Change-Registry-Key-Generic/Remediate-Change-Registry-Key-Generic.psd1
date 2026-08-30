@@ -7,7 +7,11 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Sets the configured registry value to the required value.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Jannik Reinhard'
+        )
         Source = 'Change-Registry-Key-Generic/remediation_remediate-regkey.ps1'
         Counterpart = 'Change-Registry-Key-Generic/Detect-Change-Registry-Key-Generic.ps1'
     }
@@ -17,13 +21,17 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-ItemProperty')
+        Cmdlets = @(
+            'New-ItemProperty'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -57,12 +65,15 @@
     Risk = @{
         Level = 'Medium'
         Destructive = $false
-        UserImpact = 'The script changes the Change Registry Key Generic state and can briefly affect users or services.'
+        UserImpact =
+        'The script changes the Change Registry Key Generic state and can briefly affect users or services.'
         Rollback = 'Restore the prior endpoint configuration; the script does not automate rollback.'
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Update ChocolateyApps condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Update-ChocolateyApps/detection_detection-choco-upgrade.ps1'
         Counterpart = 'Update-ChocolateyApps/Remediate-Update-ChocolateyApps.ps1'
     }
@@ -17,14 +22,22 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Where-Object', 'Write-Error', 'Write-Output')
-        Executables = @('choco.exe')
+        Cmdlets = @(
+            'Where-Object'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'choco.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -44,7 +57,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process')
+        Categories = @(
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

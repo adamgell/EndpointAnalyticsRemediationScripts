@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Uninstall Visual Cpp 2010 condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Uninstall-C++2010/remediation_Remediate_C++2010.ps1'
         Counterpart = 'Uninstall-Visual-Cpp-2010/Detect-Uninstall-Visual-Cpp-2010.ps1'
     }
@@ -17,13 +19,20 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Remove-AppxPackage', 'Write-Error', 'Write-Host')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Remove-AppxPackage'
+            'Write-Error'
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Appx', 'Destructive')
+        Categories = @(
+            'Appx'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

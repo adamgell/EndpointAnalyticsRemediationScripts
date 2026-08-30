@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects Outlook profile issues (oversized OST files).'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-OutlookProfile/detection_detect-outlookprofile.ps1'
         Counterpart = 'Reset-OutlookProfile/Remediate-Reset-OutlookProfile.ps1'
     }
@@ -17,13 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Join-Path', 'Test-Path', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Join-Path'
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File')
+        Categories = @(
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

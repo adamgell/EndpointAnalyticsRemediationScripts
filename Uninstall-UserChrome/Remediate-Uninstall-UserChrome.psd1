@@ -7,7 +7,13 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Uninstalls if app exists, only checks/uninstalls per-user Chrome in HKCU.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Adam Gell')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Adam Gell'
+        )
         Source = 'Uninstall-UserChrome/remediation_remediate.ps1'
         Counterpart = 'Uninstall-UserChrome/Detect-Uninstall-UserChrome.ps1'
     }
@@ -17,15 +23,28 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-ItemProperty', 'Select-Object', 'start-process', 'write-host')
-        Executables = @('cmd.exe', 'msiexec.exe')
-        Policies = @('HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-ItemProperty'
+            'Select-Object'
+            'start-process'
+            'write-host'
+        )
+        Executables = @(
+            'cmd.exe'
+            'msiexec.exe'
+        )
+        Policies = @(
+            'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +56,12 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process', 'Destructive')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

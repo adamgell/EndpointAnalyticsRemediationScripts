@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if the Start Menu database is corrupted or oversized.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-StartMenu/detection_detect-startmenu.ps1'
         Counterpart = 'Reset-StartMenu/Remediate-Reset-StartMenu.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Join-Path', 'Measure-Object', 'Test-Path', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Join-Path'
+            'Measure-Object'
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Appx')
+        Categories = @(
+            'File'
+            'Appx'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

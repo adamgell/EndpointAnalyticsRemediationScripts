@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Clears temporary files, logs, crash dumps, thumbnails and prefetch.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Clear-TempFiles-Advanced/remediation_clear-tempfiles.ps1'
         Counterpart = 'Clear-TempFiles-Advanced/Detect-Clear-TempFiles-Advanced.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Join-Path', 'Remove-Item', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Join-Path'
+            'Remove-Item'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('File', 'Destructive')
+        Categories = @(
+            'File'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

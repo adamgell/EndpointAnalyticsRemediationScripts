@@ -7,7 +7,13 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Test LAPSUser condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Sascha Stumpler')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Sascha Stumpler'
+        )
         Source = 'Test-LAPSUser/remediation_new-LAPSUser.ps1'
         Counterpart = 'Test-LAPSUser/Detect-Test-LAPSUser.ps1'
     }
@@ -17,15 +23,23 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Item', 'Get-ItemProperty', 'New-Object')
+        Cmdlets = @(
+            'Get-Item'
+            'Get-ItemProperty'
+            'New-Object'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Policies\LAPS')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Policies\LAPS'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,11 @@
         DataHandling = 'Handles credential or token material at runtime; secret values are not stored in the manifest.'
     }
     Test = @{
-        Categories = @('Registry', 'Native', 'Destructive')
+        Categories = @(
+            'Registry'
+            'Native'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

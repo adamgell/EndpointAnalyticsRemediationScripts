@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Script removes the Microsoft Silverlight.'
-        Authors = @('Gerardo Hernandez')
+        Authors = @(
+            'Gerardo Hernandez'
+        )
         Source = '0 - Template/Remediate_Silverlight'
         Counterpart = 'Remove-Silverlight/Detect-Remove-Silverlight.ps1'
     }
@@ -17,15 +19,28 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-ItemProperty', 'Select-Object', 'Start-Process', 'Where-Object')
-        Executables = @('msiexec.exe')
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-ItemProperty'
+            'Select-Object'
+            'Start-Process'
+            'Where-Object'
+        )
+        Executables = @(
+            'msiexec.exe'
+        )
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall'
+            'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +52,12 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process', 'Destructive')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

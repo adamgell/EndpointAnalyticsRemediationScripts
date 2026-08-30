@@ -268,7 +268,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
                 -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw "*Mapped legacy source '$approvedPath' has incorrect repository-relative casing; found '$actualPath'.*"
+        } | Should -Throw (
+            "*Mapped legacy source '$approvedPath' has incorrect repository-relative casing; " +
+            "found '$actualPath'.*"
+        )
     }
 
     It 'rejects case-colliding directory siblings when the approved legacy source exists' {
@@ -303,7 +306,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
                 -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw "*Repository path '$approvedPath' has multiple case-colliding matches for component 'Profile-cleanup'.*"
+        } | Should -Throw (
+            "*Repository path '$approvedPath' has multiple case-colliding matches " +
+            "for component 'Profile-cleanup'.*"
+        )
     }
 
     It 'rejects wrong-case paths in a destination-only tree' {
@@ -321,7 +327,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
                 -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw "*Mapped destination '$approvedPath' has incorrect repository-relative casing; found '$actualPath'.*"
+        } | Should -Throw (
+            "*Mapped destination '$approvedPath' has incorrect repository-relative casing; " +
+            "found '$actualPath'.*"
+        )
     }
 
     It 'regenerates byte-identically when live command discovery is unavailable' {
@@ -377,8 +386,18 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         $ambiguousPathMap = Join-Path $fixtureRoot 'PathMap.psd1'
         $firstPath = @($pathMap.Paths)[0]
         $pathMapContent = [System.IO.File]::ReadAllText($pathMapPath)
-        $originalRow = "@{ BasePath = '$($firstPath.BasePath)'; NewPath = '$($firstPath.NewPath)' }"
-        $ambiguousRow = "@{ BasePath = '$($firstPath.BasePath)'; NewPath = '$($firstPath.BasePath)' }"
+        $originalRow = @(
+            '        @{'
+            "            BasePath = '$($firstPath.BasePath)'"
+            "            NewPath = '$($firstPath.NewPath)'"
+            '        }'
+        ) -join "`n"
+        $ambiguousRow = @(
+            '        @{'
+            "            BasePath = '$($firstPath.BasePath)'"
+            "            NewPath = '$($firstPath.BasePath)'"
+            '        }'
+        ) -join "`n"
         [System.IO.File]::WriteAllText(
             $ambiguousPathMap,
             $pathMapContent.Replace($originalRow, $ambiguousRow)
@@ -402,7 +421,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
                 -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw "*Neither mapped source '$($firstPath.BasePath)' nor destination '$($firstPath.NewPath)' exists.*"
+        } | Should -Throw (
+            "*Neither mapped source '$($firstPath.BasePath)' nor destination " +
+            "'$($firstPath.NewPath)' exists.*"
+        )
     }
 
     It 'rejects an unexpected byte-identical dual-path state' {
@@ -423,7 +445,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
                 -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw "*Mapped source '$($firstPath.BasePath)' and destination '$($firstPath.NewPath)' both exist unexpectedly.*"
+        } | Should -Throw (
+            "*Mapped source '$($firstPath.BasePath)' and destination " +
+            "'$($firstPath.NewPath)' both exist unexpectedly.*"
+        )
     }
 
     It 'rejects a dual-path state with mismatched content' {
@@ -445,14 +470,20 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
                 -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw "*Mapped source '$($firstPath.BasePath)' and destination '$($firstPath.NewPath)' both exist with different content.*"
+        } | Should -Throw (
+            "*Mapped source '$($firstPath.BasePath)' and destination " +
+            "'$($firstPath.NewPath)' both exist with different content.*"
+        )
     }
 
     It 'records the five reviewed function definitions' {
         $expected = @(
             'Enable-RDP/Detect-Enable-RDP.ps1|IsMember|Test-GroupMembership'
             'Enable-RDP/Remediate-Enable-RDP.ps1|IsMember|Test-GroupMembership'
-            'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1|Display-ToastNotification|Show-ToastNotification'
+            (
+                'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1|' +
+                'Display-ToastNotification|Show-ToastNotification'
+            )
             'Make-Speedtest/Remediate-Make-Speedtest.ps1|Build-Signature|New-LogAnalyticsSignature'
             'Make-Speedtest/Remediate-Make-Speedtest.ps1|Post-LogAnalyticsData|Send-LogAnalyticsData'
         )
@@ -562,6 +593,46 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
             -Raw |
             ConvertFrom-Json
         $scriptFiles = @(Get-DeploymentScript -Root $repositoryRoot)
+        $gitPointerPath = Join-Path $repositoryRoot '.git'
+        $gitDirectory = if (Test-Path -LiteralPath $gitPointerPath -PathType Container) {
+            $gitPointerPath
+        }
+        else {
+            $gitPointer = [System.IO.File]::ReadAllText($gitPointerPath).Trim()
+            if ($gitPointer -notmatch '^gitdir:\s+(.+)$') {
+                throw "Invalid worktree Git pointer '$gitPointerPath'."
+            }
+            $worktreeName = ($Matches[1].Replace('\', '/').Split('/'))[-1]
+            $mainGitDirectory = Join-Path (
+                Split-Path (Split-Path $repositoryRoot -Parent) -Parent
+            ) '.git'
+            Join-Path (Join-Path $mainGitDirectory 'worktrees') $worktreeName
+        }
+        $trackedPowerShellPaths = @(
+            & git `
+                "--git-dir=$gitDirectory" `
+                "--work-tree=$repositoryRoot" `
+                ls-files `
+                -- `
+                '*.ps1' `
+                '*.psm1' `
+                '*.psd1'
+        )
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Unable to enumerate tracked PowerShell files.'
+        }
+        $trackedPowerShellFiles = @(
+            foreach ($relativePath in $trackedPowerShellPaths) {
+                $fullPath = Join-Path $repositoryRoot $relativePath
+                if (-not [System.IO.File]::Exists($fullPath)) {
+                    throw "Tracked PowerShell file '$relativePath' does not exist."
+                }
+                [pscustomobject]@{
+                    File = Get-Item -LiteralPath $fullPath
+                    Path = $relativePath
+                }
+            }
+        )
         $parsedScripts = @{}
         $approvedVerbs = [System.Collections.Generic.HashSet[string]]::new(
             [System.StringComparer]::OrdinalIgnoreCase
@@ -899,23 +970,20 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
         )
     }
 
-    It 'matches the exact approved long-line analyzer exclusions' {
+    It 'enforces 120 columns across every tracked PowerShell file with exact catalog exceptions' {
         $actual = @(
-            foreach ($parsed in $parsedScripts.Values) {
-                $text = ConvertFrom-FoundationStyleBytes -Bytes (
-                    Get-FoundationStyleBytes -File $parsed.File
-                )
-                $lineNumber = 0
-                foreach ($line in $text.Split("`n")) {
-                    $lineNumber++
+            foreach ($trackedFile in $trackedPowerShellFiles) {
+                $lines = [System.IO.File]::ReadAllLines($trackedFile.File.FullName)
+                for ($index = 0; $index -lt $lines.Count; $index++) {
+                    $line = [string] $lines[$index]
                     if (
                         $line.Length -gt 120 -and
                         $line -notmatch 'https?://' -and
                         $line -notmatch '(?i)\b[0-9a-f]{64,}\b'
                     ) {
                         Get-FoundationStyleLineKey `
-                            -Path $parsed.Path `
-                            -Line $lineNumber `
+                            -Path $trackedFile.Path `
+                            -Line ($index + 1) `
                             -LineSha256 (Get-FoundationStyleLineHash -Text $line)
                     }
                 }
@@ -928,12 +996,33 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
                     -LineSha256 $_.LineSha256
             })
 
+        $trackedPowerShellFiles.Count | Should -Be $trackedPowerShellPaths.Count
         $expected.Count | Should -Be 93
         Join-FoundationStyleKeys -Keys $actual |
             Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
     }
 
-    It 'returns zero analyzer findings while locking every long-line exception' {
+    It 'delegates the configured long-line rule only to the tracked-file repository test' {
+        $settingsPath = Join-Path $repositoryRoot 'PSScriptAnalyzerSettings.psd1'
+        $settings = Import-PowerShellDataFile $settingsPath
+        $expectedRules = @(
+            'PSAvoidUsingCmdletAliases'
+            'PSUseApprovedVerbs'
+            'PSAvoidUsingInvokeExpression'
+            'PSUseConsistentIndentation'
+            'PSUseConsistentWhitespace'
+            'PSPlaceOpenBrace'
+            'PSPlaceCloseBrace'
+            'PSAvoidLongLines'
+        )
+
+        @($settings.IncludeRules) | Should -BeExactly $expectedRules
+        @($settings.ExcludeRules) | Should -BeExactly @('PSAvoidLongLines')
+        $settings.Rules.PSAvoidLongLines.Enable | Should -BeTrue
+        $settings.Rules.PSAvoidLongLines.MaximumLineLength | Should -Be 120
+    }
+
+    It 'returns zero recursive analyzer findings for the other seven configured rules' {
         Import-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Force
         $settingsPath = Join-Path $repositoryRoot 'PSScriptAnalyzerSettings.psd1'
         $findings = @(
@@ -942,31 +1031,8 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
                 -Recurse `
                 -Settings $settingsPath
         )
-        $actual = @(
-            foreach ($parsed in $parsedScripts.Values) {
-                $lines = [IO.File]::ReadAllLines($parsed.File.FullName)
-                for ($index = 0; $index -lt $lines.Count; $index++) {
-                    $line = [string] $lines[$index]
-                    if ($line.Length -gt 120) {
-                        Get-FoundationStyleLineKey `
-                            -Path $parsed.Path `
-                            -Line ($index + 1) `
-                            -LineSha256 (Get-FoundationStyleLineHash -Text $line)
-                    }
-                }
-            }
-        )
-        $expected = @($styleExclusions.AnalyzerLongLines | ForEach-Object {
-                Get-FoundationStyleLineKey `
-                    -Path $_.Path `
-                    -Line $_.Line `
-                    -LineSha256 $_.LineSha256
-            })
 
         $findings | Should -BeNullOrEmpty
-        $expected.Count | Should -Be 102
-        Join-FoundationStyleKeys -Keys $actual |
-            Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
     }
 }
 

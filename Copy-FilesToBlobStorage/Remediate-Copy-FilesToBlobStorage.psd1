@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Uploads specified files to Azure Blob Storage using a SAS token.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Copy-FilesToBlobStorage/remediation_Copy-FilesToBlobStorageRemediation.ps1'
         Counterpart = 'Copy-FilesToBlobStorage/Detect-Copy-FilesToBlobStorage.ps1'
     }
@@ -17,16 +19,33 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-Date', 'Get-Item', 'Invoke-RestMethod', 'New-Item', 'Out-Null', 'Select-Object', 'Set-Content', 'Test-Path', 'Where-Object', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-Date'
+            'Get-Item'
+            'Invoke-RestMethod'
+            'New-Item'
+            'Out-Null'
+            'Select-Object'
+            'Set-Content'
+            'Test-Path'
+            'Where-Object'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('https://$StorageAccountName.blob.core.windows.net/$ContainerName')
+        Endpoints = @(
+            'https://$StorageAccountName.blob.core.windows.net/$ContainerName'
+        )
     }
     Configuration = @(
         @{
@@ -68,7 +87,11 @@
         DataHandling = 'Handles credential or token material at runtime; secret values are not stored in the manifest.'
     }
     Test = @{
-        Categories = @('File', 'Network', 'Rest')
+        Categories = @(
+            'File'
+            'Network'
+            'Rest'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

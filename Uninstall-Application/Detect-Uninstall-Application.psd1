@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if app exists.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Uninstall-Application/detection_detect.ps1'
         Counterpart = 'Uninstall-Application/Remediate-Uninstall-Application.ps1'
     }
@@ -17,15 +22,25 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-ItemProperty', 'Select-Object', 'write-output')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-ItemProperty'
+            'Select-Object'
+            'write-output'
+        )
         Executables = @()
-        Policies = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall')
+        Policies = @(
+            'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall'
+            'HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +59,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if machine has been on for more than 7 days.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Toast-RebootMessage/detection_detect-reboot.ps1'
         Counterpart = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
     }
@@ -17,13 +22,19 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Date', 'Get-Process', 'write-host')
+        Cmdlets = @(
+            'Get-Date'
+            'Get-Process'
+            'write-host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process')
+        Categories = @(
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

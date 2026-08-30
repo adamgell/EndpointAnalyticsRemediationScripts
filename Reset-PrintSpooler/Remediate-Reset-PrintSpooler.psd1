@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Resets the Print Spooler service and clears stuck print jobs.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-PrintSpooler/remediation_reset-printspooler.ps1'
         Counterpart = 'Reset-PrintSpooler/Detect-Reset-PrintSpooler.ps1'
     }
@@ -17,13 +19,23 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Remove-Item', 'Start-Service', 'Start-Sleep', 'Stop-Service', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Remove-Item'
+            'Start-Service'
+            'Start-Sleep'
+            'Stop-Service'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +49,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Service', 'File', 'Destructive')
+        Categories = @(
+            'Service'
+            'File'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

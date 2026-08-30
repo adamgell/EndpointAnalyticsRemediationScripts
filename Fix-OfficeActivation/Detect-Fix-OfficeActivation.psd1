@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if Microsoft Office is properly activated.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Fix-OfficeActivation/detection_detect-officeactivation.ps1'
         Counterpart = 'Fix-OfficeActivation/Remediate-Fix-OfficeActivation.ps1'
     }
@@ -17,14 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Test-Path', 'Write-Output', 'Write-Warning')
-        Executables = @('cscript')
+        Cmdlets = @(
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'cscript'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +47,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Process')
+        Categories = @(
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

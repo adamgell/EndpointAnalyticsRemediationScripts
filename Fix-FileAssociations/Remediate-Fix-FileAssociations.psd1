@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Repairs broken file associations by resetting to Windows defaults.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Fix-FileAssociations/remediation_fix-fileassociations.ps1'
         Counterpart = 'Fix-FileAssociations/Detect-Fix-FileAssociations.ps1'
     }
@@ -17,15 +19,26 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Item', 'Out-Null', 'Set-ItemProperty', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'New-Item'
+            'Out-Null'
+            'Set-ItemProperty'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Classes\$Ext')
+        Policies = @(
+            'HKLM:\SOFTWARE\Classes\$Ext'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +50,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

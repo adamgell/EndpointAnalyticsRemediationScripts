@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Shows a toast notification with a message from a centrally managed message configuration.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Show-MessageCenterMessage/remediation_Show-MessageCenterMessageRemediation.ps1'
         Counterpart = 'Show-MessageCenterMessage/Detect-Show-MessageCenterMessage.ps1'
     }
@@ -17,16 +19,29 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'NotRequired'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-Content', 'Invoke-RestMethod', 'New-Item', 'New-Object', 'Out-Null', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Add-Content'
+            'Invoke-RestMethod'
+            'New-Item'
+            'New-Object'
+            'Out-Null'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('https://yourstorageaccount.blob.core.windows.net/messages/current-message.json')
+        Endpoints = @(
+            'https://yourstorageaccount.blob.core.windows.net/messages/current-message.json'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +59,12 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Network', 'Rest', 'Ui')
+        Categories = @(
+            'File'
+            'Network'
+            'Rest'
+            'Ui'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

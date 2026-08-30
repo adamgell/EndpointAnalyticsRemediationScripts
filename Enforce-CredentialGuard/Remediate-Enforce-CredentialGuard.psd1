@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Enables Credential Guard via registry.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Enforce-CredentialGuard/remediation_enforce-credentialguard.ps1'
         Counterpart = 'Enforce-CredentialGuard/Detect-Enforce-CredentialGuard.ps1'
     }
@@ -17,15 +19,27 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Required'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Item', 'New-ItemProperty', 'Out-Null', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'New-Item'
+            'New-ItemProperty'
+            'Out-Null'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard', 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa')
+        Policies = @(
+            'HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard'
+            'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +51,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

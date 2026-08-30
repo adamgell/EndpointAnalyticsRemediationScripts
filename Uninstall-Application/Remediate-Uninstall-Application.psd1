@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Uninstalls applications whose display name matches BlacklistApps.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Uninstall-Application/remediation_remediate.ps1'
         Counterpart = 'Uninstall-Application/Detect-Uninstall-Application.ps1'
     }
@@ -17,15 +22,29 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-ItemProperty', 'Select-Object', 'start-process', 'write-host')
-        Executables = @('cmd.exe', 'msiexec.exe')
-        Policies = @('HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-ItemProperty'
+            'Select-Object'
+            'start-process'
+            'write-host'
+        )
+        Executables = @(
+            'cmd.exe'
+            'msiexec.exe'
+        )
+        Policies = @(
+            'HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall'
+            'HKLM:\Software\WOW6432NODE\Microsoft\Windows\CurrentVersion\Uninstall'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +63,12 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process', 'Destructive')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Make Speedtest condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Make-Speedtest/detection_Run-SpeedttestDetection.ps1'
         Counterpart = 'Make-Speedtest/Remediate-Make-Speedtest.ps1'
     }
@@ -17,13 +22,17 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'AlwaysRemediate' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Host')
+        Cmdlets = @(
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +46,9 @@
         DataHandling = 'Transfers reviewed local diagnostic or profile data to the configured external endpoint.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'None'

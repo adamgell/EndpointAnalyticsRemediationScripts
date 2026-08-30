@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects orphaned static routes with unreachable gateways.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Remove-StaticRoutes/detection_detect-staticroutes.ps1'
         Counterpart = 'Remove-StaticRoutes/Remediate-Remove-StaticRoutes.ps1'
     }
@@ -17,13 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-NetRoute', 'Test-Connection', 'Where-Object', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Get-NetRoute'
+            'Test-Connection'
+            'Where-Object'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Network', 'Native')
+        Categories = @(
+            'Network'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

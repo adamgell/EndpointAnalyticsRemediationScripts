@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if Windows Autologon is configured.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-Autologon/detection_Detect-AutologonDetection.ps1'
         Counterpart = 'Autologon/Remediate-Autologon.ps1'
     }
@@ -17,15 +19,23 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Handles credential or token material at runtime; secret values are not stored in the manifest.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

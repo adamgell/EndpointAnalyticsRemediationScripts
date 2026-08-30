@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Activate Numlock condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Activate-Numlock/detection_Activate-Numlock.ps1'
         Counterpart = 'Activate-Numlock/Remediate-Activate-Numlock.ps1'
     }
@@ -17,15 +22,22 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Write-Host')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Write-Host'
+        )
         Executables = @()
-        Policies = @('Registry::HKU\.DEFAULT\Control Panel\Keyboard')
+        Policies = @(
+            'Registry::HKU\.DEFAULT\Control Panel\Keyboard'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +49,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

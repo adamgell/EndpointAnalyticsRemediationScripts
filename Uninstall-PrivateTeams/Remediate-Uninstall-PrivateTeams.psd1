@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Uninstall PrivateTeams condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Uninstall-PrivateTeams/remediation_Uninstall-PrivateTeamsRemedaiton.ps1'
         Counterpart = 'Uninstall-PrivateTeams/Detect-Uninstall-PrivateTeams.ps1'
     }
@@ -17,13 +22,20 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Remove-AppxPackage', 'Write-Error', 'Write-Host')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Remove-AppxPackage'
+            'Write-Error'
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +49,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Appx', 'Destructive')
+        Categories = @(
+            'Appx'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

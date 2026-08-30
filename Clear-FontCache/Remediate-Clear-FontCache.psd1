@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Clears the Windows font cache.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Clear-FontCache/remediation_clear-fontcache.ps1'
         Counterpart = 'Clear-FontCache/Detect-Clear-FontCache.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Possible'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Remove-Item', 'Start-Service', 'Stop-Service', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Remove-Item'
+            'Start-Service'
+            'Stop-Service'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Service', 'File', 'Destructive')
+        Categories = @(
+            'Service'
+            'File'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -10,7 +10,8 @@
         'PSPlaceCloseBrace'
         'PSAvoidLongLines'
     )
-    # Exact 120-column exceptions are enforced by FoundationStyle tests and evidence.
+    # PSScriptAnalyzer 1.25.0 cannot suppress long lines by path and line without catalog AST changes.
+    # The all-tracked-PowerShell FoundationStyle test owns exact 120-column enforcement.
     ExcludeRules = @('PSAvoidLongLines')
     Rules = @{
         PSAvoidUsingCmdletAliases = @{ allowlist = @() }

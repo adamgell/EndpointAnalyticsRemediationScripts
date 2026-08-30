@@ -15,15 +15,59 @@ function ConvertTo-QuotedPsd1String {
     return "'$($Value.Replace("'", "''"))'"
 }
 
-function ConvertTo-Psd1StringArray {
-    param([Parameter(Mandatory)] [AllowEmptyCollection()] [object[]] $Value)
+function Add-Psd1StringAssignment {
+    param(
+        [Parameter(Mandatory)] [System.Collections.Generic.List[string]] $Lines,
+        [Parameter(Mandatory)] [string] $Indent,
+        [Parameter(Mandatory)] [string] $Name,
+        [Parameter(Mandatory)] [AllowEmptyString()] [string] $Value
+    )
 
-    if ($Value.Count -eq 0) {
-        return '@()'
+    $literal = ConvertTo-QuotedPsd1String -Value $Value
+    $line = "$Indent$Name = $literal"
+    if (
+        $line.Length -le 120 -or
+        $line -match 'https?://' -or
+        $line -match '(?i)\b[0-9a-f]{64,}\b'
+    ) {
+        $Lines.Add($line)
+        return
     }
 
-    $quoted = @($Value | ForEach-Object { ConvertTo-QuotedPsd1String -Value ([string] $_) })
-    return '@(' + ($quoted -join ', ') + ')'
+    $continuation = "$Indent$literal"
+    if ($continuation.Length -gt 120) {
+        throw "$Name cannot be emitted within the 120-column manifest limit."
+    }
+    $Lines.Add("$Indent$Name =")
+    $Lines.Add($continuation)
+}
+
+function Add-Psd1StringArrayAssignment {
+    param(
+        [Parameter(Mandatory)] [System.Collections.Generic.List[string]] $Lines,
+        [Parameter(Mandatory)] [string] $Indent,
+        [Parameter(Mandatory)] [string] $Name,
+        [Parameter(Mandatory)] [AllowEmptyCollection()] [object[]] $Value
+    )
+
+    if ($Value.Count -eq 0) {
+        $Lines.Add("$Indent$Name = @()")
+        return
+    }
+
+    $Lines.Add("$Indent$Name = @(")
+    foreach ($item in $Value) {
+        $line = "$Indent    $(ConvertTo-QuotedPsd1String -Value ([string] $item))"
+        if (
+            $line.Length -gt 120 -and
+            $line -notmatch 'https?://' -and
+            $line -notmatch '(?i)\b[0-9a-f]{64,}\b'
+        ) {
+            throw "$Name item cannot be emitted within the 120-column manifest limit."
+        }
+        $Lines.Add($line)
+    }
+    $Lines.Add("$Indent)")
 }
 
 function Assert-MetadataKey {
@@ -126,17 +170,39 @@ function Assert-ScriptMetadata {
     }
     $runAs = Assert-MetadataKey -Value $runtime -Key 'RunAs' -Context "$Path.Runtime"
     Assert-EnumValue -Value $runAs -Allowed $ManifestSchema.Enums.RunAs -Context "$Path.Runtime.RunAs"
-    Assert-Boolean -Value (Assert-MetadataKey -Value $runtime -Key 'RequiresElevation' -Context "$Path.Runtime") -Context "$Path.Runtime.RequiresElevation"
-    Assert-EnumValue -Value (Assert-MetadataKey -Value $runtime -Key 'SignatureCheck' -Context "$Path.Runtime") -Allowed $ManifestSchema.Enums.SignatureCheck -Context "$Path.Runtime.SignatureCheck"
-    Assert-StringArray -Value (Assert-MetadataKey -Value $runtime -Key 'SupportedWindows' -Context "$Path.Runtime") -Context "$Path.Runtime.SupportedWindows"
-    Assert-EnumValue -Value (Assert-MetadataKey -Value $runtime -Key 'Reboot' -Context "$Path.Runtime") -Allowed $ManifestSchema.Enums.Reboot -Context "$Path.Runtime.Reboot"
+    $requiresElevation = Assert-MetadataKey `
+        -Value $runtime `
+        -Key 'RequiresElevation' `
+        -Context "$Path.Runtime"
+    Assert-Boolean -Value $requiresElevation -Context "$Path.Runtime.RequiresElevation"
+    $signatureCheck = Assert-MetadataKey `
+        -Value $runtime `
+        -Key 'SignatureCheck' `
+        -Context "$Path.Runtime"
+    Assert-EnumValue `
+        -Value $signatureCheck `
+        -Allowed $ManifestSchema.Enums.SignatureCheck `
+        -Context "$Path.Runtime.SignatureCheck"
+    $supportedWindows = Assert-MetadataKey `
+        -Value $runtime `
+        -Key 'SupportedWindows' `
+        -Context "$Path.Runtime"
+    Assert-StringArray -Value $supportedWindows -Context "$Path.Runtime.SupportedWindows"
+    $reboot = Assert-MetadataKey -Value $runtime -Key 'Reboot' -Context "$Path.Runtime"
+    Assert-EnumValue `
+        -Value $reboot `
+        -Allowed $ManifestSchema.Enums.Reboot `
+        -Context "$Path.Runtime.Reboot"
 
     $behavior = Assert-MetadataKey -Value $Record -Key 'Behavior' -Context $Path
     if ($behavior -isnot [System.Collections.IDictionary]) {
         throw "$Path.Behavior metadata must be a hashtable."
     }
     $detectionMode = Assert-MetadataKey -Value $behavior -Key 'DetectionMode' -Context "$Path.Behavior"
-    Assert-EnumValue -Value $detectionMode -Allowed $ManifestSchema.Enums.DetectionMode -Context "$Path.Behavior.DetectionMode"
+    Assert-EnumValue `
+        -Value $detectionMode `
+        -Allowed $ManifestSchema.Enums.DetectionMode `
+        -Context "$Path.Behavior.DetectionMode"
     if ($Role -eq 'Detection' -and $detectionMode -eq 'NotApplicable') {
         throw "$Path detection metadata requires an applicable DetectionMode."
     }
@@ -149,22 +215,47 @@ function Assert-ScriptMetadata {
         throw "$Path.Dependencies metadata must be a hashtable."
     }
     foreach ($name in 'Modules', 'Cmdlets', 'Executables', 'Policies', 'Endpoints') {
-        Assert-StringArray -Value (Assert-MetadataKey -Value $dependencies -Key $name -Context "$Path.Dependencies") -Context "$Path.Dependencies.$name" -AllowEmpty
+        $dependency = Assert-MetadataKey `
+            -Value $dependencies `
+            -Key $name `
+            -Context "$Path.Dependencies"
+        Assert-StringArray `
+            -Value $dependency `
+            -Context "$Path.Dependencies.$name" `
+            -AllowEmpty
     }
 
     $configuration = Assert-MetadataKey -Value $Record -Key 'Configuration' -Context $Path
-    if ($null -eq $configuration -or $configuration -is [string] -or $configuration -isnot [System.Collections.IEnumerable]) {
+    if (
+        $null -eq $configuration -or
+        $configuration -is [string] -or
+        $configuration -isnot [System.Collections.IEnumerable]
+    ) {
         throw "$Path.Configuration metadata must be an array."
     }
     foreach ($setting in @($configuration)) {
         if ($setting -isnot [System.Collections.IDictionary]) {
             throw "$Path.Configuration entries must be hashtables."
         }
-        Assert-NonEmptyString -Value (Assert-MetadataKey -Value $setting -Key 'Name' -Context "$Path.Configuration") -Context "$Path.Configuration.Name"
-        Assert-Boolean -Value (Assert-MetadataKey -Value $setting -Key 'Required' -Context "$Path.Configuration") -Context "$Path.Configuration.Required"
+        $settingName = Assert-MetadataKey `
+            -Value $setting `
+            -Key 'Name' `
+            -Context "$Path.Configuration"
+        Assert-NonEmptyString -Value $settingName -Context "$Path.Configuration.Name"
+        $settingRequired = Assert-MetadataKey `
+            -Value $setting `
+            -Key 'Required' `
+            -Context "$Path.Configuration"
+        Assert-Boolean -Value $settingRequired -Context "$Path.Configuration.Required"
         $secret = Assert-MetadataKey -Value $setting -Key 'Secret' -Context "$Path.Configuration"
         Assert-Boolean -Value $secret -Context "$Path.Configuration.Secret"
-        Assert-NonEmptyString -Value (Assert-MetadataKey -Value $setting -Key 'Description' -Context "$Path.Configuration") -Context "$Path.Configuration.Description"
+        $settingDescription = Assert-MetadataKey `
+            -Value $setting `
+            -Key 'Description' `
+            -Context "$Path.Configuration"
+        Assert-NonEmptyString `
+            -Value $settingDescription `
+            -Context "$Path.Configuration.Description"
         if ($secret -and $setting.Contains('Value')) {
             throw "$Path.Configuration secret '$($setting.Name)' must not store a Value."
         }
@@ -174,10 +265,16 @@ function Assert-ScriptMetadata {
     if ($risk -isnot [System.Collections.IDictionary]) {
         throw "$Path.Risk metadata must be a hashtable."
     }
-    Assert-EnumValue -Value (Assert-MetadataKey -Value $risk -Key 'Level' -Context "$Path.Risk") -Allowed $ManifestSchema.Enums.RiskLevel -Context "$Path.Risk.Level"
-    Assert-Boolean -Value (Assert-MetadataKey -Value $risk -Key 'Destructive' -Context "$Path.Risk") -Context "$Path.Risk.Destructive"
+    $riskLevel = Assert-MetadataKey -Value $risk -Key 'Level' -Context "$Path.Risk"
+    Assert-EnumValue `
+        -Value $riskLevel `
+        -Allowed $ManifestSchema.Enums.RiskLevel `
+        -Context "$Path.Risk.Level"
+    $destructive = Assert-MetadataKey -Value $risk -Key 'Destructive' -Context "$Path.Risk"
+    Assert-Boolean -Value $destructive -Context "$Path.Risk.Destructive"
     foreach ($name in 'UserImpact', 'Rollback', 'DataHandling') {
-        Assert-NonEmptyString -Value (Assert-MetadataKey -Value $risk -Key $name -Context "$Path.Risk") -Context "$Path.Risk.$name"
+        $riskValue = Assert-MetadataKey -Value $risk -Key $name -Context "$Path.Risk"
+        Assert-NonEmptyString -Value $riskValue -Context "$Path.Risk.$name"
     }
 
     $test = Assert-MetadataKey -Value $Record -Key 'Test' -Context $Path
@@ -189,9 +286,28 @@ function Assert-ScriptMetadata {
     foreach ($category in @($categories)) {
         Assert-EnumValue -Value $category -Allowed $ManifestSchema.Enums.TestCategory -Context "$Path.Test.Categories"
     }
-    Assert-EnumValue -Value (Assert-MetadataKey -Value $test -Key 'IntegrationLevel' -Context "$Path.Test") -Allowed $ManifestSchema.Enums.IntegrationLevel -Context "$Path.Test.IntegrationLevel"
-    Assert-Boolean -Value (Assert-MetadataKey -Value $test -Key 'RequiresIntunePilot' -Context "$Path.Test") -Context "$Path.Test.RequiresIntunePilot"
-    Assert-Boolean -Value (Assert-MetadataKey -Value $test -Key 'RequiresInteractiveUser' -Context "$Path.Test") -Context "$Path.Test.RequiresInteractiveUser"
+    $integrationLevel = Assert-MetadataKey `
+        -Value $test `
+        -Key 'IntegrationLevel' `
+        -Context "$Path.Test"
+    Assert-EnumValue `
+        -Value $integrationLevel `
+        -Allowed $ManifestSchema.Enums.IntegrationLevel `
+        -Context "$Path.Test.IntegrationLevel"
+    $requiresIntunePilot = Assert-MetadataKey `
+        -Value $test `
+        -Key 'RequiresIntunePilot' `
+        -Context "$Path.Test"
+    Assert-Boolean `
+        -Value $requiresIntunePilot `
+        -Context "$Path.Test.RequiresIntunePilot"
+    $requiresInteractiveUser = Assert-MetadataKey `
+        -Value $test `
+        -Key 'RequiresInteractiveUser' `
+        -Context "$Path.Test"
+    Assert-Boolean `
+        -Value $requiresInteractiveUser `
+        -Context "$Path.Test.RequiresInteractiveUser"
 }
 
 function ConvertTo-MetadataRecord {
@@ -351,25 +467,63 @@ function New-ManifestContent {
     $lines.Add("    Id = $(ConvertTo-QuotedPsd1String $Manifest.Id)")
     $lines.Add('    Identity = @{')
     foreach ($name in 'PackageName', 'ScriptName', 'Role', 'Version', 'Description') {
-        $lines.Add("        $name = $(ConvertTo-QuotedPsd1String ([string] $Manifest.Identity[$name]))")
+        Add-Psd1StringAssignment `
+            -Lines $lines `
+            -Indent '        ' `
+            -Name $name `
+            -Value ([string] $Manifest.Identity[$name])
     }
-    $lines.Add("        Authors = $(ConvertTo-Psd1StringArray @($Manifest.Identity.Authors))")
-    $lines.Add("        Source = $(ConvertTo-QuotedPsd1String $Manifest.Identity.Source)")
-    $lines.Add("        Counterpart = $(ConvertTo-QuotedPsd1String $Manifest.Identity.Counterpart)")
+    Add-Psd1StringArrayAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'Authors' `
+        -Value @($Manifest.Identity.Authors)
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'Source' `
+        -Value $Manifest.Identity.Source
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'Counterpart' `
+        -Value $Manifest.Identity.Counterpart
     $lines.Add('    }')
     $lines.Add('    Runtime = @{')
     $lines.Add("        PowerShellVersion = '5.1'")
     $lines.Add("        Architecture = 'x64'")
-    $lines.Add("        RunAs = $(ConvertTo-QuotedPsd1String $Manifest.Runtime.RunAs)")
-    $lines.Add("        RequiresElevation = `$$($Manifest.Runtime.RequiresElevation.ToString().ToLowerInvariant())")
-    $lines.Add("        SignatureCheck = $(ConvertTo-QuotedPsd1String $Manifest.Runtime.SignatureCheck)")
-    $lines.Add("        SupportedWindows = $(ConvertTo-Psd1StringArray @($Manifest.Runtime.SupportedWindows))")
-    $lines.Add("        Reboot = $(ConvertTo-QuotedPsd1String $Manifest.Runtime.Reboot)")
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'RunAs' `
+        -Value $Manifest.Runtime.RunAs
+    $lines.Add(
+        "        RequiresElevation = `$$($Manifest.Runtime.RequiresElevation.ToString().ToLowerInvariant())"
+    )
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'SignatureCheck' `
+        -Value $Manifest.Runtime.SignatureCheck
+    Add-Psd1StringArrayAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'SupportedWindows' `
+        -Value @($Manifest.Runtime.SupportedWindows)
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'Reboot' `
+        -Value $Manifest.Runtime.Reboot
     $lines.Add('    }')
     $lines.Add("    Behavior = @{ DetectionMode = $(ConvertTo-QuotedPsd1String $Manifest.Behavior.DetectionMode) }")
     $lines.Add('    Dependencies = @{')
     foreach ($name in 'Modules', 'Cmdlets', 'Executables', 'Policies', 'Endpoints') {
-        $lines.Add("        $name = $(ConvertTo-Psd1StringArray @($Manifest.Dependencies[$name]))")
+        Add-Psd1StringArrayAssignment `
+            -Lines $lines `
+            -Indent '        ' `
+            -Name $name `
+            -Value @($Manifest.Dependencies[$name])
     }
     $lines.Add('    }')
     if (@($MetadataRecord.Configuration).Count -eq 0) {
@@ -379,28 +533,56 @@ function New-ManifestContent {
         $lines.Add('    Configuration = @(')
         foreach ($setting in @($MetadataRecord.Configuration)) {
             $lines.Add('        @{')
-            $lines.Add("            Name = $(ConvertTo-QuotedPsd1String $setting.Name)")
+            Add-Psd1StringAssignment `
+                -Lines $lines `
+                -Indent '            ' `
+                -Name 'Name' `
+                -Value $setting.Name
             $lines.Add("            Required = `$$($setting.Required.ToString().ToLowerInvariant())")
             $lines.Add("            Secret = `$$($setting.Secret.ToString().ToLowerInvariant())")
-            $lines.Add("            Description = $(ConvertTo-QuotedPsd1String $setting.Description)")
+            Add-Psd1StringAssignment `
+                -Lines $lines `
+                -Indent '            ' `
+                -Name 'Description' `
+                -Value $setting.Description
             $lines.Add('        }')
         }
         $lines.Add('    )')
     }
     $lines.Add('    Risk = @{')
-    $lines.Add("        Level = $(ConvertTo-QuotedPsd1String $Manifest.Risk.Level)")
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'Level' `
+        -Value $Manifest.Risk.Level
     $lines.Add("        Destructive = `$$($Manifest.Risk.Destructive.ToString().ToLowerInvariant())")
     foreach ($name in 'UserImpact', 'Rollback', 'DataHandling') {
-        $lines.Add("        $name = $(ConvertTo-QuotedPsd1String $Manifest.Risk[$name])")
+        Add-Psd1StringAssignment `
+            -Lines $lines `
+            -Indent '        ' `
+            -Name $name `
+            -Value $Manifest.Risk[$name]
     }
     $lines.Add('    }')
     $lines.Add('    Test = @{')
-    $lines.Add("        Categories = $(ConvertTo-Psd1StringArray @($Manifest.Test.Categories))")
+    Add-Psd1StringArrayAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'Categories' `
+        -Value @($Manifest.Test.Categories)
     $lines.Add("        Status = 'PendingMigration'")
     $lines.Add('        CoverageFloor = 0.0')
-    $lines.Add("        IntegrationLevel = $(ConvertTo-QuotedPsd1String $Manifest.Test.IntegrationLevel)")
-    $lines.Add("        RequiresIntunePilot = `$$($Manifest.Test.RequiresIntunePilot.ToString().ToLowerInvariant())")
-    $lines.Add("        RequiresInteractiveUser = `$$($Manifest.Test.RequiresInteractiveUser.ToString().ToLowerInvariant())")
+    Add-Psd1StringAssignment `
+        -Lines $lines `
+        -Indent '        ' `
+        -Name 'IntegrationLevel' `
+        -Value $Manifest.Test.IntegrationLevel
+    $lines.Add(
+        "        RequiresIntunePilot = `$$($Manifest.Test.RequiresIntunePilot.ToString().ToLowerInvariant())"
+    )
+    $lines.Add(
+        "        RequiresInteractiveUser = `$$($Manifest.Test.RequiresInteractiveUser.ToString().ToLowerInvariant())"
+    )
     $lines.Add('    }')
     $lines.Add('}')
 
@@ -422,7 +604,13 @@ if (-not $metadataData.Contains('ManifestNamespaceGuid')) {
     throw 'ManifestNamespaceGuid metadata is required.'
 }
 $namespaceGuid = [guid]::Empty
-if (-not [guid]::TryParse([string] $metadataData.ManifestNamespaceGuid, [ref] $namespaceGuid) -or $namespaceGuid -eq [guid]::Empty) {
+if (
+    -not [guid]::TryParse(
+        [string] $metadataData.ManifestNamespaceGuid,
+        [ref] $namespaceGuid
+    ) -or
+    $namespaceGuid -eq [guid]::Empty
+) {
     throw 'ManifestNamespaceGuid metadata must be a non-empty GUID.'
 }
 if ($metadataData.Contains('ScriptMetadata')) {
@@ -508,13 +696,20 @@ foreach ($newPath in $mappedPaths) {
         $packageRoles = @($packageRows | ForEach-Object {
                 [IO.Path]::GetFileNameWithoutExtension($_.NewPath).Split('-')[0]
             })
-        if (@($packageRoles | Sort-Object -Unique).Count -ne 2 -or 'Detect' -notin $packageRoles -or 'Remediate' -notin $packageRoles) {
+        if (
+            @($packageRoles | Sort-Object -Unique).Count -ne 2 -or
+            'Detect' -notin $packageRoles -or
+            'Remediate' -notin $packageRoles
+        ) {
             throw "Package '$packageName' must contain one detection and one remediation script."
         }
         $counterpart = @($packageRows | Where-Object NewPath -CNE $newPath)[0].NewPath
     }
     else {
-        throw "Package '$packageName' maps $($packageRows.Count) scripts; only pairs or detection-only packages are allowed."
+        throw (
+            "Package '$packageName' maps $($packageRows.Count) scripts; " +
+            'only pairs or detection-only packages are allowed.'
+        )
     }
 
     $record = $metadataByPath[$newPath]

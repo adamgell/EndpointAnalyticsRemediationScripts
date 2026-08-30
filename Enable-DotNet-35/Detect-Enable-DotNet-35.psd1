@@ -7,7 +7,13 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if .NET 3.5 is installed.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Nico')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Nico'
+        )
         Source = 'Enable-DotNet-35/detection_DetectDotNet35.ps1'
         Counterpart = 'Enable-DotNet-35/Remediate-Enable-DotNet-35.ps1'
     }
@@ -17,13 +23,20 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-WindowsOptionalFeature', 'Join-Path', 'Start-Transcript', 'Write-Output')
+        Cmdlets = @(
+            'Get-WindowsOptionalFeature'
+            'Join-Path'
+            'Start-Transcript'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +50,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,10 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Will detect if VPN profile is present.'
-        Authors = @('Simon Skotheimsvik', 'Simon')
+        Authors = @(
+            'Simon Skotheimsvik'
+            'Simon'
+        )
         Source = 'Fortinet-VPN-Profile/detection_FortinetVPNProfile-Detect.ps1'
         Counterpart = 'Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1'
     }
@@ -17,15 +20,22 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Test-Path', 'Write-Host')
+        Cmdlets = @(
+            'Test-Path'
+            'Write-Host'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Fortinet\FortiClient\Sslvpn\Tunnels\$VPNName')
+        Policies = @(
+            'HKLM:\SOFTWARE\Fortinet\FortiClient\Sslvpn\Tunnels\$VPNName'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +54,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Network')
+        Categories = @(
+            'Registry'
+            'File'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -257,7 +257,12 @@ try {
     if (@(Compare-Object -ReferenceObject $baseInventory -DifferenceObject $mappedBase -CaseSensitive).Count -gt 0) {
         throw 'Path map source inventory does not equal the base revision runtime inventory.'
     }
-    if (@(Compare-Object -ReferenceObject $currentInventoryArray -DifferenceObject $mappedNew -CaseSensitive).Count -gt 0) {
+    if (@(
+            Compare-Object `
+                -ReferenceObject $currentInventoryArray `
+                -DifferenceObject $mappedNew `
+                -CaseSensitive
+        ).Count -gt 0) {
         throw 'Path map destination inventory does not equal the working-tree runtime inventory.'
     }
 
@@ -296,7 +301,11 @@ try {
             -RepositoryRoot $repositoryRoot `
             -Revision $fullRevision `
             -Path ([string] $pathRow.BasePath)
-        $afterPath = Join-Path $repositoryRoot ([string] $pathRow.NewPath).Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+        $afterRelativePath = ([string] $pathRow.NewPath).Replace(
+            '/',
+            [System.IO.Path]::DirectorySeparatorChar
+        )
+        $afterPath = Join-Path $repositoryRoot $afterRelativePath
         if (-not (Test-Path -LiteralPath $afterPath -PathType Leaf)) {
             throw "Mapped destination '$($pathRow.NewPath)' does not exist."
         }
@@ -358,7 +367,9 @@ try {
                     )
                 }
                 if ($containsReference) {
-                    $gateFailures.Add("Catalog file '$($reference.RelativePath)' contains unresolved old function symbol '$oldName'.")
+                    $gateFailures.Add(
+                        "Catalog file '$($reference.RelativePath)' contains unresolved old function symbol '$oldName'."
+                    )
                 }
             }
         }

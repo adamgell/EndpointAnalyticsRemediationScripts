@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Remove ConsumerApps condition.'
-        Authors = @('Marius Wyss')
+        Authors = @(
+            'Marius Wyss'
+        )
         Source = 'Remove-ConsumerApps/remediation_Remove-ConsumerAppsRemediation.ps1'
         Counterpart = 'Remove-ConsumerApps/Detect-Remove-ConsumerApps.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Out-Null', 'Remove-AppxPackage', 'Remove-AppxProvisionedPackage', 'Where-Object', 'Write-Output')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Out-Null'
+            'Remove-AppxPackage'
+            'Remove-AppxProvisionedPackage'
+            'Where-Object'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -44,7 +55,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Appx', 'Destructive')
+        Categories = @(
+            'Appx'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

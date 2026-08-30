@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects changes to URL to uninstall apps via Winget.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Winget Management/detection_detect-uninstall-url-changes.ps1'
         Counterpart = 'Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1'
     }
@@ -17,16 +22,30 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('get-content', 'Invoke-WebRequest', 'New-Item', 'remove-item', 'select-object', 'Start-Sleep', 'Test-Path', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'get-content'
+            'Invoke-WebRequest'
+            'New-Item'
+            'remove-item'
+            'select-object'
+            'Start-Sleep'
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('https://github.com/andrew-s-taylor/winget/raw/main/uninstall-apps.txt')
+        Endpoints = @(
+            'https://github.com/andrew-s-taylor/winget/raw/main/uninstall-apps.txt'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +63,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Network', 'Rest')
+        Categories = @(
+            'File'
+            'Network'
+            'Rest'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

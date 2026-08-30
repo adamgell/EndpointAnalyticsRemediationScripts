@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Resets the complete network stack (Winsock, IP, DNS).'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-NetworkStack/remediation_reset-networkstack.ps1'
         Counterpart = 'Reset-NetworkStack/Detect-Reset-NetworkStack.ps1'
     }
@@ -17,14 +19,24 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Possible'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('netsh', 'Out-Null', 'Write-Error', 'Write-Output')
-        Executables = @('netsh.exe', 'ipconfig.exe')
+        Cmdlets = @(
+            'netsh'
+            'Out-Null'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'netsh.exe'
+            'ipconfig.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +49,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Native', 'Network', 'Destructive')
+        Categories = @(
+            'Native'
+            'Network'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Installs CMTrace to c:\windows\system32.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Install-CMTrace/remediation_install-cmtrace-remediate.ps1'
         Counterpart = 'Install-CMTrace/Detect-Install-CMTrace.ps1'
     }
@@ -17,16 +22,24 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('invoke-webrequest')
-        Executables = @('cmtrace.exe')
+        Cmdlets = @(
+            'invoke-webrequest'
+        )
+        Executables = @(
+            'cmtrace.exe'
+        )
         Policies = @()
-        Endpoints = @('https://github.com/.......')
+        Endpoints = @(
+            'https://github.com/.......'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +57,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Network')
+        Categories = @(
+            'File'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

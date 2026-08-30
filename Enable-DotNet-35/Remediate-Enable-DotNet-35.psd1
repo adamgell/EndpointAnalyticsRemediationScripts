@@ -7,7 +7,13 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Installs .NET 3.5.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Nico')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Nico'
+        )
         Source = 'Enable-DotNet-35/remediation_RemediateDotNet35.ps1'
         Counterpart = 'Enable-DotNet-35/Detect-Enable-DotNet-35.ps1'
     }
@@ -17,13 +23,19 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Enable-WindowsOptionalFeature', 'Write-host', 'Write-Output')
+        Cmdlets = @(
+            'Enable-WindowsOptionalFeature'
+            'Write-host'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +49,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

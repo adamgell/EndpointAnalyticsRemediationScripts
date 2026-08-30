@@ -6,8 +6,14 @@
         ScriptName = 'Detect-Test-LAPSUser'
         Role = 'Detection'
         Version = '1.0.0'
-        Description = 'Checks if a user exists if LAPS is configured to use a custom username, laps is installed and a Backup Directory configured.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Sascha Stumpler')
+        Description = 'Checks custom LAPS user, installation, and backup-directory configuration.'
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Sascha Stumpler'
+        )
         Source = 'Test-LAPSUser/detection_detect-LAPSUser.ps1'
         Counterpart = 'Test-LAPSUser/Remediate-Test-LAPSUser.ps1'
     }
@@ -17,15 +23,24 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Item', 'Get-ItemProperty', 'Get-LocalUser')
+        Cmdlets = @(
+            'Get-Item'
+            'Get-ItemProperty'
+            'Get-LocalUser'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Policies\LAPS', 'HKLM:\SOFTWARE\Policies\LAPS')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Policies\LAPS'
+            'HKLM:\SOFTWARE\Policies\LAPS'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +52,10 @@
         DataHandling = 'Handles credential or token material at runtime; secret values are not stored in the manifest.'
     }
     Test = @{
-        Categories = @('Registry', 'Native')
+        Categories = @(
+            'Registry'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

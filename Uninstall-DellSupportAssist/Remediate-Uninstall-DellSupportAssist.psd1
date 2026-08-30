@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Uninstalls DellSupportAssist installation.'
-        Authors = @('Jasper van der Straten')
+        Authors = @(
+            'Jasper van der Straten'
+        )
         Source = 'Uninstall-DellSupportAssist/remediation_Remediate_DellSupportassist.ps1'
         Counterpart = 'Uninstall-DellSupportAssist/Detect-Uninstall-DellSupportAssist.ps1'
     }
@@ -17,15 +19,30 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'Select-Object', 'Start-Process', 'Where-Object', 'Write-Error', 'Write-Host')
-        Executables = @('msiexec.exe', 'SupportAssistUninstaller.exe')
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'Select-Object'
+            'Start-Process'
+            'Where-Object'
+            'Write-Error'
+            'Write-Host'
+        )
+        Executables = @(
+            'msiexec.exe'
+            'SupportAssistUninstaller.exe'
+        )
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+            'HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +54,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'Process', 'Destructive')
+        Categories = @(
+            'Registry'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

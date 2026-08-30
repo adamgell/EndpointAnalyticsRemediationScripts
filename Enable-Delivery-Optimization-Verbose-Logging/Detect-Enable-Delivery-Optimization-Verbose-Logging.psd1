@@ -7,9 +7,15 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Enable Delivery Optimization Verbose Logging condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Enable-DeliveryOptimizationVerboseLogging/detection_Enable-VerboseLoggingDetection.ps1'
-        Counterpart = 'Enable-Delivery-Optimization-Verbose-Logging/Remediate-Enable-Delivery-Optimization-Verbose-Logging.ps1'
+        Counterpart =
+        'Enable-Delivery-Optimization-Verbose-Logging/Remediate-Enable-Delivery-Optimization-Verbose-Logging.ps1'
     }
     Runtime = @{
         PowerShellVersion = '5.1'
@@ -17,13 +23,17 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'AlwaysRemediate' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Host')
+        Cmdlets = @(
+            'Write-Host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

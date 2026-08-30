@@ -133,15 +133,60 @@
     }
 
     SplitPackages = @(
-        @{ SourcePackage = '0 - Template'; DestinationPackage = 'Remove-New-Outlook'; Detection = 'detection_Get-TemplateDetection.ps1'; Remediation = 'remediation_Get-TemplateRemediaton.ps1' }
-        @{ SourcePackage = '0 - Template'; DestinationPackage = 'Remove-Silverlight'; Detection = 'Detect-Silverlight'; Remediation = 'Remediate_Silverlight' }
-        @{ SourcePackage = 'Create-LocalAdmin'; DestinationPackage = 'Create-LocalAdmin'; Detection = 'detection_Create-LocalAdminDetection.ps1'; Remediation = 'remediation_Create-LocalAdminRemediation.ps1' }
-        @{ SourcePackage = 'Create-LocalAdmin'; DestinationPackage = 'Create-Laps-LocalAdmin'; Detection = 'detection_Create-LocalAdminLAPSDetection.ps1'; Remediation = 'remediation_Create-LocalAdminLAPSRemediation.ps1' }
-        @{ SourcePackage = 'Create-LocalAdmin'; DestinationPackage = 'Delete-LocalAdmin'; Detection = 'detection_Delete-LocalAdminDetection.ps1'; Remediation = 'remediation_Delete-LocalAdminRemediation.ps1' }
-        @{ SourcePackage = 'Enable-DeliveryOptimizationVerboseLogging'; DestinationPackage = 'Disable-Delivery-Optimization-Verbose-Logging'; Detection = 'detection_Disable-VerboseLoggingDetection.ps1'; Remediation = 'remediation_Disable-VerboseLoggingRemedaiton.ps1' }
-        @{ SourcePackage = 'Enable-DeliveryOptimizationVerboseLogging'; DestinationPackage = 'Enable-Delivery-Optimization-Verbose-Logging'; Detection = 'detection_Enable-VerboseLoggingDetection.ps1'; Remediation = 'remediation_Enable-VerboseLoggingRemedaiton.ps1' }
-        @{ SourcePackage = 'Winget Management'; DestinationPackage = 'Install-WinGet-Apps-From-Url'; Detection = 'detection_detect-install-url-changes.ps1'; Remediation = 'remediation_remediate-install-apps-from-url.ps1' }
-        @{ SourcePackage = 'Winget Management'; DestinationPackage = 'Uninstall-WinGet-Apps-From-Url'; Detection = 'detection_detect-uninstall-url-changes.ps1'; Remediation = 'remediation_remediate-uninstall-apps-from-url.ps1' }
+        @{
+            SourcePackage = '0 - Template'
+            DestinationPackage = 'Remove-New-Outlook'
+            Detection = 'detection_Get-TemplateDetection.ps1'
+            Remediation = 'remediation_Get-TemplateRemediaton.ps1'
+        }
+        @{
+            SourcePackage = '0 - Template'
+            DestinationPackage = 'Remove-Silverlight'
+            Detection = 'Detect-Silverlight'
+            Remediation = 'Remediate_Silverlight'
+        }
+        @{
+            SourcePackage = 'Create-LocalAdmin'
+            DestinationPackage = 'Create-LocalAdmin'
+            Detection = 'detection_Create-LocalAdminDetection.ps1'
+            Remediation = 'remediation_Create-LocalAdminRemediation.ps1'
+        }
+        @{
+            SourcePackage = 'Create-LocalAdmin'
+            DestinationPackage = 'Create-Laps-LocalAdmin'
+            Detection = 'detection_Create-LocalAdminLAPSDetection.ps1'
+            Remediation = 'remediation_Create-LocalAdminLAPSRemediation.ps1'
+        }
+        @{
+            SourcePackage = 'Create-LocalAdmin'
+            DestinationPackage = 'Delete-LocalAdmin'
+            Detection = 'detection_Delete-LocalAdminDetection.ps1'
+            Remediation = 'remediation_Delete-LocalAdminRemediation.ps1'
+        }
+        @{
+            SourcePackage = 'Enable-DeliveryOptimizationVerboseLogging'
+            DestinationPackage = 'Disable-Delivery-Optimization-Verbose-Logging'
+            Detection = 'detection_Disable-VerboseLoggingDetection.ps1'
+            Remediation = 'remediation_Disable-VerboseLoggingRemedaiton.ps1'
+        }
+        @{
+            SourcePackage = 'Enable-DeliveryOptimizationVerboseLogging'
+            DestinationPackage = 'Enable-Delivery-Optimization-Verbose-Logging'
+            Detection = 'detection_Enable-VerboseLoggingDetection.ps1'
+            Remediation = 'remediation_Enable-VerboseLoggingRemedaiton.ps1'
+        }
+        @{
+            SourcePackage = 'Winget Management'
+            DestinationPackage = 'Install-WinGet-Apps-From-Url'
+            Detection = 'detection_detect-install-url-changes.ps1'
+            Remediation = 'remediation_remediate-install-apps-from-url.ps1'
+        }
+        @{
+            SourcePackage = 'Winget Management'
+            DestinationPackage = 'Uninstall-WinGet-Apps-From-Url'
+            Detection = 'detection_detect-uninstall-url-changes.ps1'
+            Remediation = 'remediation_remediate-uninstall-apps-from-url.ps1'
+        }
     )
 
     CanonicalCmdlets = @(
@@ -173,30 +218,103 @@
     }
 
     AliasMappings = @(
-        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'where'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'; OldName = 'where'; NewName = 'Where-Object'; Occurrence = 2 }
-        @{ Path = 'Check-DiskHealth/Detect-Check-DiskHealth.ps1'; OldName = '?'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Device-Auto-Syncer/Remediate-Device-Auto-Syncer.ps1'; OldName = '?'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1'; OldName = 'echo'; NewName = 'Write-Output'; Occurrence = 1 }
-        @{ Path = 'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1'; OldName = 'echo'; NewName = 'Write-Output'; Occurrence = 2 }
-        @{ Path = 'Get-CleanUpDisk/Detect-Get-CleanUpDisk.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Get-ConnectedDevices/Detect-Get-ConnectedDevices.ps1'; OldName = '%'; NewName = 'ForEach-Object'; Occurrence = 1 }
-        @{ Path = 'Remove-ConsumerApps/Detect-Remove-ConsumerApps.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 1 }
-        @{ Path = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'; OldName = 'Where'; NewName = 'Where-Object'; Occurrence = 2 }
-        @{ Path = 'Run-Browser/Remediate-Run-Browser.ps1'; OldName = 'Start'; NewName = 'Start-Process'; Occurrence = 1 }
+        @{
+            Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
+            OldName = 'where'
+            NewName = 'Where-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
+            OldName = 'where'
+            NewName = 'Where-Object'
+            Occurrence = 2
+        }
+        @{
+            Path = 'Check-DiskHealth/Detect-Check-DiskHealth.ps1'
+            OldName = '?'
+            NewName = 'Where-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Device-Auto-Syncer/Remediate-Device-Auto-Syncer.ps1'
+            OldName = '?'
+            NewName = 'Where-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1'
+            OldName = 'echo'
+            NewName = 'Write-Output'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1'
+            OldName = 'echo'
+            NewName = 'Write-Output'
+            Occurrence = 2
+        }
+        @{
+            Path = 'Get-CleanUpDisk/Detect-Get-CleanUpDisk.ps1'
+            OldName = 'Where'
+            NewName = 'Where-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Get-ConnectedDevices/Detect-Get-ConnectedDevices.ps1'
+            OldName = '%'
+            NewName = 'ForEach-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Remove-ConsumerApps/Detect-Remove-ConsumerApps.ps1'
+            OldName = 'Where'
+            NewName = 'Where-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'
+            OldName = 'Where'
+            NewName = 'Where-Object'
+            Occurrence = 1
+        }
+        @{
+            Path = 'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1'
+            OldName = 'Where'
+            NewName = 'Where-Object'
+            Occurrence = 2
+        }
+        @{
+            Path = 'Run-Browser/Remediate-Run-Browser.ps1'
+            OldName = 'Start'
+            NewName = 'Start-Process'
+            Occurrence = 1
+        }
     )
 
     FunctionMappings = @(
         @{ Path = 'Enable-RDP/Detect-Enable-RDP.ps1'; OldName = 'IsMember'; NewName = 'Test-GroupMembership' }
         @{ Path = 'Enable-RDP/Remediate-Enable-RDP.ps1'; OldName = 'IsMember'; NewName = 'Test-GroupMembership' }
-        @{ Path = 'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1'; OldName = 'Display-ToastNotification'; NewName = 'Show-ToastNotification' }
-        @{ Path = 'Make-Speedtest/Remediate-Make-Speedtest.ps1'; OldName = 'Build-Signature'; NewName = 'New-LogAnalyticsSignature' }
-        @{ Path = 'Make-Speedtest/Remediate-Make-Speedtest.ps1'; OldName = 'Post-LogAnalyticsData'; NewName = 'Send-LogAnalyticsData' }
+        @{
+            Path = 'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1'
+            OldName = 'Display-ToastNotification'
+            NewName = 'Show-ToastNotification'
+        }
+        @{
+            Path = 'Make-Speedtest/Remediate-Make-Speedtest.ps1'
+            OldName = 'Build-Signature'
+            NewName = 'New-LogAnalyticsSignature'
+        }
+        @{
+            Path = 'Make-Speedtest/Remediate-Make-Speedtest.ps1'
+            OldName = 'Post-LogAnalyticsData'
+            NewName = 'Send-LogAnalyticsData'
+        }
     )
 
     ManifestNamespaceGuid = 'f5d90edc-dac2-5918-8a09-77c7387264ab'
-    # JSON records use: Path, Version, Description, Authors, Runtime, DetectionMode, Dependencies, Configuration, Risk, Test.
+    # JSON record fields: Path, Version, Description, Authors, Runtime, DetectionMode,
+    # Dependencies, Configuration, Risk, and Test.
     ScriptMetadataJson = @'
 [
   [
@@ -559,7 +677,7 @@
   [
     "Autologon/Remediate-Autologon.ps1",
     "1.0.0",
-    "Configures Windows Autologon via registry. IMPORTANT: Update the username and password variables before deployment.",
+    "Configures Windows Autologon. Set the username and password before deployment.",
     [
       "Jannik Reinhard"
     ],
@@ -2990,7 +3108,7 @@
   [
     "Create-Laps-LocalAdmin/Remediate-Create-Laps-LocalAdmin.ps1",
     "1.0.0",
-    "Add a local admin with a randomized password, ensuring that we do not have an account with a static password across all devices before Windows LAPS takes effect.",
+    "Creates a local administrator with a random password before Windows LAPS manages the account.",
     [
       "Joey Verlinden",
       "Andrew Taylor",
@@ -3653,7 +3771,7 @@
     [
       "Medium",
       false,
-      "The script changes the Disable Delivery Optimization Verbose Logging state and can briefly affect users or services.",
+      "Briefly affects users or services while disabling Delivery Optimization verbose logging.",
       "Restore the prior endpoint configuration; the script does not automate rollback.",
       "Reads or changes local endpoint state; the manifest stores no endpoint data."
     ],
@@ -4475,7 +4593,7 @@
     [
       "Medium",
       false,
-      "The script changes the Enable Delivery Optimization Verbose Logging state and can briefly affect users or services.",
+      "Briefly affects users or services while enabling Delivery Optimization verbose logging.",
       "Restore the prior endpoint configuration; the script does not automate rollback.",
       "Reads or changes local endpoint state; the manifest stores no endpoint data."
     ],
@@ -6647,7 +6765,7 @@
   [
     "Get-Device-Uptime-And-Reboot/Detect-Get-Device-Uptime-And-Reboot.ps1",
     "1.0.0",
-    "Checks the device uptime days. If its 7 days or more it shows a windows notification to the user that he should reboot.",
+    "Reports device uptime and prompts the user to restart after seven days.",
     [
       "Joey Verlinden",
       "Andrew Taylor",
@@ -6695,7 +6813,7 @@
   [
     "Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1",
     "1.0.0",
-    "Checks the device uptime days. If its 7 days or more it shows a windows notification to the user that he should reboot.",
+    "Reports device uptime and prompts the user to restart after seven days.",
     [
       "Joey Verlinden",
       "Andrew Taylor",
@@ -7468,7 +7586,7 @@
       ],
       [],
       [
-        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\Credential Providers\\{D6886603-9D2F-4EB2-B667-1971041FA96B}\\$LoggedOnUserSID",
+        "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Authentication\\Credential Providers",
         "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WinBio\\AccountInfo\\$LoggedOnUserSID"
       ],
       []
@@ -10976,7 +11094,7 @@
   [
     "Reset-SoftwareDistributionFolder/Remediate-Reset-SoftwareDistributionFolder.ps1",
     "1.0.0",
-    "Script to reset the SoftwareDistribution folder by stopping Windows Updates services, renaming the folder to SoftwareDistribution.old and starting the services again.",
+    "Restarts Windows Update services and recreates the SoftwareDistribution folder.",
     [
       "Jose Schenardie"
     ],
@@ -12002,7 +12120,7 @@
   [
     "Set-Cached-Logon-Count-0/Detect-Set-Cached-Logon-Count-0.ps1",
     "1.0.0",
-    "Windows NT may use a cache to store the last interactive logon (i.e. console logon), to provide a safe logon for the host in the event that the Domain Controller goes down. This feature is currently activated on this host.",
+    "Manages cached interactive domain logons when a domain controller is unavailable.",
     [
       "EndpointAnalyticsRemediationScripts contributors"
     ],
@@ -12050,7 +12168,7 @@
   [
     "Set-Cached-Logon-Count-0/Remediate-Set-Cached-Logon-Count-0.ps1",
     "1.0.0",
-    "Windows NT may use a cache to store the last interactive logon (i.e. console logon), to provide a safe logon for the host in the event that the Domain Controller goes down. This feature is currently activated on this host.",
+    "Manages cached interactive domain logons when a domain controller is unavailable.",
     [
       "EndpointAnalyticsRemediationScripts contributors"
     ],
@@ -12187,10 +12305,10 @@
         "wmic.exe"
       ],
       [
-        "Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\wmic.exe",
+        "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\wmic.exe",
         "Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\wmic.exe",
-        "Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\wmic.exe",
-        "Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\wmic.exe"
+        "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\wmic.exe",
+        "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\SilentProcessExit\\wmic.exe"
       ],
       []
     ],
@@ -12756,7 +12874,7 @@
   [
     "Test-LAPSUser/Detect-Test-LAPSUser.ps1",
     "1.0.0",
-    "Checks if a user exists if LAPS is configured to use a custom username, laps is installed and a Backup Directory configured.",
+    "Checks custom LAPS user, installation, and backup-directory configuration.",
     [
       "Joey Verlinden",
       "Andrew Taylor",

@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if Microsoft Teams is outdated and needs updating.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Update-MicrosoftTeams/detection_Update-MicrosoftTeamsDetection.ps1'
         Counterpart = 'Update-MicrosoftTeams/Remediate-Update-MicrosoftTeams.ps1'
     }
@@ -17,15 +19,32 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Get-ChildItem', 'Get-ItemProperty', 'Join-Path', 'Select-Object', 'Sort-Object', 'Where-Object', 'Write-Error', 'Write-Output')
-        Executables = @('winget.exe')
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Get-ChildItem'
+            'Get-ItemProperty'
+            'Join-Path'
+            'Select-Object'
+            'Sort-Object'
+            'Where-Object'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'winget.exe'
+        )
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*'
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +56,12 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Appx', 'Registry', 'File', 'Process')
+        Categories = @(
+            'Appx'
+            'Registry'
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

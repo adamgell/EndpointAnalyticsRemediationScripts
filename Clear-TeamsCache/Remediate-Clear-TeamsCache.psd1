@@ -7,7 +7,13 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Source https://www.solutions2share.com/clear-microsoft-teams-cache.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Michael Oliveri')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Michael Oliveri'
+        )
         Source = 'Clear-TeamsCache/remediation_Clear-TeamsCacheRemedaiton.ps1'
         Counterpart = 'Clear-TeamsCache/Detect-Clear-TeamsCache.ps1'
     }
@@ -17,13 +23,23 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Get-Process', 'Remove-Item', 'Start-Sleep', 'Stop-Process', 'Write-Host', 'Write-Output')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Get-Process'
+            'Remove-Item'
+            'Start-Sleep'
+            'Stop-Process'
+            'Write-Host'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +53,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('File', 'Process', 'Destructive')
+        Categories = @(
+            'File'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

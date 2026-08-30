@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if backup has been run in the last hour.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Profile-Backup/detection_detect-backup.ps1'
         Counterpart = 'Profile-Backup/Remediate-Profile-Backup.ps1'
     }
@@ -17,13 +22,19 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Content', 'Get-Date', 'write-host')
+        Cmdlets = @(
+            'Get-Content'
+            'Get-Date'
+            'write-host'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads the local backup timestamp marker; detection does not transfer profile data.'
     }
     Test = @{
-        Categories = @('File', 'Native')
+        Categories = @(
+            'File'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

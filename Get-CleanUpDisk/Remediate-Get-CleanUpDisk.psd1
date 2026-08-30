@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Get CleanUpDisk condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Get-CleanUpDisk/remediation_Get-CleanUpDiskRemedaiton.ps1'
         Counterpart = 'Get-CleanUpDisk/Detect-Get-CleanUpDisk.ps1'
     }
@@ -17,15 +22,25 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-ItemProperty', 'Out-Null', 'Start-Process')
-        Executables = @('CleanMgr.exe')
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\$keyName')
+        Cmdlets = @(
+            'New-ItemProperty'
+            'Out-Null'
+            'Start-Process'
+        )
+        Executables = @(
+            'CleanMgr.exe'
+        )
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\$keyName'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +52,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'Process', 'Destructive')
+        Categories = @(
+            'Registry'
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

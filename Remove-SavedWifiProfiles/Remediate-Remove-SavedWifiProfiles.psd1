@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Removes saved WiFi profiles that use insecure authentication (Open/WEP).'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Remove-SavedWifiProfiles/remediation_remove-savedwifiprofiles.ps1'
         Counterpart = 'Remove-SavedWifiProfiles/Detect-Remove-SavedWifiProfiles.ps1'
     }
@@ -17,14 +19,25 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Out-Null', 'Select-Object', 'Select-String', 'Write-Error', 'Write-Output')
-        Executables = @('netsh.exe')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Out-Null'
+            'Select-Object'
+            'Select-String'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'netsh.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +50,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Native', 'Network', 'Destructive')
+        Categories = @(
+            'Native'
+            'Network'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

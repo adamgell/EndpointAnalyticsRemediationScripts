@@ -7,7 +7,12 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Downloads custom backup script and deploys to backup user profile to OneDrive.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Profile-Backup/remediation_remediate-backup.ps1'
         Counterpart = 'Profile-Backup/Detect-Profile-Backup.ps1'
     }
@@ -17,16 +22,34 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-Content', 'Get-Date', 'Invoke-WebRequest', 'New-Item', 'Out-Null', 'set-Content', 'Start-Process', 'Test-Path', 'Write-Error')
-        Executables = @('Cscript.exe')
+        Cmdlets = @(
+            'Add-Content'
+            'Get-Date'
+            'Invoke-WebRequest'
+            'New-Item'
+            'Out-Null'
+            'set-Content'
+            'Start-Process'
+            'Test-Path'
+            'Write-Error'
+        )
+        Executables = @(
+            'Cscript.exe'
+        )
         Policies = @()
-        Endpoints = @('https://raw.githubusercontent.com/andrew-s-taylor/public/main/Batch%20Scripts/backup.bat', 'https://raw.githubusercontent.com/andrew-s-taylor/public/main/Batch%20Scripts/NEWrestore.bat', 'https://raw.githubusercontent.com/andrew-s-taylor/public/main/Batch%20Scripts/run-invisible.vbs')
+        Endpoints = @(
+            'https://raw.githubusercontent.com/andrew-s-taylor/public/main/Batch%20Scripts/backup.bat'
+            'https://raw.githubusercontent.com/andrew-s-taylor/public/main/Batch%20Scripts/NEWrestore.bat'
+            'https://raw.githubusercontent.com/andrew-s-taylor/public/main/Batch%20Scripts/run-invisible.vbs'
+        )
     }
     Configuration = @()
     Risk = @{
@@ -37,7 +60,11 @@
         DataHandling = 'Transfers reviewed local diagnostic or profile data to the configured external endpoint.'
     }
     Test = @{
-        Categories = @('File', 'Rest', 'Native')
+        Categories = @(
+            'File'
+            'Rest'
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

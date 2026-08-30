@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Removes OEM bloatware and unnecessary pre-installed apps.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Remove-BloatwareAdvanced/remediation_remove-bloatware.ps1'
         Counterpart = 'Remove-BloatwareAdvanced/Detect-Remove-BloatwareAdvanced.ps1'
     }
@@ -17,16 +19,30 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-AppxPackage', 'Get-AppxProvisionedPackage', 'Remove-AppxPackage', 'Remove-AppxProvisionedPackage', 'Where-Object', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Get-AppxPackage'
+            'Get-AppxProvisionedPackage'
+            'Remove-AppxPackage'
+            'Remove-AppxProvisionedPackage'
+            'Where-Object'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('king.com.BubbleWitch3Saga', 'king.com.CandyCrushSaga', 'king.com.CandyCrushSodaSaga')
+        Endpoints = @(
+            'king.com.BubbleWitch3Saga'
+            'king.com.CandyCrushSaga'
+            'king.com.CandyCrushSodaSaga'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +60,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Appx', 'Destructive')
+        Categories = @(
+            'Appx'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

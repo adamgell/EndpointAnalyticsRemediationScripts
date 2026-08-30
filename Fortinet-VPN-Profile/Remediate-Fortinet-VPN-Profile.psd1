@@ -7,7 +7,10 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Will create a VPN profile.'
-        Authors = @('Simon Skotheimsvik', 'Simon')
+        Authors = @(
+            'Simon Skotheimsvik'
+            'Simon'
+        )
         Source = 'Fortinet-VPN-Profile/remediation_FortinetVPNProfile-Remediation.ps1'
         Counterpart = 'Fortinet-VPN-Profile/Detect-Fortinet-VPN-Profile.ps1'
     }
@@ -17,15 +20,23 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-Item', 'New-ItemProperty', 'Test-Path')
+        Cmdlets = @(
+            'New-Item'
+            'New-ItemProperty'
+            'Test-Path'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Fortinet\FortiClient\Sslvpn\Tunnels\$VPNName')
+        Policies = @(
+            'HKLM:\SOFTWARE\Fortinet\FortiClient\Sslvpn\Tunnels\$VPNName'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -50,7 +61,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Network')
+        Categories = @(
+            'Registry'
+            'File'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

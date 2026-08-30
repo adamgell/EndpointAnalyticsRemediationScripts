@@ -6,8 +6,10 @@
         ScriptName = 'Remediate-Autologon'
         Role = 'Remediation'
         Version = '1.0.0'
-        Description = 'Configures Windows Autologon via registry. IMPORTANT: Update the username and password variables before deployment.'
-        Authors = @('Jannik Reinhard')
+        Description = 'Configures Windows Autologon. Set the username and password before deployment.'
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-Autologon/remediation_Detect-AutologonRemediation.ps1'
         Counterpart = 'Autologon/Detect-Autologon.ps1'
     }
@@ -17,15 +19,23 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Set-ItemProperty', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Set-ItemProperty'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -56,7 +66,9 @@
         DataHandling = 'Handles credential or token material at runtime; secret values are not stored in the manifest.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,13 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Checks if the registry keys defined are set correctly.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Marius Wyss')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Marius Wyss'
+        )
         Source = 'Change-MultipleRegistryKeys/detection_Change-MultipleRegistryKeysDetection.ps1'
         Counterpart = 'Change-MultipleRegistryKeys/Remediate-Change-MultipleRegistryKeys.ps1'
     }
@@ -17,15 +23,26 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Item', 'Get-ItemProperty', 'Measure-Object', 'Test-Path', 'Write-Output')
+        Cmdlets = @(
+            'Get-Item'
+            'Get-ItemProperty'
+            'Measure-Object'
+            'Test-Path'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\', 'SOFTWARE\Contoso\Product')
+        Policies = @(
+            'HKLM:\'
+            'SOFTWARE\Contoso\Product'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +61,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

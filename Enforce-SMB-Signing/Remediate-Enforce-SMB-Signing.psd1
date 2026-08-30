@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Background https://learn.microsoft.com/en-GB/troubleshoot/windows-server/networking/overview-server-message-block-signing.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Enforce-SMB-Signing/remediation_Remediate-SMB-Signing.ps1'
         Counterpart = 'Enforce-SMB-Signing/Detect-Enforce-SMB-Signing.ps1'
     }
@@ -17,15 +19,21 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-ItemProperty')
+        Cmdlets = @(
+            'New-ItemProperty'
+        )
         Executables = @()
-        Policies = @('HKLM\System\CurrentControlSet\Services\LanManWorkstation\Parameters')
+        Policies = @(
+            'HKLM\System\CurrentControlSet\Services\LanManWorkstation\Parameters'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +45,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

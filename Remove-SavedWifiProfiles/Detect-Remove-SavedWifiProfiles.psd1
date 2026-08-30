@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects saved WiFi profiles that use insecure authentication (Open/WEP).'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Remove-SavedWifiProfiles/detection_detect-savedwifiprofiles.ps1'
         Counterpart = 'Remove-SavedWifiProfiles/Remediate-Remove-SavedWifiProfiles.ps1'
     }
@@ -17,14 +19,24 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Select-Object', 'Select-String', 'Write-Output', 'Write-Warning')
-        Executables = @('netsh.exe')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Select-Object'
+            'Select-String'
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'netsh.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +49,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native', 'Network')
+        Categories = @(
+            'Native'
+            'Network'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

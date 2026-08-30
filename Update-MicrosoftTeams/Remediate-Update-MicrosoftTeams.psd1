@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Updates Microsoft Teams using winget.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Update-MicrosoftTeams/remediation_Update-MicrosoftTeamsRemediation.ps1'
         Counterpart = 'Update-MicrosoftTeams/Detect-Update-MicrosoftTeams.ps1'
     }
@@ -17,14 +19,26 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Join-Path', 'Select-Object', 'Sort-Object', 'Write-Error', 'Write-Output')
-        Executables = @('AppInstallerCLI.exe', 'winget.exe')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Join-Path'
+            'Select-Object'
+            'Sort-Object'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'AppInstallerCLI.exe'
+            'winget.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +51,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File', 'Process')
+        Categories = @(
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects OEM bloatware and unnecessary pre-installed apps.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Remove-BloatwareAdvanced/detection_detect-bloatware.ps1'
         Counterpart = 'Remove-BloatwareAdvanced/Remediate-Remove-BloatwareAdvanced.ps1'
     }
@@ -17,16 +19,27 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Get-AppxPackage', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Get-AppxPackage'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('king.com.BubbleWitch3Saga', 'king.com.CandyCrushSaga', 'king.com.CandyCrushSodaSaga')
+        Endpoints = @(
+            'king.com.BubbleWitch3Saga'
+            'king.com.CandyCrushSaga'
+            'king.com.CandyCrushSodaSaga'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +57,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Appx')
+        Categories = @(
+            'Appx'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

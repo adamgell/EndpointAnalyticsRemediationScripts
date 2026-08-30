@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Analyzes BSODs and runs system file checks.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-BlueScreenHistory/remediation_analyze-bluescreens.ps1'
         Counterpart = 'Blue-Screen-History/Detect-Blue-Screen-History.ps1'
     }
@@ -17,15 +19,33 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('ForEach-Object', 'Get-Date', 'Get-WinEvent', 'Join-Path', 'New-Item', 'Out-File', 'Out-Null', 'Test-Path', 'Write-Error', 'Write-Output')
-        Executables = @('DISM', 'sfc')
-        Policies = @('Microsoft-Windows-WER-SystemErrorReporting')
+        Cmdlets = @(
+            'ForEach-Object'
+            'Get-Date'
+            'Get-WinEvent'
+            'Join-Path'
+            'New-Item'
+            'Out-File'
+            'Out-Null'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'DISM'
+            'sfc'
+        )
+        Policies = @(
+            'Microsoft-Windows-WER-SystemErrorReporting'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +57,11 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Process')
+        Categories = @(
+            'Registry'
+            'File'
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

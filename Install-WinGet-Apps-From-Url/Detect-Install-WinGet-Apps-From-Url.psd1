@@ -7,7 +7,12 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects changes to URL to trigger app install.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+        )
         Source = 'Winget Management/detection_detect-install-url-changes.ps1'
         Counterpart = 'Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1'
     }
@@ -17,16 +22,30 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('get-content', 'Invoke-WebRequest', 'New-Item', 'remove-item', 'select-object', 'Start-Sleep', 'Test-Path', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'get-content'
+            'Invoke-WebRequest'
+            'New-Item'
+            'remove-item'
+            'select-object'
+            'Start-Sleep'
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
         Policies = @()
-        Endpoints = @('https://github.com/andrew-s-taylor/winget/raw/main/install-apps.txt')
+        Endpoints = @(
+            'https://github.com/andrew-s-taylor/winget/raw/main/install-apps.txt'
+        )
     }
     Configuration = @(
         @{
@@ -44,7 +63,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Network', 'File')
+        Categories = @(
+            'Network'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

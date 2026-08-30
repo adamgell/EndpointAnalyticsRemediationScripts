@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Remediates the Remove WindowsBackup condition.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Remove-WindowsBackup/remediation_remediate-backup.ps1'
         Counterpart = 'Remove-WindowsBackup/Detect-Remove-WindowsBackup.ps1'
     }
@@ -17,13 +19,17 @@
         RunAs = 'Either'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Remove-WindowsPackage')
+        Cmdlets = @(
+            'Remove-WindowsPackage'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +43,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Native', 'Destructive')
+        Categories = @(
+            'Native'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

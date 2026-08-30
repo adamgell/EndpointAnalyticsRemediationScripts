@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects whether a prior SoftwareDistribution backup folder exists.'
-        Authors = @('Jose Schenardie')
+        Authors = @(
+            'Jose Schenardie'
+        )
         Source = 'Reset-SoftwareDistributionFolder/detection_Detect-Reset-SoftwareDistributionFolder.ps1'
         Counterpart = 'Reset-SoftwareDistributionFolder/Remediate-Reset-SoftwareDistributionFolder.ps1'
     }
@@ -17,13 +19,17 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Test-Path')
+        Cmdlets = @(
+            'Test-Path'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +43,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('File')
+        Categories = @(
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

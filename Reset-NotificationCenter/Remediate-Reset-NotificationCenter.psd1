@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Resets the Windows Notification Center database.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-NotificationCenter/remediation_reset-notificationcenter.ps1'
         Counterpart = 'Reset-NotificationCenter/Detect-Reset-NotificationCenter.ps1'
     }
@@ -17,13 +19,24 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ChildItem', 'Join-Path', 'Remove-Item', 'Start-Service', 'Stop-Service', 'Test-Path', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Get-ChildItem'
+            'Join-Path'
+            'Remove-Item'
+            'Start-Service'
+            'Stop-Service'
+            'Test-Path'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +50,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('File', 'Service', 'Destructive')
+        Categories = @(
+            'File'
+            'Service'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

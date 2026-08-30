@@ -6,8 +6,10 @@
         ScriptName = 'Remediate-Set-Cached-Logon-Count-0'
         Role = 'Remediation'
         Version = '1.0.0'
-        Description = 'Windows NT may use a cache to store the last interactive logon (i.e. console logon), to provide a safe logon for the host in the event that the Domain Controller goes down. This feature is currently activated on this host.'
-        Authors = @('EndpointAnalyticsRemediationScripts contributors')
+        Description = 'Manages cached interactive domain logons when a domain controller is unavailable.'
+        Authors = @(
+            'EndpointAnalyticsRemediationScripts contributors'
+        )
         Source = 'Set-Cached-Logon-Count-0/remediation_Remediate_Cached_Logon_Count.ps1'
         Counterpart = 'Set-Cached-Logon-Count-0/Detect-Set-Cached-Logon-Count-0.ps1'
     }
@@ -17,15 +19,21 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('New-ItemProperty')
+        Cmdlets = @(
+            'New-ItemProperty'
+        )
         Executables = @()
-        Policies = @('HKLM:\Software\Microsoft\Windows Nt\CurrentVersion\Winlogon')
+        Policies = @(
+            'HKLM:\Software\Microsoft\Windows Nt\CurrentVersion\Winlogon'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +45,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry')
+        Categories = @(
+            'Registry'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

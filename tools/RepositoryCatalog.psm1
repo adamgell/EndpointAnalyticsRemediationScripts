@@ -109,14 +109,22 @@ function Test-ScriptManifest {
 
     if ($manifest.SchemaVersion -ne $schema.SchemaVersion) { $errors.Add('SchemaVersion is unsupported.') }
     if ($manifest.Identity.Role -notin $schema.Enums.Role) { $errors.Add('Identity.Role is invalid.') }
-    if ($manifest.Runtime.Architecture -notin $schema.Enums.Architecture) { $errors.Add('Runtime.Architecture is invalid.') }
+    if ($manifest.Runtime.Architecture -notin $schema.Enums.Architecture) {
+        $errors.Add('Runtime.Architecture is invalid.')
+    }
     if ($manifest.Runtime.RunAs -notin $schema.Enums.RunAs) { $errors.Add('Runtime.RunAs is invalid.') }
-    if ($manifest.Behavior.DetectionMode -notin $schema.Enums.DetectionMode) { $errors.Add('Behavior.DetectionMode is invalid.') }
+    if ($manifest.Behavior.DetectionMode -notin $schema.Enums.DetectionMode) {
+        $errors.Add('Behavior.DetectionMode is invalid.')
+    }
     if ($manifest.Risk.Level -notin $schema.Enums.RiskLevel) { $errors.Add('Risk.Level is invalid.') }
     if ($manifest.Test.Status -notin $schema.Enums.TestStatus) { $errors.Add('Test.Status is invalid.') }
-    if ($manifest.Runtime.SignatureCheck -notin $schema.Enums.SignatureCheck) { $errors.Add('Runtime.SignatureCheck is invalid.') }
+    if ($manifest.Runtime.SignatureCheck -notin $schema.Enums.SignatureCheck) {
+        $errors.Add('Runtime.SignatureCheck is invalid.')
+    }
     if ($manifest.Runtime.Reboot -notin $schema.Enums.Reboot) { $errors.Add('Runtime.Reboot is invalid.') }
-    if ($manifest.Test.IntegrationLevel -notin $schema.Enums.IntegrationLevel) { $errors.Add('Test.IntegrationLevel is invalid.') }
+    if ($manifest.Test.IntegrationLevel -notin $schema.Enums.IntegrationLevel) {
+        $errors.Add('Test.IntegrationLevel is invalid.')
+    }
     foreach ($category in @($manifest.Test.Categories)) {
         if ($category -notin $schema.Enums.TestCategory) { $errors.Add("Test category '$category' is invalid.") }
     }

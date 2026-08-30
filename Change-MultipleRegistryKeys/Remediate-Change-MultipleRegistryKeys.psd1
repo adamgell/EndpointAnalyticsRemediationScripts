@@ -7,7 +7,13 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Creates the registry keys defined below.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Marius Wyss')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Marius Wyss'
+        )
         Source = 'Change-MultipleRegistryKeys/remediation_Change-MultipleRegistryKeysRemediaton.ps1'
         Counterpart = 'Change-MultipleRegistryKeys/Detect-Change-MultipleRegistryKeys.ps1'
     }
@@ -17,15 +23,28 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'New-Item', 'New-ItemProperty', 'Out-Null', 'Remove-ItemProperty', 'Test-Path', 'Write-Output')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'New-Item'
+            'New-ItemProperty'
+            'Out-Null'
+            'Remove-ItemProperty'
+            'Test-Path'
+            'Write-Output'
+        )
         Executables = @()
-        Policies = @('HKLM:\', 'SOFTWARE\Contoso\Product')
+        Policies = @(
+            'HKLM:\'
+            'SOFTWARE\Contoso\Product'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +63,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Registry', 'File', 'Destructive')
+        Categories = @(
+            'Registry'
+            'File'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

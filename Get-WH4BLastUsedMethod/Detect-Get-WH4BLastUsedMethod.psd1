@@ -7,7 +7,13 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects the Get WH4BLastUsedMethod condition.'
-        Authors = @('Joey Verlinden', 'Andrew Taylor', 'Florian Slazmann', 'Jannik Reinhard', 'Marius Wyss')
+        Authors = @(
+            'Joey Verlinden'
+            'Andrew Taylor'
+            'Florian Slazmann'
+            'Jannik Reinhard'
+            'Marius Wyss'
+        )
         Source = 'Get-WH4BLastUsedMethod/detection_Get-WH4BLastUsedMethodDetection.ps1'
         Counterpart = ''
     }
@@ -17,15 +23,28 @@
         RunAs = 'User'
         RequiresElevation = $false
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Inventory' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-ItemProperty', 'New-Item', 'Start-Transcript', 'Stop-Transcript', 'Test-Path', 'Write-Error', 'Write-Host', 'Write-Warning')
+        Cmdlets = @(
+            'Get-ItemProperty'
+            'New-Item'
+            'Start-Transcript'
+            'Stop-Transcript'
+            'Test-Path'
+            'Write-Error'
+            'Write-Host'
+            'Write-Warning'
+        )
         Executables = @()
-        Policies = @('HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI')
+        Policies = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI'
+        )
         Endpoints = @()
     }
     Configuration = @(
@@ -44,7 +63,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'InteractiveWindows'

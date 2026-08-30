@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Detects if OneDrive sync is working properly.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Reset-OneDriveSync/detection_detect-onedrivesync.ps1'
         Counterpart = 'Reset-OneDriveSync/Remediate-Reset-OneDriveSync.ps1'
     }
@@ -17,14 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Get-Process', 'Write-Output', 'Write-Warning')
-        Executables = @('OneDrive.exe')
+        Cmdlets = @(
+            'Get-Process'
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'OneDrive.exe'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +47,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Process')
+        Categories = @(
+            'Process'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

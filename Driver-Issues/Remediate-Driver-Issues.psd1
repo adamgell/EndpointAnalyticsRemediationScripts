@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Attempts to fix driver issues by restarting problem devices.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Detect-DriverIssues/remediation_fix-driverissues.ps1'
         Counterpart = 'Driver-Issues/Detect-Driver-Issues.ps1'
     }
@@ -17,14 +19,27 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Disable-PnpDevice', 'Enable-PnpDevice', 'Get-PnpDevice', 'Out-Null', 'Start-Sleep', 'Write-Error', 'Write-Output', 'Write-Warning')
-        Executables = @('pnputil')
+        Cmdlets = @(
+            'Disable-PnpDevice'
+            'Enable-PnpDevice'
+            'Get-PnpDevice'
+            'Out-Null'
+            'Start-Sleep'
+            'Write-Error'
+            'Write-Output'
+            'Write-Warning'
+        )
+        Executables = @(
+            'pnputil'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +52,11 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Process', 'Native', 'Destructive')
+        Categories = @(
+            'Process'
+            'Native'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

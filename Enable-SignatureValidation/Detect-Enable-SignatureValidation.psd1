@@ -7,7 +7,9 @@
         Role = 'Detection'
         Version = '1.0.0'
         Description = 'Written to resolve this https://msrc.microsoft.com/update-guide/vulnerability/CVE-2013-3900.'
-        Authors = @('Tom Coleman')
+        Authors = @(
+            'Tom Coleman'
+        )
         Source = 'Enable-SignatureValidation/detection_Detect_Signature_Validation.ps1'
         Counterpart = 'Enable-SignatureValidation/Remediate-Enable-SignatureValidation.ps1'
     }
@@ -17,15 +19,24 @@
         RunAs = 'Either'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'Compliance' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Test-Path', 'Write-Output', 'Write-Warning')
+        Cmdlets = @(
+            'Test-Path'
+            'Write-Output'
+            'Write-Warning'
+        )
         Executables = @()
-        Policies = @('Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Cryptography\Wintrust\Config', 'Registry::HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config')
+        Policies = @(
+            'Registry::HKEY_LOCAL_MACHINE\Software\Microsoft\Cryptography\Wintrust\Config'
+            'Registry::HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Cryptography\Wintrust\Config'
+        )
         Endpoints = @()
     }
     Configuration = @()
@@ -37,7 +48,10 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Registry', 'File')
+        Categories = @(
+            'Registry'
+            'File'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Repairs the WMI repository if corrupted.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Fix-WMI-Repository/remediation_fix-wmirepository.ps1'
         Counterpart = 'Fix-WMI-Repository/Detect-Fix-WMI-Repository.ps1'
     }
@@ -17,14 +19,21 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'None'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Write-Error', 'Write-Output')
-        Executables = @('winmgmt')
+        Cmdlets = @(
+            'Write-Error'
+            'Write-Output'
+        )
+        Executables = @(
+            'winmgmt'
+        )
         Policies = @()
         Endpoints = @()
     }
@@ -37,7 +46,10 @@
         DataHandling = 'Reads local state and can delete or replace endpoint data selected by the script.'
     }
     Test = @{
-        Categories = @('Process', 'Destructive')
+        Categories = @(
+            'Process'
+            'Destructive'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'

@@ -7,7 +7,9 @@
         Role = 'Remediation'
         Version = '1.0.0'
         Description = 'Enables BitLocker on the OS drive with TPM protector.'
-        Authors = @('Jannik Reinhard')
+        Authors = @(
+            'Jannik Reinhard'
+        )
         Source = 'Enforce-BitLocker/remediation_enforce-bitlocker.ps1'
         Counterpart = 'Enforce-BitLocker/Detect-Enforce-BitLocker.ps1'
     }
@@ -17,13 +19,22 @@
         RunAs = 'System'
         RequiresElevation = $true
         SignatureCheck = 'Either'
-        SupportedWindows = @('AllSupported')
+        SupportedWindows = @(
+            'AllSupported'
+        )
         Reboot = 'Possible'
     }
     Behavior = @{ DetectionMode = 'NotApplicable' }
     Dependencies = @{
         Modules = @()
-        Cmdlets = @('Add-BitLockerKeyProtector', 'Enable-BitLocker', 'Get-BitLockerVolume', 'Get-Tpm', 'Write-Error', 'Write-Output')
+        Cmdlets = @(
+            'Add-BitLockerKeyProtector'
+            'Enable-BitLocker'
+            'Get-BitLockerVolume'
+            'Get-Tpm'
+            'Write-Error'
+            'Write-Output'
+        )
         Executables = @()
         Policies = @()
         Endpoints = @()
@@ -37,7 +48,9 @@
         DataHandling = 'Reads or changes local endpoint state; the manifest stores no endpoint data.'
     }
     Test = @{
-        Categories = @('Native')
+        Categories = @(
+            'Native'
+        )
         Status = 'PendingMigration'
         CoverageFloor = 0.0
         IntegrationLevel = 'WindowsVm'
