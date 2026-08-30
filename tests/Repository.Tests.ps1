@@ -1593,7 +1593,10 @@ function Invoke-Pester {
         [string] $Output,
         [switch] $PassThru
     )
-    $record = [ordered]@{ Command = 'Invoke-Pester' }
+    $record = [ordered]@{
+        Command = 'Invoke-Pester'
+        Configuration = $null
+    }
     if ($null -ne $Configuration) {
         $record.Configuration = [ordered]@{
             RunPath = @($Configuration.Run.Path)
