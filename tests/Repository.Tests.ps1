@@ -2422,6 +2422,8 @@ function Install-Module {
     }
 
     It 'preloads CimCmdlets for a fresh ValidateRewrite process' -Skip:(
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+        -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
         [Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT
     ) {
         $baseRevision = (Get-Content `
