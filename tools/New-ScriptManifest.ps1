@@ -749,11 +749,17 @@ foreach ($newPath in $mappedPaths) {
         })
 }
 
-$utf8NoBom = [Text.UTF8Encoding]::new($false)
+$utf8Bom = New-Object System.Text.UTF8Encoding -ArgumentList $true
 foreach ($plannedFile in $plannedFiles) {
     $parent = Split-Path $plannedFile.Path -Parent
     [IO.Directory]::CreateDirectory($parent) | Out-Null
-    [IO.File]::WriteAllText($plannedFile.Path, $plannedFile.Content, $utf8NoBom)
+
+    $preamble = $utf8Bom.GetPreamble()
+    $contentBytes = $utf8Bom.GetBytes($plannedFile.Content)
+    $bytes = [byte[]]::new($preamble.Length + $contentBytes.Length)
+    [Array]::Copy($preamble, 0, $bytes, 0, $preamble.Length)
+    [Array]::Copy($contentBytes, 0, $bytes, $preamble.Length, $contentBytes.Length)
+    [IO.File]::WriteAllBytes($plannedFile.Path, $bytes)
 }
 
 Write-Output "Generated $($plannedFiles.Count) script manifests in '$resolvedOutputRoot'."

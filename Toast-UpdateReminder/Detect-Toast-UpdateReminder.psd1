@@ -1,4 +1,4 @@
-@{
+﻿@{
     SchemaVersion = '1.0'
     Id = '851e7ca3-1ec5-512f-b028-6ddfb06ddf08'
     Identity = @{

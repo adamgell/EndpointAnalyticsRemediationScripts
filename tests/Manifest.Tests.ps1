@@ -455,6 +455,26 @@ Describe 'Deterministic manifest generation' {
             $firstHash | Should -BeExactly $secondHash -Because $relativePath
         }
     }
+    It 'writes a UTF-8 BOM to all generated sidecars' {
+        $outputRoot = Join-Path $TestDrive 'utf8-bom'
+        $run = Invoke-TestManifestGenerator `
+            -TestPathMap $pathMapPath `
+            -TestMetadata $metadataPath `
+            -OutputRoot $outputRoot
+
+        $run.ExitCode | Should -Be 0 -Because $run.Output
+        $generatedFiles = @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*.psd1')
+        $generatedFiles.Count | Should -Be 271
+
+        foreach ($file in $generatedFiles) {
+            $bytes = [IO.File]::ReadAllBytes($file.FullName)
+            $bytes.Length | Should -BeGreaterThan 3 -Because $file.FullName
+            $bytes[0] | Should -Be 0xEF -Because $file.FullName
+            $bytes[1] | Should -Be 0xBB -Because $file.FullName
+            $bytes[2] | Should -Be 0xBF -Because $file.FullName
+        }
+    }
+
 
     It 'emits generated sidecars at 120 columns except URLs and integrity hashes' {
         $outputRoot = Join-Path $TestDrive 'line-width'
