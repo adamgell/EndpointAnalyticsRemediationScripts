@@ -65,8 +65,6 @@ function Install-PinnedModule {
         RequiredVersion = $version
         Repository = [string] $Requirement.Repository
         Scope = 'CurrentUser'
-        Force = $true
-        Confirm = $false
         ErrorAction = 'Stop'
     }
 

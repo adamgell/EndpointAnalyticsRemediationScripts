@@ -1606,15 +1606,16 @@ Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
     }
 }
 Describe 'Build quality interface' -Tag 'BuildInterface' {
+    $windowsPowerShellPath = if (-not [string]::IsNullOrEmpty($env:SystemRoot)) {
+        Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+    }
+    else {
+        ''
+    }
+
     BeforeAll {
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
         $buildPath = Join-Path $repositoryRoot 'build.ps1'
-        $windowsPowerShellPath = if (-not [string]::IsNullOrEmpty($env:SystemRoot)) {
-            Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
-        }
-        else {
-            ''
-        }
         $powerShellPath = if (
             [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
             [System.IO.File]::Exists($windowsPowerShellPath)
