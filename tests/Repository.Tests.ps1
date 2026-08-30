@@ -1527,11 +1527,32 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
                 -Value '# controlled fixture' -Encoding utf8
             Set-Content -LiteralPath (Join-Path $root 'standards/ManifestSchema.psd1') `
                 -Value '@{}' -Encoding utf8
+            if ($Route -eq 'Validate') {
+                $manifestGenerator = @'
+param(
+    [string] $PathMap,
+    [string] $Metadata,
+    [string] $Schema,
+    [string] $OutputRoot
+)
+$map = Import-PowerShellDataFile -LiteralPath $PathMap
+foreach ($row in @($map.Paths)) {
+    $manifestPath = Join-Path $OutputRoot ([System.IO.Path]::ChangeExtension(
+            [string] $row.NewPath,
+            '.psd1'
+        ))
+    New-Item -ItemType Directory -Path (Split-Path $manifestPath) -Force | Out-Null
+    Set-Content -LiteralPath $manifestPath -Value '@{}' -Encoding utf8
+}
+'@
+                Set-Content -LiteralPath (Join-Path $root 'tools/New-ScriptManifest.ps1') `
+                    -Value $manifestGenerator -Encoding utf8
+            }
 
             $requiredModules = if ($Route -eq 'Analyze') {
                 "@{ PSScriptAnalyzer = @{ Version = '1.25.0'; Repository = 'PSGallery' } }"
             }
-            elseif ($Route -in @('Test', 'CheckFormat')) {
+            elseif ($Route -in @('Validate', 'Test', 'CheckFormat')) {
                 "@{ Pester = @{ Version = '5.7.1'; Repository = 'PSGallery' } }"
             }
             else {
@@ -1772,6 +1793,31 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
             }
         }
     }
+    It 'accepts exactly the six public tasks and rejects retired task names' {
+        $taskParameter = (Get-Command -Name $buildPath).Parameters['Task']
+        $validateSet = @(
+            $taskParameter.Attributes |
+                Where-Object {
+                    $_ -is [System.Management.Automation.ValidateSetAttribute]
+                }
+        )
+        $validateSet.Count | Should -Be 1
+
+        $expectedTasks = @(
+            'Bootstrap'
+            'Validate'
+            'Analyze'
+            'Test'
+            'CheckFormat'
+            'ValidateRewrite'
+        )
+        $actualTasks = @($validateSet[0].ValidValues)
+        ($actualTasks -join '|') | Should -BeExactly ($expectedTasks -join '|')
+        @($actualTasks).Count | Should -Be 6
+        foreach ($retiredTask in @('ValidateStyle', 'ValidateMaps', 'ValidateManifests')) {
+            $actualTasks | Should -Not -Contain $retiredTask
+        }
+    }
 
     It 'invokes Validate with every inventory, manifest, parser, reference, and migration check without executing scripts' `
         -Skip:(
@@ -1823,7 +1869,22 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
         $transitionChecks.Count | Should -Be 271
         $referenceChecks.Count | Should -Be 1
         $referenceChecks[0].Root | Should -Be $fixture
-        $result.Records.Count | Should -Be 544
+        $mapInvocation = @(
+            $result.Records |
+                Where-Object {
+                    $_.Command -eq 'Invoke-Pester' -and $null -eq $_.Configuration
+                }
+        )
+        $mapInvocation.Count | Should -Be 1
+        ($result.Output -join "`n") | Should -Match `
+            'Path-map and symbol-map validation passed\.'
+        ($result.Output -join "`n") | Should -Match `
+            'Manifest generation passed 271 byte-identical checks\.'
+        $mapInvocation[0].Path | Should -Be (
+            Join-Path $fixture 'tests/Repository.Tests.ps1'
+        )
+        @($mapInvocation[0].Tag) | Should -Be @('FoundationMap')
+        $result.Records.Count | Should -Be 545
 
         for ($index = 0; $index -lt 271; $index++) {
             $number = $index + 1

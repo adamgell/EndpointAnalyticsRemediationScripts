@@ -42,12 +42,9 @@ powershell.exe -NoProfile -File .\build.ps1 -Task Validate
 powershell.exe -NoProfile -File .\build.ps1 -Task Analyze
 powershell.exe -NoProfile -File .\build.ps1 -Task Test
 powershell.exe -NoProfile -File .\build.ps1 -Task CheckFormat
-powershell.exe -NoProfile -File .\build.ps1 -Task ValidateStyle
-powershell.exe -NoProfile -File .\build.ps1 -Task ValidateMaps
-powershell.exe -NoProfile -File .\build.ps1 -Task ValidateManifests
 ```
 
-`Validate` checks the deployment inventory, same-basename manifests, native metadata, PowerShell parsing, the foundation path map, and local Markdown references. `Analyze` runs the pinned PSScriptAnalyzer configuration. `Test` runs the Pester suite with coverage enabled for scripts whose manifests are `Covered`. `CheckFormat` verifies style without rewriting files. The map and manifest tasks run their focused checks.
+`Validate` checks the deployment inventory, same-basename manifests, native metadata, PowerShell parsing, the foundation path and symbol maps, generated manifests, and local Markdown references. `Analyze` runs the pinned PSScriptAnalyzer configuration. `Test` runs the Pester suite with coverage enabled for scripts whose manifests are `Covered`. `CheckFormat` verifies style without rewriting files. Path-map, symbol-map, and generated-manifest validation are part of `Validate`; there are no separate public tasks for those checks.
 
 Do not use the deployment catalog as a runner. `tools/RepositoryCatalog.psm1` is an inventory and validation module only. Normal validation, analysis, testing, formatting checks, and CI must not execute a detection or remediation script. Do not run remediation scripts as a routine smoke test because they can modify endpoint state.
 
@@ -92,11 +89,9 @@ powershell.exe -NoProfile -File .\build.ps1 `
 
 Rewrite evidence proves source and destination equivalence. It is not a deployment input and must never cause the catalog or any deployment script to execute.
 
-## Contribution steps
-
 1. Choose a new scenario or an existing `PendingMigration` package. Inspect the entire package directory and its current manifest before editing.
 2. Create or rename only to the canonical package and script paths. Keep each script standalone and add one same-basename manifest per script.
 3. Add native, schema-valid metadata and update the package README with links to the current script paths. Keep secrets and tenant-specific values out of the repository.
 4. Add behavioral tests for a new script and set its manifest status to `Covered`. For an existing `PendingMigration` script, record the required behavior work instead of claiming coverage.
-5. Run `Bootstrap`, `Validate`, `Analyze`, `Test`, and `CheckFormat` with Windows PowerShell 5.1. Run `ValidateMaps` and `ValidateManifests` when paths or manifests change. Use `ValidateRewrite` only for an explicitly declared rewrite evidence set.
+5. Run `Bootstrap`, `Validate`, `Analyze`, `Test`, and `CheckFormat` with Windows PowerShell 5.1. Use `ValidateRewrite` only for an explicitly declared rewrite evidence set.
 6. Confirm that no quality task or test executes a deployment script, then include the relevant test and endpoint evidence in the pull request.

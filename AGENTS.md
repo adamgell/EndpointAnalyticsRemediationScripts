@@ -54,9 +54,6 @@ powershell.exe -NoProfile -File .\build.ps1 -Task Validate
 powershell.exe -NoProfile -File .\build.ps1 -Task Analyze
 powershell.exe -NoProfile -File .\build.ps1 -Task Test
 powershell.exe -NoProfile -File .\build.ps1 -Task CheckFormat
-powershell.exe -NoProfile -File .\build.ps1 -Task ValidateStyle
-powershell.exe -NoProfile -File .\build.ps1 -Task ValidateMaps
-powershell.exe -NoProfile -File .\build.ps1 -Task ValidateManifests
 ```
 
 `ValidateRewrite` is opt-in and requires `-BaseRevision`, `-PathMap`, `-SymbolMap`, and `-ReportPath`. Use the foundation evidence paths only for the one-time cutover, or the corresponding `evidence/rewrites/<name>/` paths for a declared later rewrite:
@@ -71,7 +68,7 @@ powershell.exe -NoProfile -File .\build.ps1 `
     -ReportPath .\evidence\foundation\RewriteReport.json
 ```
 
-`Validate` inventories deployment scripts, validates every same-basename manifest, parses PowerShell, checks the foundation map, and resolves local Markdown links. `Analyze` invokes the pinned PSScriptAnalyzer settings. `Test` runs Pester and enables command coverage for `Covered` scripts. `CheckFormat` verifies formatting without rewriting files. The map and manifest routes run focused validation. None of these routes may execute a deployment script, and the catalog must never be used to execute one.
+`Validate` inventories deployment scripts, validates every same-basename manifest, parses PowerShell, checks the foundation path and symbol maps, compares generated manifests, and resolves local Markdown links. `Analyze` invokes the pinned PSScriptAnalyzer settings. `Test` runs Pester and enables command coverage for `Covered` scripts. `CheckFormat` verifies formatting without rewriting files. None of these routes may execute a deployment script, and the catalog must never be used to execute one.
 
 ## Review and testing rules
 

@@ -6,10 +6,7 @@ param(
         'Analyze',
         'Test',
         'CheckFormat',
-        'ValidateRewrite',
-        'ValidateStyle',
-        'ValidateMaps',
-        'ValidateManifests'
+        'ValidateRewrite'
     )]
     [string] $Task = 'Validate',
     [string] $BaseRevision,
@@ -444,6 +441,8 @@ switch ($Task) {
     }
     'Validate' {
         Invoke-RepositoryValidation
+        Invoke-MapValidation
+        Invoke-ManifestValidation
     }
     'Analyze' {
         Invoke-RepositoryAnalyzer
@@ -453,19 +452,6 @@ switch ($Task) {
     }
     'CheckFormat' {
         Invoke-FormatCheck
-    }
-    'ValidateStyle' {
-        # Load Pester before analyzer execution; the analyzer may load its
-        # own Pester reference while scanning the repository test scripts.
-        Import-QualityModules -Names @('Pester')
-        Invoke-RepositoryAnalyzer
-        Invoke-RepositoryTests
-    }
-    'ValidateMaps' {
-        Invoke-MapValidation
-    }
-    'ValidateManifests' {
-        Invoke-ManifestValidation
     }
     'ValidateRewrite' {
         foreach ($parameter in 'BaseRevision', 'PathMap', 'SymbolMap', 'ReportPath') {
