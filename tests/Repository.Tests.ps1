@@ -1890,7 +1890,10 @@ exit 0
         }
     }
 
-    It 'invokes Validate with every inventory, manifest, parser, reference, and migration check without executing scripts' `
+    It (
+        'invokes Validate with every inventory, manifest, parser, reference, and ' +
+        'migration check without executing scripts'
+    ) `
         -Skip:(
         ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
         -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
@@ -2156,7 +2159,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
         $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
             "    Write-CatalogContractLog 'Get-UnresolvedRepositoryReference' @{ Root = `$Root }`n    @()`n}",
-            "    Write-CatalogContractLog 'Get-UnresolvedRepositoryReference' @{ Root = `$Root }`n    [pscustomobject]@{ Markdown = 'controlled.md'; Target = './controlled-target' }`n}"
+            (
+                "    Write-CatalogContractLog 'Get-UnresolvedRepositoryReference' @{ " +
+                "Root = `$Root }`n    [pscustomobject]@{ Markdown = 'controlled.md'; " +
+                "Target = './controlled-target' }`n}"
+            )
         )
         Set-Content -LiteralPath $catalogPath -Value $catalog -Encoding utf8
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
