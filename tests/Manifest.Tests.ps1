@@ -29,16 +29,24 @@
             [Parameter(Mandatory)] [string] $OutputRoot
         )
 
-        $output = @(
-            & $powerShellPath -NoProfile -File $generatorPath `
-                -PathMap $TestPathMap `
-                -Metadata $TestMetadata `
-                -Schema $schemaPath `
-                -OutputRoot $OutputRoot 2>&1
-        )
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $output = @(
+                & $powerShellPath -NoProfile -File $generatorPath `
+                    -PathMap $TestPathMap `
+                    -Metadata $TestMetadata `
+                    -Schema $schemaPath `
+                    -OutputRoot $OutputRoot 2>&1
+            )
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
 
         return [pscustomobject]@{
-            ExitCode = $LASTEXITCODE
+            ExitCode = $exitCode
             Output = $output -join [Environment]::NewLine
         }
     }
@@ -398,15 +406,23 @@ Describe 'Deterministic manifest generation' {
     ) {
         $windowsPowerShellPath = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
         $outputRoot = Join-Path $TestDrive 'windows-powershell-5.1'
-        $output = @(
-            & $windowsPowerShellPath -NoProfile -NonInteractive -File $generatorPath `
-                -PathMap $pathMapPath `
-                -Metadata $metadataPath `
-                -Schema $schemaPath `
-                -OutputRoot $outputRoot 2>&1
-        )
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $output = @(
+                & $windowsPowerShellPath -NoProfile -NonInteractive -File $generatorPath `
+                    -PathMap $pathMapPath `
+                    -Metadata $metadataPath `
+                    -Schema $schemaPath `
+                    -OutputRoot $outputRoot 2>&1
+            )
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
 
-        $LASTEXITCODE | Should -Be 0 -Because ($output -join [Environment]::NewLine)
+        $exitCode | Should -Be 0 -Because ($output -join [Environment]::NewLine)
         @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*.psd1').Count |
             Should -Be 271
     }

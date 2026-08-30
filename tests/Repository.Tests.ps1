@@ -165,13 +165,21 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
         ).Trim()
         Import-Module "$repositoryRoot/tools/RepositoryCatalog.psm1" -Force
         $gitContext = Resolve-FoundationRepositoryGitContext -RepositoryRoot $repositoryRoot
-        $commonGitDirectoryOutput = @(
-            & git `
-                "--git-dir=$($gitContext.GitDirectory)" `
-                rev-parse `
-                --git-common-dir 2>&1
-        )
-        if ($LASTEXITCODE -ne 0 -or $commonGitDirectoryOutput.Count -ne 1) {
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $commonGitDirectoryOutput = @(
+                & git `
+                    "--git-dir=$($gitContext.GitDirectory)" `
+                    rev-parse `
+                    --git-common-dir 2>&1
+            )
+            $commonGitExitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        if ($commonGitExitCode -ne 0 -or $commonGitDirectoryOutput.Count -ne 1) {
             throw 'Unable to resolve the common Git directory for symbol-map fixtures.'
         }
         $commonGitDirectoryValue = ([string] $commonGitDirectoryOutput[0]).Trim()
@@ -197,8 +205,15 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
                 $env:GIT_WORK_TREE = $null
                 $env:GIT_INDEX_FILE = $IndexPath
                 $env:GIT_NO_REPLACE_OBJECTS = $null
-                $output = @(& git @Arguments 2>&1)
-                $exitCode = $LASTEXITCODE
+                $previousErrorActionPreference = $ErrorActionPreference
+                try {
+                    $ErrorActionPreference = 'Continue'
+                    $output = @(& git @Arguments 2>&1)
+                    $exitCode = $LASTEXITCODE
+                }
+                finally {
+                    $ErrorActionPreference = $previousErrorActionPreference
+                }
             }
             finally {
                 $env:GIT_DIR = $originalGitDirectory
@@ -1229,8 +1244,15 @@ Describe 'Foundation mover dirty-tree preconditions' -Tag 'FoundationCutover' {
             try {
                 $env:GIT_DIR = $null
                 $env:GIT_WORK_TREE = $null
-                $output = @(& git -C $Root @Arguments 2>&1)
-                $exitCode = $LASTEXITCODE
+                $previousErrorActionPreference = $ErrorActionPreference
+                try {
+                    $ErrorActionPreference = 'Continue'
+                    $output = @(& git -C $Root @Arguments 2>&1)
+                    $exitCode = $LASTEXITCODE
+                }
+                finally {
+                    $ErrorActionPreference = $previousErrorActionPreference
+                }
             }
             finally {
                 $env:GIT_DIR = $originalGitDirectory
@@ -1419,8 +1441,15 @@ Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
             try {
                 $env:GIT_DIR = $null
                 $env:GIT_WORK_TREE = $null
-                $output = @(& git -C $Root @Arguments 2>&1)
-                $exitCode = $LASTEXITCODE
+                $previousErrorActionPreference = $ErrorActionPreference
+                try {
+                    $ErrorActionPreference = 'Continue'
+                    $output = @(& git -C $Root @Arguments 2>&1)
+                    $exitCode = $LASTEXITCODE
+                }
+                finally {
+                    $ErrorActionPreference = $previousErrorActionPreference
+                }
             }
             finally {
                 $env:GIT_DIR = $originalGitDirectory
@@ -1958,12 +1987,19 @@ exit 0
                 $env:BUILD_CONTRACT_FAILURE = $null
                 $env:BUILD_CONTRACT_RESULT = $PesterResult
                 $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE = '1'
-                $output = @(
-                    & $powerShellPath -NoProfile -NonInteractive `
-                        -ExecutionPolicy Bypass `
-                        -File (Join-Path $FixtureRoot 'build.ps1') @Arguments 2>&1
-                )
-                $exitCode = $LASTEXITCODE
+                $previousErrorActionPreference = $ErrorActionPreference
+                try {
+                    $ErrorActionPreference = 'Continue'
+                    $output = @(
+                        & $powerShellPath -NoProfile -NonInteractive `
+                            -ExecutionPolicy Bypass `
+                            -File (Join-Path $FixtureRoot 'build.ps1') @Arguments 2>&1
+                    )
+                    $exitCode = $LASTEXITCODE
+                }
+                finally {
+                    $ErrorActionPreference = $previousErrorActionPreference
+                }
             }
             finally {
                 $env:PSModulePath = $originalModulePath
@@ -2536,7 +2572,19 @@ function Install-Module {
         $exitCode = $LASTEXITCODE
 
         $exitCode | Should -Be 0
-        $calls = @($output -join '' | ConvertFrom-Json)
+        $parsedCalls = @($output -join '' | ConvertFrom-Json)
+        $calls = @(
+            foreach ($call in $parsedCalls) {
+                if ($call -is [System.Array]) {
+                    foreach ($item in $call) {
+                        $item
+                    }
+                }
+                else {
+                    $call
+                }
+            }
+        )
         $calls.Count | Should -Be 4
         @($calls | Where-Object SkipPublisherCheck).Count | Should -Be 2
         @($calls | Where-Object Force).Count | Should -Be 0
