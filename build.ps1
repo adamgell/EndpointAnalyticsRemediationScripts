@@ -308,7 +308,7 @@ function Invoke-MapValidation {
     Import-QualityModules -Names @('Pester')
     $result = Invoke-Pester `
         -Path (Join-Path $repositoryRoot 'tests/Repository.Tests.ps1') `
-        -Tag FoundationMap `
+        -Tag FoundationMapCurrentTree `
         -Output Detailed `
         -PassThru
     if ($result.FailedCount -gt 0) {

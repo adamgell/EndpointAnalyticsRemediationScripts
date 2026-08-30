@@ -1,4 +1,4 @@
-﻿Describe 'Foundation path map' -Tag 'FoundationMap' {
+﻿Describe 'Foundation path map' -Tag 'FoundationMapCurrentTree' {
     BeforeAll {
         $map = Import-PowerShellDataFile "$PSScriptRoot/../evidence/foundation/PathMap.psd1"
     }
@@ -17,7 +17,7 @@
     }
 }
 
-Describe 'Foundation path map details' -Tag 'FoundationMap' {
+Describe 'Foundation path map details' -Tag 'FoundationMapCurrentTree' {
     BeforeAll {
         $map = Import-PowerShellDataFile "$PSScriptRoot/../evidence/foundation/PathMap.psd1"
     }
@@ -62,7 +62,98 @@ Describe 'Foundation path map details' -Tag 'FoundationMap' {
     }
 }
 
-Describe 'Foundation symbol map' -Tag 'FoundationMap' {
+Describe 'Foundation symbol map' -Tag 'FoundationMapCurrentTree' {
+    BeforeAll {
+        $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $symbolMapPath = Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1'
+        $symbolMap = Import-PowerShellDataFile $symbolMapPath
+    }
+
+    It 'records every canonical cmdlet-casing rewrite' {
+        @($symbolMap.Commands).Count | Should -Be 81
+        $invalid = @($symbolMap.Commands | Where-Object {
+                $_.OldName -ceq $_.NewName -or
+                $_.OldName -ine $_.NewName -or
+                [int] $_.Occurrence -lt 1
+            })
+        $invalid | Should -BeNullOrEmpty
+    }
+
+    It 'records the 12 reviewed alias occurrences across 9 files' {
+        $expected = @(
+            'Check-DiskHealth/Detect-Check-DiskHealth.ps1|?|Where-Object|1'
+            'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1|echo|Write-Output|1'
+            'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1|echo|Write-Output|2'
+            'Device-Auto-Syncer/Remediate-Device-Auto-Syncer.ps1|?|Where-Object|1'
+            'Get-CleanUpDisk/Detect-Get-CleanUpDisk.ps1|Where|Where-Object|1'
+            'Get-ConnectedDevices/Detect-Get-ConnectedDevices.ps1|%|ForEach-Object|1'
+            'Remove-ConsumerApps/Detect-Remove-ConsumerApps.ps1|Where|Where-Object|1'
+            'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1|Where|Where-Object|1'
+            'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1|Where|Where-Object|2'
+            'Run-Browser/Remediate-Run-Browser.ps1|Start|Start-Process|1'
+            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|1'
+            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|2'
+        )
+        $actual = @($symbolMap.Aliases | ForEach-Object {
+                '{0}|{1}|{2}|{3}' -f $_.Path, $_.OldName, $_.NewName, $_.Occurrence
+            })
+
+        @($actual).Count | Should -Be 12
+        @($symbolMap.Aliases.Path | Sort-Object -Unique).Count | Should -Be 9
+        Compare-Object -ReferenceObject $expected -DifferenceObject $actual -CaseSensitive |
+            Should -BeNullOrEmpty
+    }
+
+    It 'preserves both lowercase Toast aliases with source-exact casing' {
+        $actual = @($symbolMap.Aliases | Where-Object {
+                $_.Path -ceq 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
+            } | ForEach-Object {
+                '{0}|{1}' -f $_.OldName, $_.Occurrence
+            })
+
+        ($actual -join "`n") | Should -BeExactly "where|1`nwhere|2"
+    }
+
+    It 'records the five reviewed function definitions' {
+        $expected = @(
+            'Enable-RDP/Detect-Enable-RDP.ps1|IsMember|Test-GroupMembership'
+            'Enable-RDP/Remediate-Enable-RDP.ps1|IsMember|Test-GroupMembership'
+            (
+                'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1|' +
+                'Display-ToastNotification|Show-ToastNotification'
+            )
+            'Make-Speedtest/Remediate-Make-Speedtest.ps1|Build-Signature|New-LogAnalyticsSignature'
+            'Make-Speedtest/Remediate-Make-Speedtest.ps1|Post-LogAnalyticsData|Send-LogAnalyticsData'
+        )
+        $actual = @($symbolMap.Functions | ForEach-Object {
+                '{0}|{1}|{2}' -f $_.Path, $_.OldName, $_.NewName
+            })
+
+        @($actual).Count | Should -Be 5
+        Compare-Object -ReferenceObject $expected -DifferenceObject $actual -CaseSensitive |
+            Should -BeNullOrEmpty
+    }
+
+    It 'uses deterministic ordinal path and occurrence ordering' {
+        foreach ($name in 'Commands', 'Aliases') {
+            [string[]] $actual = @($symbolMap[$name] | ForEach-Object {
+                    '{0}`0{1:D8}`0{2}`0{3}' -f $_.Path, [int] $_.Occurrence, $_.OldName, $_.NewName
+                })
+            [string[]] $expected = @($actual)
+            [System.Array]::Sort($expected, [System.StringComparer]::Ordinal)
+            ($actual -join "`n") | Should -Be ($expected -join "`n")
+        }
+
+        [string[]] $actualFunctions = @($symbolMap.Functions | ForEach-Object {
+                '{0}`0{1}`0{2}' -f $_.Path, $_.OldName, $_.NewName
+            })
+        [string[]] $expectedFunctions = @($actualFunctions)
+        [System.Array]::Sort($expectedFunctions, [System.StringComparer]::Ordinal)
+        ($actualFunctions -join "`n") | Should -Be ($expectedFunctions -join "`n")
+    }
+}
+
+Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
     BeforeAll {
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
         $symbolGenerator = Join-Path $repositoryRoot 'tools/New-FoundationSymbolMap.ps1'
@@ -250,51 +341,6 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 $env:GIT_NO_REPLACE_OBJECTS = $originalGitNoReplaceObjects
             }
         }
-    }
-
-    It 'records every canonical cmdlet-casing rewrite' {
-        @($symbolMap.Commands).Count | Should -Be 81
-        $invalid = @($symbolMap.Commands | Where-Object {
-                $_.OldName -ceq $_.NewName -or
-                $_.OldName -ine $_.NewName -or
-                [int] $_.Occurrence -lt 1
-            })
-        $invalid | Should -BeNullOrEmpty
-    }
-
-    It 'records the 12 reviewed alias occurrences across 9 files' {
-        $expected = @(
-            'Check-DiskHealth/Detect-Check-DiskHealth.ps1|?|Where-Object|1'
-            'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1|echo|Write-Output|1'
-            'Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1|echo|Write-Output|2'
-            'Device-Auto-Syncer/Remediate-Device-Auto-Syncer.ps1|?|Where-Object|1'
-            'Get-CleanUpDisk/Detect-Get-CleanUpDisk.ps1|Where|Where-Object|1'
-            'Get-ConnectedDevices/Detect-Get-ConnectedDevices.ps1|%|ForEach-Object|1'
-            'Remove-ConsumerApps/Detect-Remove-ConsumerApps.ps1|Where|Where-Object|1'
-            'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1|Where|Where-Object|1'
-            'Remove-ConsumerApps/Remediate-Remove-ConsumerApps.ps1|Where|Where-Object|2'
-            'Run-Browser/Remediate-Run-Browser.ps1|Start|Start-Process|1'
-            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|1'
-            'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|2'
-        )
-        $actual = @($symbolMap.Aliases | ForEach-Object {
-                '{0}|{1}|{2}|{3}' -f $_.Path, $_.OldName, $_.NewName, $_.Occurrence
-            })
-
-        @($actual).Count | Should -Be 12
-        @($symbolMap.Aliases.Path | Sort-Object -Unique).Count | Should -Be 9
-        Compare-Object -ReferenceObject $expected -DifferenceObject $actual -CaseSensitive |
-            Should -BeNullOrEmpty
-    }
-
-    It 'preserves both lowercase Toast aliases with source-exact casing' {
-        $actual = @($symbolMap.Aliases | Where-Object {
-                $_.Path -ceq 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
-            } | ForEach-Object {
-                '{0}|{1}' -f $_.OldName, $_.Occurrence
-            })
-
-        ($actual -join "`n") | Should -BeExactly "where|1`nwhere|2"
     }
 
     It 'regenerates byte-identically from the default baseline marker in the normalized tree' {
@@ -492,43 +538,6 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     }
 
 
-    It 'records the five reviewed function definitions' {
-        $expected = @(
-            'Enable-RDP/Detect-Enable-RDP.ps1|IsMember|Test-GroupMembership'
-            'Enable-RDP/Remediate-Enable-RDP.ps1|IsMember|Test-GroupMembership'
-            (
-                'Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1|' +
-                'Display-ToastNotification|Show-ToastNotification'
-            )
-            'Make-Speedtest/Remediate-Make-Speedtest.ps1|Build-Signature|New-LogAnalyticsSignature'
-            'Make-Speedtest/Remediate-Make-Speedtest.ps1|Post-LogAnalyticsData|Send-LogAnalyticsData'
-        )
-        $actual = @($symbolMap.Functions | ForEach-Object {
-                '{0}|{1}|{2}' -f $_.Path, $_.OldName, $_.NewName
-            })
-
-        @($actual).Count | Should -Be 5
-        Compare-Object -ReferenceObject $expected -DifferenceObject $actual -CaseSensitive |
-            Should -BeNullOrEmpty
-    }
-
-    It 'uses deterministic ordinal path and occurrence ordering' {
-        foreach ($name in 'Commands', 'Aliases') {
-            [string[]] $actual = @($symbolMap[$name] | ForEach-Object {
-                    '{0}`0{1:D8}`0{2}`0{3}' -f $_.Path, [int] $_.Occurrence, $_.OldName, $_.NewName
-                })
-            [string[]] $expected = @($actual)
-            [System.Array]::Sort($expected, [System.StringComparer]::Ordinal)
-            ($actual -join "`n") | Should -Be ($expected -join "`n")
-        }
-
-        [string[]] $actualFunctions = @($symbolMap.Functions | ForEach-Object {
-                '{0}`0{1}`0{2}' -f $_.Path, $_.OldName, $_.NewName
-            })
-        [string[]] $expectedFunctions = @($actualFunctions)
-        [System.Array]::Sort($expectedFunctions, [System.StringComparer]::Ordinal)
-        ($actualFunctions -join "`n") | Should -Be ($expectedFunctions -join "`n")
-    }
 }
 
 Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
@@ -1501,7 +1510,8 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
 
         function New-BuildContractFixture {
             param(
-                [Parameter(Mandatory)] [ValidateSet('Validate', 'Analyze', 'Test', 'CheckFormat')]
+                [Parameter(Mandatory)]
+                [ValidateSet('Validate', 'Analyze', 'Test', 'CheckFormat', 'ValidateRewrite')]
                 [string] $Route
             )
 
@@ -1524,7 +1534,7 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
             Set-Content -LiteralPath (Join-Path $root 'PSScriptAnalyzerSettings.psd1') `
                 -Value '@{}' -Encoding utf8
             Set-Content -LiteralPath (Join-Path $root 'tests/Repository.Tests.ps1') `
-                -Value '# controlled fixture' -Encoding utf8
+                -Value 'param([string[]] $Tag)' -Encoding utf8
             Set-Content -LiteralPath (Join-Path $root 'standards/ManifestSchema.psd1') `
                 -Value '@{}' -Encoding utf8
             if ($Route -eq 'Validate') {
@@ -1604,6 +1614,20 @@ function Invoke-Pester {
         (($record | ConvertTo-Json -Compress) + [Environment]::NewLine)
     )
     $failedCount = if ($env:BUILD_CONTRACT_FAILURE -eq '1') { 1 } else { 0 }
+    if ($env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE -eq '1' -and
+        $null -ne $Path -and
+        [System.IO.File]::Exists($Path)) {
+        try {
+            $global:LASTEXITCODE = 0
+            & $Path -Tag $Tag
+            if ($LASTEXITCODE -ne 0) {
+                $failedCount = 1
+            }
+        }
+        catch {
+            $failedCount = 1
+        }
+    }
     [pscustomobject]@{
         FailedCount = $failedCount
         PassedCount = if ($failedCount -eq 0) { 1 } else { 0 }
@@ -1741,9 +1765,36 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
                 Set-Content -LiteralPath (Join-Path $root 'evidence/foundation/PathMap.psd1') `
                     -Value '@{ Paths = @() }' -Encoding utf8
             }
+            if ($Route -eq 'ValidateRewrite') {
+                Set-Content -LiteralPath (Join-Path $root 'evidence/foundation/BaseRevision.txt') `
+                    -Value ('a' * 40) -Encoding ascii
+                Set-Content -LiteralPath (Join-Path $root 'evidence/foundation/SymbolRenames.psd1') `
+                    -Value '@{}' -Encoding utf8
+                $rewriteGate = @'
+param(
+    [string] $BaseRevision,
+    [string] $PathMap,
+    [string] $SymbolMap,
+    [string] $ReportPath
+)
+$record = [ordered]@{
+    Command = 'Test-PowerShellRewrite'
+    BaseRevision = $BaseRevision
+    PathMap = $PathMap
+    SymbolMap = $SymbolMap
+    ReportPath = $ReportPath
+}
+[System.IO.File]::AppendAllText(
+    $env:BUILD_CONTRACT_LOG,
+    (($record | ConvertTo-Json -Compress) + [Environment]::NewLine)
+)
+exit 0
+'@
+                Set-Content -LiteralPath (Join-Path $root 'tools/Test-PowerShellRewrite.ps1') `
+                    -Value $rewriteGate -Encoding utf8
+            }
             $root
         }
-
         function Invoke-BuildContractFixture {
             param(
                 [Parameter(Mandatory)] [string] $FixtureRoot,
@@ -1756,6 +1807,7 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
             $originalLogPath = $env:BUILD_CONTRACT_LOG
             $originalSentinelPath = $env:BUILD_CONTRACT_SENTINEL
             $originalFailure = $env:BUILD_CONTRACT_FAILURE
+            $originalExecuteFixture = $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE
             try {
                 $env:PSModulePath = (
                     (Join-Path $FixtureRoot 'modules') + [System.IO.Path]::PathSeparator +
@@ -1764,6 +1816,7 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
                 $env:BUILD_CONTRACT_LOG = $logPath
                 $env:BUILD_CONTRACT_SENTINEL = $sentinelPath
                 $env:BUILD_CONTRACT_FAILURE = $null
+                $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE = '1'
                 $output = @(
                     & $powerShellPath -NoProfile -NonInteractive `
                         -ExecutionPolicy Bypass `
@@ -1776,6 +1829,7 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
                 $env:BUILD_CONTRACT_LOG = $originalLogPath
                 $env:BUILD_CONTRACT_SENTINEL = $originalSentinelPath
                 $env:BUILD_CONTRACT_FAILURE = $originalFailure
+                $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE = $originalExecuteFixture
             }
             $records = @()
             if ([System.IO.File]::Exists($logPath)) {
@@ -1883,7 +1937,7 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
         $mapInvocation[0].Path | Should -Be (
             Join-Path $fixture 'tests/Repository.Tests.ps1'
         )
-        @($mapInvocation[0].Tag) | Should -Be @('FoundationMap')
+        @($mapInvocation[0].Tag) | Should -Be @('FoundationMapCurrentTree')
         $result.Records.Count | Should -Be 545
 
         for ($index = 0; $index -lt 271; $index++) {
@@ -1901,6 +1955,41 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
             $transitionChecks[$index].After | Should -Be 'Covered'
         }
     }
+    It 'keeps Validate independent of baseline Git blobs in an archive-like tree' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        Set-Content -LiteralPath (Join-Path $fixture 'tools/New-FoundationSymbolMap.ps1') `
+            -Value @'
+Add-Content -LiteralPath $env:BUILD_CONTRACT_SENTINEL -Value 'baseline-generator'
+throw 'Baseline Git blob is unavailable in this archive-like fixture.'
+'@ -Encoding utf8
+        Set-Content -LiteralPath (Join-Path $fixture 'tests/Repository.Tests.ps1') `
+            -Value @'
+param([string[]] $Tag)
+if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseline') {
+    & (Join-Path $PSScriptRoot '../tools/New-FoundationSymbolMap.ps1')
+}
+'@ -Encoding utf8
+
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+        $mapInvocation = @(
+            $result.Records |
+                Where-Object {
+                    $_.Command -eq 'Invoke-Pester' -and $null -eq $_.Configuration
+                }
+        )
+
+        $result.ExitCode | Should -Be 0
+        (Test-Path -LiteralPath $result.SentinelPath) | Should -BeFalse
+        $mapInvocation.Count | Should -Be 1
+        @($mapInvocation[0].Tag) | Should -Be @('FoundationMapCurrentTree')
+    }
+
     It 'rejects an internally matching 270-entry deployment inventory' `
         -Skip:(
             ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
@@ -2060,6 +2149,50 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
             'Unresolved repository references: controlled\.md: \./controlled-target'
     }
 
+    It 'runs ValidateRewrite through the supplied rewrite-equivalence gate' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route ValidateRewrite
+        $pathMapPath = Join-Path $fixture 'evidence/foundation/PathMap.psd1'
+        $symbolMapPath = Join-Path $fixture 'evidence/foundation/SymbolRenames.psd1'
+        $reportPath = Join-Path $fixture 'evidence/foundation/RewriteReport.json'
+        $baseRevision = 'a' * 40
+        $result = Invoke-BuildContractFixture `
+            -FixtureRoot $fixture `
+            -Arguments @(
+                '-Task'
+                'ValidateRewrite'
+                '-BaseRevision'
+                $baseRevision
+                '-PathMap'
+                $pathMapPath
+                '-SymbolMap'
+                $symbolMapPath
+                '-ReportPath'
+                $reportPath
+            )
+        $mapInvocations = @(
+            $result.Records |
+                Where-Object {
+                    $_.Command -eq 'Invoke-Pester' -and $null -eq $_.Configuration
+                }
+        )
+        $rewriteInvocations = @(
+            $result.Records | Where-Object Command -eq 'Test-PowerShellRewrite'
+        )
+
+        $result.ExitCode | Should -Be 0
+        $mapInvocations.Count | Should -Be 0
+        $rewriteInvocations.Count | Should -Be 1
+        $rewriteInvocations[0].BaseRevision | Should -Be $baseRevision
+        $rewriteInvocations[0].PathMap | Should -Be $pathMapPath
+        $rewriteInvocations[0].SymbolMap | Should -Be $symbolMapPath
+        $rewriteInvocations[0].ReportPath | Should -Be $reportPath
+    }
     It 'invokes Analyze with recursive analysis and repository settings' -Skip:(
         ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
             -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
