@@ -1875,11 +1875,11 @@ exit 0
 
     It 'invokes Validate with every inventory, manifest, parser, reference, and migration check without executing scripts' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
         $scriptFiles = @(
@@ -1957,11 +1957,11 @@ exit 0
     }
     It 'keeps Validate independent of baseline Git blobs in an archive-like tree' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         Set-Content -LiteralPath (Join-Path $fixture 'tools/New-FoundationSymbolMap.ps1') `
             -Value @'
@@ -1992,11 +1992,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects an internally matching 270-entry deployment inventory' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         $removedScript = Join-Path $fixture 'runtime/Script271.ps1'
         $removedManifest = Join-Path $fixture 'runtime/Script271.psd1'
@@ -2031,11 +2031,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects an inventory whose destination path map does not match' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         $pathMapPath = Join-Path $fixture 'evidence/foundation/PathMap.psd1'
         $pathMap = (Get-Content -LiteralPath $pathMapPath -Raw).Replace(
@@ -2052,11 +2052,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects a deployment script with a missing manifest' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         Remove-Item -LiteralPath (Join-Path $fixture 'runtime/Script271.psd1')
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
@@ -2068,11 +2068,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects an invalid deployment manifest' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
         $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
@@ -2092,11 +2092,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects a deployment script with a PowerShell parser error' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         Set-Content -LiteralPath (Join-Path $fixture 'runtime/Script271.ps1') `
             -Value 'if (' -Encoding utf8
@@ -2109,11 +2109,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects an invalid migration transition from the catalog validator' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
         $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
@@ -2130,11 +2130,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'rejects unresolved repository references from the catalog validator' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route Validate
         $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
         $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
@@ -2151,11 +2151,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'runs ValidateRewrite through the supplied rewrite-equivalence gate' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route ValidateRewrite
         $pathMapPath = Join-Path $fixture 'evidence/foundation/PathMap.psd1'
         $symbolMapPath = Join-Path $fixture 'evidence/foundation/SymbolRenames.psd1'
@@ -2164,17 +2164,17 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $result = Invoke-BuildContractFixture `
             -FixtureRoot $fixture `
             -Arguments @(
-                '-Task'
-                'ValidateRewrite'
-                '-BaseRevision'
-                $baseRevision
-                '-PathMap'
-                $pathMapPath
-                '-SymbolMap'
-                $symbolMapPath
-                '-ReportPath'
-                $reportPath
-            )
+            '-Task'
+            'ValidateRewrite'
+            '-BaseRevision'
+            $baseRevision
+            '-PathMap'
+            $pathMapPath
+            '-SymbolMap'
+            $symbolMapPath
+            '-ReportPath'
+            $reportPath
+        )
         $mapInvocations = @(
             $result.Records |
                 Where-Object {
@@ -2195,9 +2195,9 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
     }
     It 'invokes Analyze with recursive analysis and repository settings' -Skip:(
         ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
         ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
     ) {
         $fixture = New-BuildContractFixture -Route Analyze
         $result = Invoke-BuildContractFixture `
@@ -2214,9 +2214,9 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'invokes Test with Pester configuration and Covered command coverage' -Skip:(
         ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
         ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
     ) {
         $fixture = New-BuildContractFixture -Route Test
         $result = Invoke-BuildContractFixture `
@@ -2240,9 +2240,9 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'invokes CheckFormat as verification and leaves fixture bytes unchanged' -Skip:(
         ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
         ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
     ) {
         $fixture = New-BuildContractFixture -Route CheckFormat
         $selectedFiles = @(
@@ -2258,7 +2258,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         )
         $beforeTree = @(
             foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
-                    Sort-Object -Property FullName)) {
+                Sort-Object -Property FullName)) {
                 $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
                 "$($file.FullName):$($hash.Hash)"
             }
@@ -2272,7 +2272,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         )
         $afterTree = @(
             foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
-                    Sort-Object -Property FullName)) {
+                Sort-Object -Property FullName)) {
                 $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
                 "$($file.FullName):$($hash.Hash)"
             }
@@ -2294,11 +2294,11 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
 
     It 'propagates a failed CheckFormat result from a mutated disposable command fixture' `
         -Skip:(
-            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
-                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
-            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
-                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
-        ) {
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
         $fixture = New-BuildContractFixture -Route CheckFormat
         $pesterPath = Join-Path $fixture 'modules/Pester/Pester.psm1'
         $mutated = (Get-Content -LiteralPath $pesterPath -Raw).Replace(
