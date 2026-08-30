@@ -444,7 +444,7 @@ $reportDirectory = [System.IO.Path]::GetDirectoryName($reportFullPath)
 if (-not [string]::IsNullOrEmpty($reportDirectory)) {
     [System.IO.Directory]::CreateDirectory($reportDirectory) | Out-Null
 }
-$json = $report | ConvertTo-Json -Depth 12
+$json = ($report | ConvertTo-Json -Depth 12).Replace("`r`n", "`n")
 $utf8WithoutBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($reportFullPath, $json + "`n", $utf8WithoutBom)
 

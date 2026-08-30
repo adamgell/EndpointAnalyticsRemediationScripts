@@ -4,12 +4,12 @@ This repository contains standalone Microsoft Intune Endpoint Analytics packages
 
 ## Package and path conventions
 
-- Put one Intune deployment unit in one top-level package directory. Do not make a package depend on another package or on repository code at deployment time.
+- Put one Intune deployment unit in one package directory under `scripts/`. Do not make a package depend on another package or on repository code at deployment time.
 - Use a scenario name that describes the endpoint behavior. Name the detection entry point `Detect-<Scenario>.ps1` and its same-basename manifest `Detect-<Scenario>.psd1`.
 - Add `Remediate-<Scenario>.ps1` and `Remediate-<Scenario>.psd1` when the package changes endpoint state. Detection-only packages omit the remediation pair.
 - Keep the `.ps1` and `.psd1` sidecars beside each other. Every deployable script has exactly one manifest with the same basename.
 - Upload the scripts as standalone Intune content. Intune must be able to run a script without importing, dot-sourcing, or executing a repository catalog or shared module.
-- Use the current path and script names in package READMEs. The authoritative post-cutover destinations are recorded in `evidence/foundation/PathMap.psd1`; do not add links to removed paths such as `0 - Template/`.
+- Use the `scripts/<Package>/` paths and script names in package READMEs. The foundation path map preserves package-relative historical destinations; the physical deployment packages live under `scripts/`.
 
 ## Manifest metadata
 
@@ -75,7 +75,7 @@ powershell.exe -NoProfile -File .\build.ps1 `
     -ReportPath .\evidence\foundation\RewriteReport.json
 ```
 
-A later formatting-only rewrite must opt in with a new evidence directory under `evidence/rewrites/<name>/` containing its own `BaseRevision.txt`, `PathMap.psd1`, and `SymbolRenames.psd1`. Run the required `ValidateRewrite` command against that rewrite-specific evidence set and commit only the deterministic report and maps that belong to that rewrite. `ValidateRewrite` requires all four parameters:
+A later path or formatting rewrite must opt in with a new evidence directory under `evidence/rewrites/<name>/` containing its own `BaseRevision.txt`, `PathMap.psd1`, and `SymbolRenames.psd1`. Run the required `ValidateRewrite` command against that rewrite-specific evidence set and commit only the deterministic report and maps that belong to that rewrite. `ValidateRewrite` requires all four parameters:
 
 ```powershell
 $baseRevision = Get-Content .\evidence\rewrites\<name>\BaseRevision.txt -Raw
