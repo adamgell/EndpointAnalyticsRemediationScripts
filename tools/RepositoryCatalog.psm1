@@ -185,7 +185,8 @@ function Get-UnresolvedRepositoryReference {
     param([Parameter(Mandatory)] [string] $Root)
 
     $linkPattern = [regex]'\[[^\]]+\]\((?<target>[^)#]+)(?:#[^)]+)?\)'
-    foreach ($markdown in Get-ChildItem -LiteralPath $Root -Recurse -File -Include '*.md') {
+    foreach ($markdown in Get-ChildItem -LiteralPath $Root -Recurse -File |
+            Where-Object { $_.Extension -ieq '.md' }) {
         $content = Get-Content -LiteralPath $markdown.FullName -Raw
         foreach ($match in $linkPattern.Matches($content)) {
             $target = $match.Groups['target'].Value.Trim().Trim('<', '>')

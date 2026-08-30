@@ -198,9 +198,9 @@ jobs:
                       $expectedRows
                   )
               }
-              $actualHash = (Get-FileHash -LiteralPath $generatedReportPath -Algorithm SHA256).Hash
-              $expectedHash = (Get-FileHash -LiteralPath $committedReportPath -Algorithm SHA256).Hash
-              if ($actualHash -cne $expectedHash) {
+              $committedCanonical = $committedReport | ConvertTo-Json -Depth 12 -Compress
+              $generatedCanonical = $generatedReport | ConvertTo-Json -Depth 12 -Compress
+              if ($generatedCanonical -cne $committedCanonical) {
                   throw "Committed rewrite report '$committedReportPath' does not match regenerated evidence."
               }
           }

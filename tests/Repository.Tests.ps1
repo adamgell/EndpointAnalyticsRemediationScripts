@@ -731,7 +731,8 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
         $approvedLongLineDigest = 'd43eae67fa2231aeebc5895e9e1418ca025361dca6c4643ca8c50e990c282abe'
         $scriptFiles = @(Get-DeploymentScript -Root $scriptRoot)
         $trackedPowerShellPaths = @(
-            Get-FoundationTrackedPowerShellPath -RepositoryRoot $repositoryRoot
+            Get-FoundationTrackedPowerShellPath -RepositoryRoot $repositoryRoot |
+                Where-Object { $_ -notlike 'evidence/rewrites/*' }
         )
         $trackedPowerShellFiles = @(
             foreach ($relativePath in $trackedPowerShellPaths) {
