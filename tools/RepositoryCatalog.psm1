@@ -258,13 +258,21 @@ function Resolve-FoundationValidatedGitContext {
         return $null
     }
 
-    $output = @(& git `
-            "--git-dir=$GitDirectory" `
-            "--work-tree=$WorkTree" `
-            rev-parse `
-            --absolute-git-dir `
-            --show-toplevel 2>&1)
-    if ($LASTEXITCODE -ne 0 -or $output.Count -lt 2) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        $output = @(& git `
+                "--git-dir=$GitDirectory" `
+                "--work-tree=$WorkTree" `
+                rev-parse `
+                --absolute-git-dir `
+                --show-toplevel 2>&1)
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+    if ($exitCode -ne 0 -or $output.Count -lt 2) {
         return $null
     }
 
@@ -288,12 +296,20 @@ function Resolve-FoundationNativeGitContext {
     try {
         $env:GIT_DIR = $null
         $env:GIT_WORK_TREE = $null
-        $output = @(& git `
-                -C $RepositoryRoot `
-                rev-parse `
-                --absolute-git-dir `
-                --show-toplevel 2>&1)
-        if ($LASTEXITCODE -ne 0 -or $output.Count -lt 2) {
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $output = @(& git `
+                    -C $RepositoryRoot `
+                    rev-parse `
+                    --absolute-git-dir `
+                    --show-toplevel 2>&1)
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+        if ($exitCode -ne 0 -or $output.Count -lt 2) {
             return $null
         }
     }

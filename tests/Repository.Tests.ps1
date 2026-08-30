@@ -243,6 +243,12 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
                 '--quiet'
                 $gitDirectory
             )
+            $null = Invoke-FoundationSymbolFixtureGit -Arguments @(
+                "--git-dir=$gitDirectory"
+                'config'
+                'core.autocrlf'
+                'false'
+            )
             $alternateDirectory = Join-Path $gitDirectory 'objects/info'
             [System.IO.Directory]::CreateDirectory($alternateDirectory) | Out-Null
             $alternateObjects = (Join-Path $commonGitDirectory 'objects').Replace('\', '/')
@@ -1163,7 +1169,7 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
             })
 
         $trackedPowerShellFiles.Count | Should -Be $trackedPowerShellPaths.Count
-        $trackedPowerShellFiles.Count | Should -Be 577
+        $trackedPowerShellFiles.Count | Should -Be 578
         $expected.Count | Should -Be 93
         Assert-FoundationApprovedLongLineCatalog `
             -Keys $expected `
