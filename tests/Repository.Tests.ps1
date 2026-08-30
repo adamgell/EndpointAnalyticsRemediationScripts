@@ -67,10 +67,60 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
         $symbolGenerator = Join-Path $repositoryRoot 'tools/New-FoundationSymbolMap.ps1'
         $pathMapPath = Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1'
+        $pathMap = Import-PowerShellDataFile $pathMapPath
         $packageDataPath = Join-Path $repositoryRoot 'standards/FoundationPackages.psd1'
         $symbolMapPath = Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1'
         $expectedSymbolMapBytes = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($symbolMapPath))
         $symbolMap = Import-PowerShellDataFile $symbolMapPath
+        function Copy-FoundationSymbolGenerator {
+            param([Parameter(Mandatory)] [string] $Root)
+
+            $toolDirectory = Join-Path $Root 'tools'
+            [System.IO.Directory]::CreateDirectory($toolDirectory) | Out-Null
+            $fixtureGenerator = Join-Path $toolDirectory 'New-FoundationSymbolMap.ps1'
+            [System.IO.File]::Copy($symbolGenerator, $fixtureGenerator, $false)
+            return $fixtureGenerator
+        }
+
+        function Copy-FoundationMappedFile {
+            param(
+                [Parameter(Mandatory)] [string] $Root,
+                [Parameter(Mandatory)] [string] $SourceRelativePath,
+                [Parameter(Mandatory)] [string] $TargetRelativePath
+            )
+
+            $sourcePath = Join-Path $repositoryRoot $SourceRelativePath.Replace(
+                '/',
+                [System.IO.Path]::DirectorySeparatorChar
+            )
+            $targetPath = Join-Path $Root $TargetRelativePath.Replace(
+                '/',
+                [System.IO.Path]::DirectorySeparatorChar
+            )
+            [System.IO.Directory]::CreateDirectory(
+                [System.IO.Path]::GetDirectoryName($targetPath)
+            ) | Out-Null
+            [System.IO.File]::Copy($sourcePath, $targetPath, $false)
+            return $targetPath
+        }
+
+        function Copy-FoundationSymbolTree {
+            param(
+                [Parameter(Mandatory)] [string] $Root,
+                [Parameter(Mandatory)]
+                [ValidateSet('BasePath', 'NewPath')]
+                [string] $Layout
+            )
+
+            $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $Root
+            foreach ($pathRow in @($pathMap.Paths)) {
+                $null = Copy-FoundationMappedFile `
+                    -Root $Root `
+                    -SourceRelativePath ([string] $pathRow.NewPath) `
+                    -TargetRelativePath ([string] $pathRow[$Layout])
+            }
+            return $fixtureGenerator
+        }
     }
 
     It 'records every canonical cmdlet-casing rewrite' {
@@ -118,6 +168,20 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         ($actual -join "`n") | Should -BeExactly "where|1`nwhere|2"
     }
 
+    It 'regenerates byte-identically from a legacy-source tree' {
+        $fixtureRoot = Join-Path $TestDrive 'legacy-source-tree'
+        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
+        $outputPath = Join-Path $fixtureRoot 'SymbolRenames.psd1'
+
+        & $fixtureGenerator `
+            -PathMap $pathMapPath `
+            -PackageData $packageDataPath `
+            -OutputPath $outputPath
+
+        [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
+            Should -BeExactly $expectedSymbolMapBytes
+    }
+
     It 'regenerates byte-identically when live command discovery is unavailable' {
         $outputPath = Join-Path $TestDrive 'without-live-discovery.psd1'
 
@@ -161,6 +225,83 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
 
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
             Should -BeExactly $expectedSymbolMapBytes
+    }
+
+    It 'rejects a path-map row with indistinguishable source and destination paths' {
+        $fixtureRoot = Join-Path $TestDrive 'ambiguous-path-map'
+        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
+        $ambiguousPathMap = Join-Path $fixtureRoot 'PathMap.psd1'
+        $firstPath = @($pathMap.Paths)[0]
+        $pathMapContent = [System.IO.File]::ReadAllText($pathMapPath)
+        $originalRow = "@{ BasePath = '$($firstPath.BasePath)'; NewPath = '$($firstPath.NewPath)' }"
+        $ambiguousRow = "@{ BasePath = '$($firstPath.BasePath)'; NewPath = '$($firstPath.BasePath)' }"
+        [System.IO.File]::WriteAllText(
+            $ambiguousPathMap,
+            $pathMapContent.Replace($originalRow, $ambiguousRow)
+        )
+
+        {
+            & $fixtureGenerator `
+                -PathMap $ambiguousPathMap `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Path map row '$($firstPath.BasePath)' uses indistinguishable source and destination paths.*"
+    }
+
+    It 'rejects an unresolved mapped file' {
+        $fixtureRoot = Join-Path $TestDrive 'missing-mapped-file'
+        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
+        $firstPath = @($pathMap.Paths)[0]
+
+        {
+            & $fixtureGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Neither mapped source '$($firstPath.BasePath)' nor destination '$($firstPath.NewPath)' exists.*"
+    }
+
+    It 'rejects an unexpected byte-identical dual-path state' {
+        $fixtureRoot = Join-Path $TestDrive 'dual-path'
+        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
+        $firstPath = @($pathMap.Paths)[0]
+        $null = Copy-FoundationMappedFile `
+            -Root $fixtureRoot `
+            -SourceRelativePath ([string] $firstPath.NewPath) `
+            -TargetRelativePath ([string] $firstPath.BasePath)
+        $null = Copy-FoundationMappedFile `
+            -Root $fixtureRoot `
+            -SourceRelativePath ([string] $firstPath.NewPath) `
+            -TargetRelativePath ([string] $firstPath.NewPath)
+
+        {
+            & $fixtureGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Mapped source '$($firstPath.BasePath)' and destination '$($firstPath.NewPath)' both exist unexpectedly.*"
+    }
+
+    It 'rejects a dual-path state with mismatched content' {
+        $fixtureRoot = Join-Path $TestDrive 'mismatched-dual-path'
+        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
+        $firstPath = @($pathMap.Paths)[0]
+        $null = Copy-FoundationMappedFile `
+            -Root $fixtureRoot `
+            -SourceRelativePath ([string] $firstPath.NewPath) `
+            -TargetRelativePath ([string] $firstPath.BasePath)
+        $destinationPath = Copy-FoundationMappedFile `
+            -Root $fixtureRoot `
+            -SourceRelativePath ([string] $firstPath.NewPath) `
+            -TargetRelativePath ([string] $firstPath.NewPath)
+        [System.IO.File]::AppendAllText($destinationPath, "`n# mismatched fixture")
+
+        {
+            & $fixtureGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Mapped source '$($firstPath.BasePath)' and destination '$($firstPath.NewPath)' both exist with different content.*"
     }
 
     It 'records the five reviewed function definitions' {

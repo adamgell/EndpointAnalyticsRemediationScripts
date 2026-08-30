@@ -142,6 +142,9 @@ foreach ($pathRow in $pathRows) {
     if (-not (Test-SafeRepositoryPath -Path $basePath) -or -not (Test-SafeRepositoryPath -Path $newPath)) {
         throw "Path map contains unsafe row '$basePath' -> '$newPath'."
     }
+    if ([System.StringComparer]::OrdinalIgnoreCase.Equals($basePath, $newPath)) {
+        throw "Path map row '$basePath' uses indistinguishable source and destination paths."
+    }
     if (-not $sourcePaths.Add($basePath)) {
         throw "Path map source '$basePath' is duplicated or case-colliding."
     }
@@ -150,19 +153,39 @@ foreach ($pathRow in $pathRows) {
     }
 
     $sourceFullPath = Join-Path $repositoryRoot $basePath.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
-    if (-not (Test-Path -LiteralPath $sourceFullPath -PathType Leaf)) {
-        throw "Mapped source '$basePath' does not exist."
+    $destinationFullPath = Join-Path $repositoryRoot $newPath.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+    $sourceExists = [System.IO.File]::Exists($sourceFullPath)
+    $destinationExists = [System.IO.File]::Exists($destinationFullPath)
+    if ($sourceExists -and $destinationExists) {
+        $sourceBytes = [System.IO.File]::ReadAllBytes($sourceFullPath)
+        $destinationBytes = [System.IO.File]::ReadAllBytes($destinationFullPath)
+        $contentMatches = $sourceBytes.Length -eq $destinationBytes.Length
+        for ($index = 0; $contentMatches -and $index -lt $sourceBytes.Length; $index++) {
+            if ($sourceBytes[$index] -ne $destinationBytes[$index]) {
+                $contentMatches = $false
+            }
+        }
+        if (-not $contentMatches) {
+            throw "Mapped source '$basePath' and destination '$newPath' both exist with different content."
+        }
+        throw "Mapped source '$basePath' and destination '$newPath' both exist unexpectedly."
     }
+    if (-not $sourceExists -and -not $destinationExists) {
+        throw "Neither mapped source '$basePath' nor destination '$newPath' exists."
+    }
+
+    $parseFullPath = if ($sourceExists) { $sourceFullPath } else { $destinationFullPath }
+    $parseRelativePath = if ($sourceExists) { $basePath } else { $newPath }
     $tokens = $null
     $parseErrors = $null
     $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-        $sourceFullPath,
+        $parseFullPath,
         [ref] $tokens,
         [ref] $parseErrors
     )
     if (@($parseErrors).Count -gt 0) {
         $messages = @($parseErrors | ForEach-Object Message) -join '; '
-        throw "Mapped source '$basePath' has parser errors: $messages"
+        throw "Mapped file '$parseRelativePath' has parser errors: $messages"
     }
 
     $parsedByDestination.Add($newPath, [pscustomobject]@{
