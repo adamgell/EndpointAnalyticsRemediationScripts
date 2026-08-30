@@ -421,6 +421,16 @@ Describe 'PowerShell rewrite wrapper' {
         @($result.Report.Failures).Count | Should -Be 0
     }
 
+    It 'does not report a member identifier named after the old function' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'member-identifier') `
+            -CandidateSource '$result.IsMember'
+
+        $result.ExitCode | Should -Be 0
+        $result.Report.Passed | Should -BeTrue
+        @($result.Report.Failures).Count | Should -Be 0
+    }
+
     It 'validates a two-file Git rewrite, writes sorted JSON, and never executes source' {
         $repo = Join-Path $TestDrive 'repo'
         $tools = Join-Path $repo 'tools'

@@ -160,7 +160,9 @@ function Test-PowerShellFunctionReference {
 
     $stringExpressions = @($ast.FindAll({
         param($node)
-        $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
+        ($node -is [System.Management.Automation.Language.StringConstantExpressionAst] -and
+            -not ($node.Parent -is [System.Management.Automation.Language.MemberExpressionAst] -and
+                [object]::ReferenceEquals($node.Parent.Member, $node))) -or
             $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
     }, $true))
     foreach ($stringExpression in $stringExpressions) {
