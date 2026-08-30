@@ -2,7 +2,8 @@
 param(
     [Parameter(Mandatory)] [string] $PathMap,
     [Parameter(Mandatory)] [string] $PackageData,
-    [Parameter(Mandatory)] [string] $OutputPath
+    [Parameter(Mandatory)] [string] $OutputPath,
+    [string] $BaseRevisionPath
 )
 
 Set-StrictMode -Version Latest
@@ -30,82 +31,148 @@ function Test-SafeRepositoryPath {
     return $true
 }
 
-function Resolve-RepositoryRelativeFile {
+function Get-FoundationBaseRevision {
+    param([Parameter(Mandatory)] [string] $Path)
+
+    if (-not [System.IO.File]::Exists($Path)) {
+        throw "Baseline marker '$Path' does not exist."
+    }
+
+    $markerBytes = [System.IO.File]::ReadAllBytes($Path)
+    $isFullLowercaseSha = $markerBytes.Length -eq 40
+    foreach ($byte in $markerBytes) {
+        if (-not (
+                ($byte -ge [byte][char] '0' -and $byte -le [byte][char] '9') -or
+                ($byte -ge [byte][char] 'a' -and $byte -le [byte][char] 'f')
+            )) {
+            $isFullLowercaseSha = $false
+            break
+        }
+    }
+    if (-not $isFullLowercaseSha) {
+        throw 'Baseline marker must contain exactly one lowercase 40-character Git commit SHA with no trailing bytes.'
+    }
+
+    return [System.Text.Encoding]::ASCII.GetString($markerBytes)
+}
+
+function Test-FoundationGitCommit {
     param(
-        [Parameter(Mandatory)] [string] $Root,
-        [Parameter(Mandatory)] [string] $RelativePath
+        [Parameter(Mandatory)] [string] $GitDirectory,
+        [Parameter(Mandatory)] [string] $Revision
     )
 
-    $currentDirectory = New-Object System.IO.DirectoryInfo($Root)
-    $actualSegments = New-Object 'System.Collections.Generic.List[string]'
-    [string[]] $approvedSegments = $RelativePath.Split('/')
-    for ($segmentIndex = 0; $segmentIndex -lt $approvedSegments.Length; $segmentIndex++) {
-        $approvedSegment = $approvedSegments[$segmentIndex]
-        $matchingEntries = New-Object 'System.Collections.Generic.List[System.IO.FileSystemInfo]'
-        foreach ($entry in $currentDirectory.GetFileSystemInfos()) {
-            if ([System.StringComparer]::OrdinalIgnoreCase.Equals($entry.Name, $approvedSegment)) {
-                $matchingEntries.Add($entry)
-            }
-        }
-        if ($matchingEntries.Count -eq 0) {
-            return [pscustomobject]@{
-                Exists = $false
-                HasExactCasing = $false
-                FullPath = $null
-                RelativePath = $null
-            }
-        }
+    $escapedGitDirectory = $GitDirectory.Replace('"', '\"')
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'git'
+    $startInfo.Arguments = (
+        "--no-replace-objects --git-dir=`"$escapedGitDirectory`" rev-parse --verify `"$Revision^{commit}`""
+    )
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
 
-        if ($matchingEntries.Count -gt 1) {
-            throw (
-                "Repository path '$RelativePath' has multiple case-colliding matches " +
-                "for component '$approvedSegment'."
-            )
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    try {
+        if (-not $process.Start()) {
+            throw "Git did not start while validating baseline revision '$Revision'."
         }
-
-        $matchingEntry = $null
-        foreach ($entry in $matchingEntries) {
-            if ([System.StringComparer]::Ordinal.Equals($entry.Name, $approvedSegment)) {
-                $matchingEntry = $entry
-                break
-            }
-        }
-        if ($null -eq $matchingEntry) {
-            $matchingEntry = $matchingEntries[0]
-        }
-        $actualSegments.Add($matchingEntry.Name)
-
-        $isFinalSegment = $segmentIndex -eq ($approvedSegments.Length - 1)
-        if ($isFinalSegment) {
-            if ($matchingEntry -isnot [System.IO.FileInfo]) {
-                return [pscustomobject]@{
-                    Exists = $false
-                    HasExactCasing = $false
-                    FullPath = $null
-                    RelativePath = $null
-                }
-            }
-            $actualRelativePath = $actualSegments -join '/'
-            return [pscustomobject]@{
-                Exists = $true
-                HasExactCasing = [System.StringComparer]::Ordinal.Equals(
-                    $RelativePath,
-                    $actualRelativePath
-                )
-                FullPath = $matchingEntry.FullName
-                RelativePath = $actualRelativePath
-            }
-        }
-        if ($matchingEntry -isnot [System.IO.DirectoryInfo]) {
-            return [pscustomobject]@{
-                Exists = $false
-                HasExactCasing = $false
-                FullPath = $null
-                RelativePath = $null
-            }
-        }
-        $currentDirectory = $matchingEntry
+        $output = $process.StandardOutput.ReadToEnd().Trim()
+        $null = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+        return $process.ExitCode -eq 0 -and $output -ceq $Revision
     }
+    finally {
+        $process.Dispose()
+    }
+}
+
+function Get-FoundationGitBlobBytes {
+    param(
+        [Parameter(Mandatory)] [string] $GitDirectory,
+        [Parameter(Mandatory)] [string] $Revision,
+        [Parameter(Mandatory)] [string] $Path
+    )
+
+    $objectName = "$Revision`:$Path"
+    $escapedGitDirectory = $GitDirectory.Replace('"', '\"')
+    $escapedObjectName = $objectName.Replace('"', '\"')
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'git'
+    $startInfo.Arguments = (
+        "--no-replace-objects --git-dir=`"$escapedGitDirectory`" cat-file blob `"$escapedObjectName`""
+    )
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    $memory = New-Object System.IO.MemoryStream
+    try {
+        if (-not $process.Start()) {
+            throw "Git did not start while reading baseline blob '$objectName'."
+        }
+        $process.StandardOutput.BaseStream.CopyTo($memory)
+        $errorText = $process.StandardError.ReadToEnd().Trim()
+        $process.WaitForExit()
+        if ($process.ExitCode -ne 0) {
+            throw "Baseline blob '$objectName' does not exist. Git reported: $errorText"
+        }
+        return , ($memory.ToArray())
+    }
+    finally {
+        $memory.Dispose()
+        $process.Dispose()
+    }
+}
+
+function ConvertFrom-FoundationScriptBytes {
+    param([Parameter(Mandatory)] [AllowEmptyCollection()] [byte[]] $Bytes)
+
+    $encoding = $null
+    $offset = 0
+    if ($Bytes.Length -ge 4 -and
+        $Bytes[0] -eq 0x00 -and $Bytes[1] -eq 0x00 -and
+        $Bytes[2] -eq 0xFE -and $Bytes[3] -eq 0xFF) {
+        $encoding = New-Object System.Text.UTF32Encoding($true, $true, $true)
+        $offset = 4
+    }
+    elseif ($Bytes.Length -ge 4 -and
+        $Bytes[0] -eq 0xFF -and $Bytes[1] -eq 0xFE -and
+        $Bytes[2] -eq 0x00 -and $Bytes[3] -eq 0x00) {
+        $encoding = New-Object System.Text.UTF32Encoding($false, $true, $true)
+        $offset = 4
+    }
+    elseif ($Bytes.Length -ge 3 -and
+        $Bytes[0] -eq 0xEF -and $Bytes[1] -eq 0xBB -and $Bytes[2] -eq 0xBF) {
+        $encoding = New-Object System.Text.UTF8Encoding($false, $true)
+        $offset = 3
+    }
+    elseif ($Bytes.Length -ge 2 -and $Bytes[0] -eq 0xFE -and $Bytes[1] -eq 0xFF) {
+        $encoding = New-Object System.Text.UnicodeEncoding($true, $true, $true)
+        $offset = 2
+    }
+    elseif ($Bytes.Length -ge 2 -and $Bytes[0] -eq 0xFF -and $Bytes[1] -eq 0xFE) {
+        $encoding = New-Object System.Text.UnicodeEncoding($false, $true, $true)
+        $offset = 2
+    }
+    else {
+        foreach ($byte in $Bytes) {
+            if ($byte -ge 0x80) {
+                throw (
+                    'BOM-less non-ASCII baseline source cannot be decoded deterministically ' +
+                    'under Windows PowerShell 5.1.'
+                )
+            }
+        }
+        $encoding = New-Object System.Text.UTF8Encoding($false, $true)
+    }
+
+    return $encoding.GetString($Bytes, $offset, $Bytes.Length - $offset)
 }
 
 function Get-CommandRecords {
@@ -196,6 +263,19 @@ function Set-SymbolRowOrder {
 }
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+Import-Module (Join-Path $PSScriptRoot 'RepositoryCatalog.psm1') -Force
+if ([string]::IsNullOrWhiteSpace($BaseRevisionPath)) {
+    $BaseRevisionPath = Join-Path $repositoryRoot 'evidence/foundation/BaseRevision.txt'
+}
+$baseRevision = Get-FoundationBaseRevision -Path $BaseRevisionPath
+$gitContext = Resolve-FoundationRepositoryGitContext -RepositoryRoot $repositoryRoot
+$baselineCommitExists = Test-FoundationGitCommit `
+    -GitDirectory $gitContext.GitDirectory `
+    -Revision $baseRevision
+if (-not $baselineCommitExists) {
+    throw "Baseline revision '$baseRevision' does not exist or is not a commit."
+}
+
 $pathData = Import-PowerShellDataFile -Path $PathMap
 $packageDataContent = Import-PowerShellDataFile -Path $PackageData
 if (-not $pathData.ContainsKey('Paths')) {
@@ -232,56 +312,28 @@ foreach ($pathRow in $pathRows) {
         throw "Path map destination '$newPath' is duplicated or case-colliding."
     }
 
-    $sourceResolution = Resolve-RepositoryRelativeFile -Root $repositoryRoot -RelativePath $basePath
-    if ($sourceResolution.Exists -and -not $sourceResolution.HasExactCasing) {
-        throw (
-            "Mapped legacy source '$basePath' has incorrect repository-relative casing; " +
-            "found '$($sourceResolution.RelativePath)'."
-        )
+    $sourceBytes = Get-FoundationGitBlobBytes `
+        -GitDirectory $gitContext.GitDirectory `
+        -Revision $baseRevision `
+        -Path $basePath
+    try {
+        $sourceText = ConvertFrom-FoundationScriptBytes -Bytes $sourceBytes
     }
-    $destinationResolution = Resolve-RepositoryRelativeFile `
-        -Root $repositoryRoot `
-        -RelativePath $newPath
-    if ($destinationResolution.Exists -and -not $destinationResolution.HasExactCasing) {
-        throw (
-            "Mapped destination '$newPath' has incorrect repository-relative casing; " +
-            "found '$($destinationResolution.RelativePath)'."
-        )
-    }
-    $sourceExists = $sourceResolution.Exists
-    $destinationExists = $destinationResolution.Exists
-    $sourceFullPath = $sourceResolution.FullPath
-    $destinationFullPath = $destinationResolution.FullPath
-    if ($sourceExists -and $destinationExists) {
-        $sourceBytes = [System.IO.File]::ReadAllBytes($sourceFullPath)
-        $destinationBytes = [System.IO.File]::ReadAllBytes($destinationFullPath)
-        $contentMatches = $sourceBytes.Length -eq $destinationBytes.Length
-        for ($index = 0; $contentMatches -and $index -lt $sourceBytes.Length; $index++) {
-            if ($sourceBytes[$index] -ne $destinationBytes[$index]) {
-                $contentMatches = $false
-            }
-        }
-        if (-not $contentMatches) {
-            throw "Mapped source '$basePath' and destination '$newPath' both exist with different content."
-        }
-        throw "Mapped source '$basePath' and destination '$newPath' both exist unexpectedly."
-    }
-    if (-not $sourceExists -and -not $destinationExists) {
-        throw "Neither mapped source '$basePath' nor destination '$newPath' exists."
+    catch {
+        throw "Baseline blob '$baseRevision`:$basePath' could not be decoded: $($_.Exception.Message)"
     }
 
-    $parseFullPath = if ($sourceExists) { $sourceResolution.FullPath } else { $destinationResolution.FullPath }
-    $parseRelativePath = if ($sourceExists) { $basePath } else { $newPath }
     $tokens = $null
     $parseErrors = $null
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile(
-        $parseFullPath,
+    $ast = [System.Management.Automation.Language.Parser]::ParseInput(
+        $sourceText,
+        $basePath,
         [ref] $tokens,
         [ref] $parseErrors
     )
     if (@($parseErrors).Count -gt 0) {
         $messages = @($parseErrors | ForEach-Object Message) -join '; '
-        throw "Mapped file '$parseRelativePath' has parser errors: $messages"
+        throw "Baseline blob '$baseRevision`:$basePath' has parser errors: $messages"
     }
 
     $parsedByDestination.Add($newPath, [pscustomobject]@{

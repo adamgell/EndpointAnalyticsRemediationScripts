@@ -64,10 +64,10 @@ Describe 'Foundation path map details' -Tag 'FoundationMap' {
 
 Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     BeforeAll {
-        Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
         $symbolGenerator = Join-Path $repositoryRoot 'tools/New-FoundationSymbolMap.ps1'
         $pathMapPath = Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1'
+        $baseRevisionPath = Join-Path $repositoryRoot 'evidence/foundation/BaseRevision.txt'
         $pathMap = Import-PowerShellDataFile $pathMapPath
         $packageDataPath = Join-Path $repositoryRoot 'standards/FoundationPackages.psd1'
         $symbolMapPath = Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1'
@@ -76,114 +76,179 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         $baseRevision = (
             Get-Content "$repositoryRoot/evidence/foundation/BaseRevision.txt" -Raw
         ).Trim()
+        Import-Module "$repositoryRoot/tools/RepositoryCatalog.psm1" -Force
         $gitContext = Resolve-FoundationRepositoryGitContext -RepositoryRoot $repositoryRoot
-        $gitDirectory = $gitContext.GitDirectory
-        function Copy-FoundationSymbolGenerator {
-            param([Parameter(Mandatory)] [string] $Root)
-
-            $toolDirectory = Join-Path $Root 'tools'
-            [System.IO.Directory]::CreateDirectory($toolDirectory) | Out-Null
-            $fixtureGenerator = Join-Path $toolDirectory 'New-FoundationSymbolMap.ps1'
-            [System.IO.File]::Copy($symbolGenerator, $fixtureGenerator, $false)
-            return $fixtureGenerator
+        $commonGitDirectoryOutput = @(
+            & git `
+                "--git-dir=$($gitContext.GitDirectory)" `
+                rev-parse `
+                --git-common-dir 2>&1
+        )
+        if ($LASTEXITCODE -ne 0 -or $commonGitDirectoryOutput.Count -ne 1) {
+            throw 'Unable to resolve the common Git directory for symbol-map fixtures.'
+        }
+        $commonGitDirectoryValue = ([string] $commonGitDirectoryOutput[0]).Trim()
+        $commonGitDirectory = if ([System.IO.Path]::IsPathRooted($commonGitDirectoryValue)) {
+            [System.IO.Path]::GetFullPath($commonGitDirectoryValue)
+        }
+        else {
+            [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $commonGitDirectoryValue))
         }
 
-        function Copy-FoundationMappedFile {
+        function Invoke-FoundationSymbolFixtureGit {
             param(
-                [Parameter(Mandatory)] [string] $Root,
-                [Parameter(Mandatory)] [string] $SourceRelativePath,
-                [Parameter(Mandatory)] [string] $TargetRelativePath,
-                [switch] $FromBaseline
+                [Parameter(Mandatory)] [string[]] $Arguments,
+                [string] $IndexPath
             )
 
-            $targetPath = Join-Path $Root $TargetRelativePath.Replace(
-                '/',
-                [System.IO.Path]::DirectorySeparatorChar
-            )
-            [System.IO.Directory]::CreateDirectory(
-                [System.IO.Path]::GetDirectoryName($targetPath)
-            ) | Out-Null
-            if ($FromBaseline) {
-                $gitOutput = @(& git `
-                        "--git-dir=$gitDirectory" `
-                        show `
-                        "${baseRevision}:$SourceRelativePath" 2>&1)
-                if ($LASTEXITCODE -ne 0) {
-                    throw "Unable to read baseline '$SourceRelativePath': $($gitOutput -join [Environment]::NewLine)"
-                }
-                $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-                [System.IO.File]::WriteAllLines($targetPath, $gitOutput, $utf8NoBom)
+            $originalGitDirectory = $env:GIT_DIR
+            $originalGitWorkTree = $env:GIT_WORK_TREE
+            $originalGitIndexFile = $env:GIT_INDEX_FILE
+            $originalGitNoReplaceObjects = $env:GIT_NO_REPLACE_OBJECTS
+            try {
+                $env:GIT_DIR = $null
+                $env:GIT_WORK_TREE = $null
+                $env:GIT_INDEX_FILE = $IndexPath
+                $env:GIT_NO_REPLACE_OBJECTS = $null
+                $output = @(& git @Arguments 2>&1)
+                $exitCode = $LASTEXITCODE
             }
-            else {
-                $sourcePath = Join-Path $repositoryRoot $SourceRelativePath.Replace(
-                    '/',
-                    [System.IO.Path]::DirectorySeparatorChar
+            finally {
+                $env:GIT_DIR = $originalGitDirectory
+                $env:GIT_WORK_TREE = $originalGitWorkTree
+                $env:GIT_INDEX_FILE = $originalGitIndexFile
+                $env:GIT_NO_REPLACE_OBJECTS = $originalGitNoReplaceObjects
+            }
+            if ($exitCode -ne 0) {
+                throw "git $($Arguments -join ' ') failed: $($output -join [Environment]::NewLine)"
+            }
+
+            return $output
+        }
+
+        function New-FoundationSymbolGitFixture {
+            param(
+                [Parameter(Mandatory)] [string] $Root,
+                [Parameter(Mandatory)] [string] $ScriptContent
+            )
+
+            [System.IO.Directory]::CreateDirectory($Root) | Out-Null
+            $gitDirectory = Join-Path $Root 'repository.git'
+            $null = Invoke-FoundationSymbolFixtureGit -Arguments @(
+                'init'
+                '--bare'
+                '--quiet'
+                $gitDirectory
+            )
+            $alternateDirectory = Join-Path $gitDirectory 'objects/info'
+            [System.IO.Directory]::CreateDirectory($alternateDirectory) | Out-Null
+            $alternateObjects = (Join-Path $commonGitDirectory 'objects').Replace('\', '/')
+            [System.IO.File]::WriteAllText(
+                (Join-Path $alternateDirectory 'alternates'),
+                $alternateObjects,
+                (New-Object System.Text.UTF8Encoding($false))
+            )
+
+            $scriptPath = Join-Path $Root 'Sentinel.ps1'
+            [System.IO.File]::WriteAllText(
+                $scriptPath,
+                $ScriptContent,
+                (New-Object System.Text.UTF8Encoding($false))
+            )
+            $blob = @(
+                Invoke-FoundationSymbolFixtureGit -Arguments @(
+                    "--git-dir=$gitDirectory"
+                    'hash-object'
+                    '-w'
+                    $scriptPath
                 )
-                [System.IO.File]::Copy($sourcePath, $targetPath, $false)
-            }
-            return $targetPath
-        }
+            )[0]
+            $indexPath = Join-Path $Root 'fixture.index'
+            $readTreeArguments = @(
+                "--git-dir=$gitDirectory"
+                'read-tree'
+                $baseRevision
+            )
+            $null = Invoke-FoundationSymbolFixtureGit `
+                -IndexPath $indexPath `
+                -Arguments $readTreeArguments
 
-        function Copy-FoundationSymbolTree {
-            param(
-                [Parameter(Mandatory)] [string] $Root,
-                [Parameter(Mandatory)]
-                [ValidateSet('BasePath', 'NewPath')]
-                [string] $Layout
+            $firstPath = @($pathMap.Paths)[0]
+            $updateIndexArguments = @(
+                "--git-dir=$gitDirectory"
+                'update-index'
+                '--add'
+                '--cacheinfo'
+                '100644'
+                ([string] $blob)
+                ([string] $firstPath.BasePath)
+            )
+            $null = Invoke-FoundationSymbolFixtureGit `
+                -IndexPath $indexPath `
+                -Arguments $updateIndexArguments
+
+            $writeTreeArguments = @(
+                "--git-dir=$gitDirectory"
+                'write-tree'
+            )
+            $treeOutput = Invoke-FoundationSymbolFixtureGit `
+                -IndexPath $indexPath `
+                -Arguments $writeTreeArguments
+            $tree = @($treeOutput)[0]
+            $revision = @(
+                Invoke-FoundationSymbolFixtureGit -Arguments @(
+                    "--git-dir=$gitDirectory"
+                    '-c'
+                    'user.name=Foundation Symbol Tests'
+                    '-c'
+                    'user.email=foundation-symbol@example.invalid'
+                    'commit-tree'
+                    ([string] $tree)
+                    '-p'
+                    $baseRevision
+                    '-m'
+                    'foundation symbol fixture'
+                )
+            )[0]
+            $markerPath = Join-Path $Root 'BaseRevision.txt'
+            [System.IO.File]::WriteAllText(
+                $markerPath,
+                ([string] $revision),
+                [System.Text.Encoding]::ASCII
             )
 
-            $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $Root
-            foreach ($pathRow in @($pathMap.Paths)) {
-                $sourceRelativePath = if ($Layout -eq 'BasePath') {
-                    [string] $pathRow.BasePath
-                }
-                else {
-                    [string] $pathRow.NewPath
-                }
-                $null = Copy-FoundationMappedFile `
-                    -Root $Root `
-                    -SourceRelativePath $sourceRelativePath `
-                    -TargetRelativePath ([string] $pathRow[$Layout]) `
-                    -FromBaseline:($Layout -eq 'BasePath')
+            return [pscustomobject]@{
+                GitDirectory = $gitDirectory
+                MarkerPath = $markerPath
+                Revision = [string] $revision
             }
-            return $fixtureGenerator
         }
 
-        function Copy-FoundationSymbolTreeWithDirectoryCasing {
+        function Invoke-FoundationSymbolFixtureGenerator {
             param(
-                [Parameter(Mandatory)] [string] $Root,
-                [Parameter(Mandatory)]
-                [ValidateSet('BasePath', 'NewPath')]
-                [string] $Layout,
-                [Parameter(Mandatory)] [string] $ApprovedDirectory,
-                [Parameter(Mandatory)] [string] $ActualDirectory
+                [Parameter(Mandatory)] $Fixture,
+                [Parameter(Mandatory)] [string] $MarkerPath,
+                [Parameter(Mandatory)] [string] $OutputPath
             )
 
-            $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $Root
-            $approvedPrefix = "$ApprovedDirectory/"
-            foreach ($pathRow in @($pathMap.Paths)) {
-                $targetRelativePath = [string] $pathRow[$Layout]
-                if ($targetRelativePath.StartsWith(
-                        $approvedPrefix,
-                        [System.StringComparison]::Ordinal
-                    )) {
-                    $targetRelativePath = $ActualDirectory + $targetRelativePath.Substring(
-                        $ApprovedDirectory.Length
-                    )
-                }
-                $sourceRelativePath = if ($Layout -eq 'BasePath') {
-                    [string] $pathRow.BasePath
-                }
-                else {
-                    [string] $pathRow.NewPath
-                }
-                $null = Copy-FoundationMappedFile `
-                    -Root $Root `
-                    -SourceRelativePath $sourceRelativePath `
-                    -TargetRelativePath $targetRelativePath `
-                    -FromBaseline:($Layout -eq 'BasePath')
+            $originalGitDirectory = $env:GIT_DIR
+            $originalGitWorkTree = $env:GIT_WORK_TREE
+            $originalGitNoReplaceObjects = $env:GIT_NO_REPLACE_OBJECTS
+            try {
+                $env:GIT_DIR = [string] $Fixture.GitDirectory
+                $env:GIT_WORK_TREE = $repositoryRoot
+                $env:GIT_NO_REPLACE_OBJECTS = $null
+                & $symbolGenerator `
+                    -PathMap $pathMapPath `
+                    -PackageData $packageDataPath `
+                    -OutputPath $OutputPath `
+                    -BaseRevisionPath $MarkerPath
             }
-            return $fixtureGenerator
+            finally {
+                $env:GIT_DIR = $originalGitDirectory
+                $env:GIT_WORK_TREE = $originalGitWorkTree
+                $env:GIT_NO_REPLACE_OBJECTS = $originalGitNoReplaceObjects
+            }
         }
     }
 
@@ -232,12 +297,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         ($actual -join "`n") | Should -BeExactly "where|1`nwhere|2"
     }
 
-    It 'regenerates byte-identically from a legacy-source tree' {
-        $fixtureRoot = Join-Path $TestDrive 'legacy-source-tree'
-        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
-        $outputPath = Join-Path $fixtureRoot 'SymbolRenames.psd1'
+    It 'regenerates byte-identically from the default baseline marker in the normalized tree' {
+        $outputPath = Join-Path $TestDrive 'current-tree-SymbolRenames.psd1'
 
-        & $fixtureGenerator `
+        & $symbolGenerator `
             -PathMap $pathMapPath `
             -PackageData $packageDataPath `
             -OutputPath $outputPath
@@ -246,90 +309,108 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             Should -BeExactly $expectedSymbolMapBytes
     }
 
-    It 'rejects wrong-case paths in a legacy-source tree' {
-        $fixtureRoot = Join-Path $TestDrive 'wrong-case-legacy-source-tree'
-        $fixtureGenerator = Copy-FoundationSymbolTreeWithDirectoryCasing `
-            -Root $fixtureRoot `
-            -Layout BasePath `
-            -ApprovedDirectory 'Profile-cleanup' `
-            -ActualDirectory 'Profile-Cleanup'
-        $approvedPath = 'Profile-cleanup/detection_detect-old-profiles.ps1'
-        $actualPath = 'Profile-Cleanup/detection_detect-old-profiles.ps1'
+    It 'rejects a baseline marker that is not exactly one full Git SHA' {
+        $invalidMarkerPath = Join-Path $TestDrive 'InvalidBaseRevision.txt'
+        [System.IO.File]::WriteAllText(
+            $invalidMarkerPath,
+            "$baseRevision`n",
+            (New-Object System.Text.UTF8Encoding($false))
+        )
 
         {
-            & $fixtureGenerator `
+            & $symbolGenerator `
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw (
-            "*Mapped legacy source '$approvedPath' has incorrect repository-relative casing; " +
-            "found '$actualPath'.*"
-        )
+                -OutputPath (Join-Path $TestDrive 'invalid-marker-SymbolRenames.psd1') `
+                -BaseRevisionPath $invalidMarkerPath
+        } | Should -Throw '*Baseline marker must contain exactly one lowercase 40-character Git commit SHA*'
     }
 
-    It 'rejects case-colliding directory siblings when the approved legacy source exists' {
-        $fixtureRoot = Join-Path $TestDrive 'case-colliding-legacy-source-tree'
-        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
-        $approvedPath = 'Profile-cleanup/detection_detect-old-profiles.ps1'
-        $approvedFullPath = Join-Path $fixtureRoot $approvedPath.Replace(
-            '/',
-            [System.IO.Path]::DirectorySeparatorChar
+    It 'rejects a full baseline revision that does not exist' {
+        $missingRevision = '0000000000000000000000000000000000000000'
+        $missingRevisionPath = Join-Path $TestDrive 'MissingBaseRevision.txt'
+        [System.IO.File]::WriteAllText(
+            $missingRevisionPath,
+            $missingRevision,
+            (New-Object System.Text.UTF8Encoding($false))
         )
-        [System.IO.File]::Exists($approvedFullPath) | Should -BeTrue
-
-        [System.IO.Directory]::CreateDirectory(
-            (Join-Path $fixtureRoot 'Profile-Cleanup')
-        ) | Out-Null
-        $caseCollidingDirectories = @(
-            [System.IO.Directory]::GetDirectories($fixtureRoot) |
-                Where-Object {
-                    [System.StringComparer]::OrdinalIgnoreCase.Equals(
-                        [System.IO.Path]::GetFileName($_),
-                        'Profile-Cleanup'
-                    )
-                }
-        )
-        if ($caseCollidingDirectories.Count -ne 2) {
-            Set-ItResult -Skipped -Because 'The test filesystem does not preserve case-colliding names.'
-            return
-        }
 
         {
-            & $fixtureGenerator `
+            & $symbolGenerator `
                 -PathMap $pathMapPath `
                 -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw (
-            "*Repository path '$approvedPath' has multiple case-colliding matches " +
-            "for component 'Profile-cleanup'.*"
-        )
+                -OutputPath (Join-Path $TestDrive 'missing-revision-SymbolRenames.psd1') `
+                -BaseRevisionPath $missingRevisionPath
+        } | Should -Throw "*Baseline revision '$missingRevision' does not exist or is not a commit.*"
     }
 
-    It 'rejects wrong-case paths in a destination-only tree' {
-        $fixtureRoot = Join-Path $TestDrive 'wrong-case-destination-only-tree'
-        $fixtureGenerator = Copy-FoundationSymbolTreeWithDirectoryCasing `
-            -Root $fixtureRoot `
-            -Layout NewPath `
-            -ApprovedDirectory 'Profile-Cleanup' `
-            -ActualDirectory 'Profile-cleanup'
-        $approvedPath = 'Profile-Cleanup/Detect-Profile-Cleanup.ps1'
-        $actualPath = 'Profile-cleanup/Detect-Profile-Cleanup.ps1'
+    It 'rejects a mapped legacy source missing from the baseline revision' {
+        $missingBasePath = 'Missing-Foundation-Baseline/Detect-Missing-Foundation-Baseline.ps1'
+        $missingBlobPathMap = Join-Path $TestDrive 'MissingBlobPathMap.psd1'
+        $firstPath = @($pathMap.Paths)[0]
+        $pathMapContent = [System.IO.File]::ReadAllText($pathMapPath)
+        $originalBasePathLine = "            BasePath = '$($firstPath.BasePath)'"
+        $missingBasePathLine = "            BasePath = '$missingBasePath'"
+        [System.IO.File]::WriteAllText(
+            $missingBlobPathMap,
+            $pathMapContent.Replace($originalBasePathLine, $missingBasePathLine),
+            (New-Object System.Text.UTF8Encoding($false))
+        )
 
         {
-            & $fixtureGenerator `
-                -PathMap $pathMapPath `
+            & $symbolGenerator `
+                -PathMap $missingBlobPathMap `
                 -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw (
-            "*Mapped destination '$approvedPath' has incorrect repository-relative casing; " +
-            "found '$actualPath'.*"
-        )
+                -OutputPath (Join-Path $TestDrive 'missing-blob-SymbolRenames.psd1') `
+                -BaseRevisionPath $baseRevisionPath
+        } | Should -Throw "*Baseline blob '$baseRevision`:$missingBasePath' does not exist.*"
     }
+
+    It 'never executes a baseline catalog sentinel' {
+        $sideEffectPath = Join-Path $TestDrive 'baseline-catalog-sentinel-executed.txt'
+        $sentinelContent = (
+            "[System.IO.File]::WriteAllText('{0}', 'executed')" -f
+            $sideEffectPath.Replace("'", "''")
+        )
+        $fixture = New-FoundationSymbolGitFixture `
+            -Root (Join-Path $TestDrive 'baseline-catalog-sentinel') `
+            -ScriptContent $sentinelContent
+        $outputPath = Join-Path $TestDrive 'baseline-sentinel-SymbolRenames.psd1'
+
+        Invoke-FoundationSymbolFixtureGenerator `
+            -Fixture $fixture `
+            -MarkerPath $fixture.MarkerPath `
+            -OutputPath $outputPath
+
+        [System.IO.File]::Exists($sideEffectPath) | Should -BeFalse
+        [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
+            Should -BeExactly $expectedSymbolMapBytes
+    }
+
+    It 'ignores repository-local Git replacement objects for the baseline revision' {
+        $fixture = New-FoundationSymbolGitFixture `
+            -Root (Join-Path $TestDrive 'replacement-object') `
+            -ScriptContent "write-output 'replacement object'"
+        $null = Invoke-FoundationSymbolFixtureGit -Arguments @(
+            "--git-dir=$($fixture.GitDirectory)"
+            'update-ref'
+            "refs/replace/$baseRevision"
+            $fixture.Revision
+        )
+        $outputPath = Join-Path $TestDrive 'replacement-object-SymbolRenames.psd1'
+
+        Invoke-FoundationSymbolFixtureGenerator `
+            -Fixture $fixture `
+            -MarkerPath $baseRevisionPath `
+            -OutputPath $outputPath
+
+        [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
+            Should -BeExactly $expectedSymbolMapBytes
+    }
+
 
     It 'regenerates byte-identically when live command discovery is unavailable' {
-        $fixtureRoot = Join-Path $TestDrive 'without-live-discovery'
-        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
-        $outputPath = Join-Path $fixtureRoot 'SymbolRenames.psd1'
+        $outputPath = Join-Path $TestDrive 'without-live-discovery-SymbolRenames.psd1'
         & {
             function Get-Command {
                 throw 'Live command discovery is unavailable.'
@@ -338,7 +419,11 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 throw 'Live alias discovery is unavailable.'
             }
 
-            & $fixtureGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
+            & $symbolGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath $outputPath `
+                -BaseRevisionPath $baseRevisionPath
         }
 
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
@@ -346,9 +431,7 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     }
 
     It 'regenerates byte-identically when live command discovery is polluted' {
-        $fixtureRoot = Join-Path $TestDrive 'with-polluted-live-discovery'
-        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
-        $outputPath = Join-Path $fixtureRoot 'SymbolRenames.psd1'
+        $outputPath = Join-Path $TestDrive 'with-polluted-live-discovery-SymbolRenames.psd1'
         & {
             function Get-Command {
                 [CmdletBinding()]
@@ -366,7 +449,11 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 }
             }
 
-            & $fixtureGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
+            & $symbolGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath $outputPath `
+                -BaseRevisionPath $baseRevisionPath
         }
 
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
@@ -374,9 +461,7 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     }
 
     It 'rejects a path-map row with indistinguishable source and destination paths' {
-        $fixtureRoot = Join-Path $TestDrive 'ambiguous-path-map'
-        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
-        $ambiguousPathMap = Join-Path $fixtureRoot 'PathMap.psd1'
+        $ambiguousPathMap = Join-Path $TestDrive 'AmbiguousPathMap.psd1'
         $firstPath = @($pathMap.Paths)[0]
         $pathMapContent = [System.IO.File]::ReadAllText($pathMapPath)
         $originalRow = @(
@@ -393,81 +478,19 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         ) -join "`n"
         [System.IO.File]::WriteAllText(
             $ambiguousPathMap,
-            $pathMapContent.Replace($originalRow, $ambiguousRow)
+            $pathMapContent.Replace($originalRow, $ambiguousRow),
+            (New-Object System.Text.UTF8Encoding($false))
         )
 
         {
-            & $fixtureGenerator `
+            & $symbolGenerator `
                 -PathMap $ambiguousPathMap `
                 -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+                -OutputPath (Join-Path $TestDrive 'ambiguous-SymbolRenames.psd1') `
+                -BaseRevisionPath $baseRevisionPath
         } | Should -Throw "*Path map row '$($firstPath.BasePath)' uses indistinguishable source and destination paths.*"
     }
 
-    It 'rejects an unresolved mapped file' {
-        $fixtureRoot = Join-Path $TestDrive 'missing-mapped-file'
-        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
-        $firstPath = @($pathMap.Paths)[0]
-
-        {
-            & $fixtureGenerator `
-                -PathMap $pathMapPath `
-                -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw (
-            "*Neither mapped source '$($firstPath.BasePath)' nor destination " +
-            "'$($firstPath.NewPath)' exists.*"
-        )
-    }
-
-    It 'rejects an unexpected byte-identical dual-path state' {
-        $fixtureRoot = Join-Path $TestDrive 'dual-path'
-        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
-        $firstPath = @($pathMap.Paths)[0]
-        $null = Copy-FoundationMappedFile `
-            -Root $fixtureRoot `
-            -SourceRelativePath ([string] $firstPath.NewPath) `
-            -TargetRelativePath ([string] $firstPath.BasePath)
-        $null = Copy-FoundationMappedFile `
-            -Root $fixtureRoot `
-            -SourceRelativePath ([string] $firstPath.NewPath) `
-            -TargetRelativePath ([string] $firstPath.NewPath)
-
-        {
-            & $fixtureGenerator `
-                -PathMap $pathMapPath `
-                -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw (
-            "*Mapped source '$($firstPath.BasePath)' and destination " +
-            "'$($firstPath.NewPath)' both exist unexpectedly.*"
-        )
-    }
-
-    It 'rejects a dual-path state with mismatched content' {
-        $fixtureRoot = Join-Path $TestDrive 'mismatched-dual-path'
-        $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $fixtureRoot
-        $firstPath = @($pathMap.Paths)[0]
-        $null = Copy-FoundationMappedFile `
-            -Root $fixtureRoot `
-            -SourceRelativePath ([string] $firstPath.NewPath) `
-            -TargetRelativePath ([string] $firstPath.BasePath)
-        $destinationPath = Copy-FoundationMappedFile `
-            -Root $fixtureRoot `
-            -SourceRelativePath ([string] $firstPath.NewPath) `
-            -TargetRelativePath ([string] $firstPath.NewPath)
-        [System.IO.File]::AppendAllText($destinationPath, "`n# mismatched fixture")
-
-        {
-            & $fixtureGenerator `
-                -PathMap $pathMapPath `
-                -PackageData $packageDataPath `
-                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
-        } | Should -Throw (
-            "*Mapped source '$($firstPath.BasePath)' and destination " +
-            "'$($firstPath.NewPath)' both exist with different content.*"
-        )
-    }
 
     It 'records the five reviewed function definitions' {
         $expected = @(
