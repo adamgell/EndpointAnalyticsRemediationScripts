@@ -1,9 +1,8 @@
-# Devices
+# Check PNP devices
 
-**Check-PNPDevicesDetectionDetection.ps1** checks devices, if they are working as expected, if not it will return the devices and exit non-zero.
-**Check-PNPDevicesRemediation.ps1** will remove the devices and trigger a re-detect.
+[`Detect-Check-PNPDevices.ps1`](Detect-Check-PNPDevices.ps1) checks whether devices are working as expected. If a device is not working, detection reports it and exits nonzero. [`Remediate-Check-PNPDevices.ps1`](Remediate-Check-PNPDevices.ps1) removes the affected devices and triggers rediscovery.
 
-## Usage/Examples
+## Usage and examples
 
 ### Filter
 

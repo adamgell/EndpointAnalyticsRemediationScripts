@@ -78,12 +78,12 @@ flowchart LR
 
 ## Contributing
 
-We love contributions from the Intune community! Here's how you can help:
+Contributions must follow the repository's package, naming, manifest, testing, and review standards. Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for the required workflow, build commands, migration rules, and safety requirements.
 
 | | How to contribute |
 |---|---|
 | **Got an idea?** | [Open an issue](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/issues/new) describing the script you'd like to see |
-| **Got a script?** | Use the template in [`0 - Template`](./0%20-%20Template) and submit a pull request |
+| **Got a script?** | Follow the [contributor workflow](CONTRIBUTING.md) and submit a pull request |
 
 ![Submit an idea](https://github.com/JayRHa/EndpointAnalyticsRemediationScripts/blob/main/assets/submitIdea.png)
 

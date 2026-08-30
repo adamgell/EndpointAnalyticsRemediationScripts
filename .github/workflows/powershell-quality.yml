@@ -1,0 +1,206 @@
+name: PowerShell quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: powershell
+
+jobs:
+  quality:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bootstrap pinned modules
+        run: .\build.ps1 -Task Bootstrap
+      - name: Validate repository
+        run: .\build.ps1 -Task Validate
+      - name: Analyze PowerShell
+        run: .\build.ps1 -Task Analyze
+      - name: Run Pester
+        run: .\build.ps1 -Task Test
+      - name: Check formatting
+        run: .\build.ps1 -Task CheckFormat
+
+  foundation-rewrite:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: scope
+        name: Detect one-time foundation cutover
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git cat-file -e "$($env:BASE_SHA):evidence/foundation/RewriteReport.json" 2>$null
+          $baseHasReport = $LASTEXITCODE -eq 0
+          $headHasReport = Test-Path -LiteralPath '.\evidence\foundation\RewriteReport.json' -PathType Leaf
+          $runGate = $headHasReport -and -not $baseHasReport
+          "run=$($runGate.ToString().ToLowerInvariant())" |
+              Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding ascii
+      - name: Bootstrap pinned modules
+        if: steps.scope.outputs.run == 'true'
+        run: .\build.ps1 -Task Bootstrap
+      - name: Regenerate foundation rewrite evidence
+        if: steps.scope.outputs.run == 'true'
+        run: |
+          $baseRevision = (Get-Content '.\evidence\foundation\BaseRevision.txt' -Raw).Trim()
+          .\build.ps1 `
+              -Task ValidateRewrite `
+              -BaseRevision $baseRevision `
+              -PathMap '.\evidence\foundation\PathMap.psd1' `
+              -SymbolMap '.\evidence\foundation\SymbolRenames.psd1' `
+              -ReportPath "$env:RUNNER_TEMP\RewriteReport.json"
+      - name: Verify foundation rewrite evidence
+        if: steps.scope.outputs.run == 'true'
+        run: |
+          $reportPath = Join-Path $env:RUNNER_TEMP 'RewriteReport.json'
+          if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+              throw 'ValidateRewrite did not produce a rewrite report.'
+          }
+          $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+          if (-not $report.Passed) {
+              throw 'Regenerated foundation rewrite report did not pass.'
+          }
+          if (@($report.Rows).Count -ne 271) {
+              throw "Expected 271 foundation rewrite rows, found $(@($report.Rows).Count)."
+          }
+          $actual = (Get-FileHash -LiteralPath $reportPath).Hash
+          $expected = (Get-FileHash -LiteralPath '.\evidence\foundation\RewriteReport.json').Hash
+          if ($actual -ne $expected) {
+              throw 'Committed foundation rewrite report does not match regenerated evidence.'
+          }
+      - uses: actions/upload-artifact@v4
+        if: steps.scope.outputs.run == 'true'
+        with:
+          name: foundation-rewrite-report
+          path: ${{ runner.temp }}\RewriteReport.json
+
+  declared-rewrites:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bootstrap pinned modules
+        run: .\build.ps1 -Task Bootstrap
+      - name: Validate newly declared formatting rewrites
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          $addedFiles = @(git diff --diff-filter=A --name-only $env:BASE_SHA HEAD -- 'evidence/rewrites/*')
+          if ($LASTEXITCODE -ne 0) {
+              throw 'Unable to determine newly declared rewrite evidence files.'
+          }
+
+          $rewriteFiles = @(
+              $addedFiles | Where-Object {
+                  [string] $_ -like 'evidence/rewrites/*'
+              }
+          )
+          $rewriteDirectories = @(
+              $rewriteFiles |
+                  ForEach-Object { Split-Path -Parent ([string] $_) } |
+                  Sort-Object -Unique
+          )
+          $reportIndex = 0
+          foreach ($directory in $rewriteDirectories) {
+              if ($directory -notmatch '^evidence/rewrites/[^/]+$') {
+                  throw "Rewrite evidence path '$directory' must be evidence/rewrites/<name>."
+              }
+
+              $requiredFiles = @(
+                  'BaseRevision.txt'
+                  'PathMap.psd1'
+                  'SymbolRenames.psd1'
+                  'RewriteReport.json'
+              )
+              foreach ($fileName in $requiredFiles) {
+                  $relativePath = "$directory/$fileName"
+                  if ($addedFiles -cnotcontains $relativePath) {
+                      throw "Rewrite evidence '$directory' must add '$fileName' in this pull request."
+                  }
+                  git cat-file -e "HEAD:$relativePath" 2>$null
+                  if ($LASTEXITCODE -ne 0) {
+                      throw "Rewrite evidence '$relativePath' is not committed in the pull request head."
+                  }
+                  $workingPath = $relativePath.Replace(
+                      '/',
+                      [System.IO.Path]::DirectorySeparatorChar
+                  )
+                  if (-not (Test-Path -LiteralPath $workingPath -PathType Leaf)) {
+                      throw "Rewrite evidence '$relativePath' is missing from the checkout."
+                  }
+              }
+
+              $baseRevision = (Get-Content (Join-Path $directory 'BaseRevision.txt') -Raw).Trim()
+              $pathMapPath = Join-Path $directory 'PathMap.psd1'
+              $symbolMapPath = Join-Path $directory 'SymbolRenames.psd1'
+              $committedReportPath = Join-Path $directory 'RewriteReport.json'
+              $pathMap = Import-PowerShellDataFile -LiteralPath $pathMapPath
+              if (-not $pathMap.ContainsKey('Paths')) {
+                  throw "Rewrite evidence '$directory' path map is missing its Paths collection."
+              }
+              $expectedRows = @($pathMap.Paths).Count
+              if ($expectedRows -lt 1) {
+                  throw "Rewrite evidence '$directory' path map must declare at least one row."
+              }
+
+              $committedReport = Get-Content -LiteralPath $committedReportPath -Raw | ConvertFrom-Json
+              if (-not $committedReport.Passed) {
+                  throw "Committed rewrite report '$committedReportPath' does not pass."
+              }
+              if (@($committedReport.Rows).Count -ne $expectedRows) {
+                  throw (
+                      "Committed rewrite report '$committedReportPath' has {0} rows; expected {1} declared rows." -f
+                      @($committedReport.Rows).Count,
+                      $expectedRows
+                  )
+              }
+
+              $reportIndex++
+              $generatedReportPath = Join-Path `
+                  $env:RUNNER_TEMP `
+                  "declared-rewrite-$reportIndex.json"
+              & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PWD 'build.ps1') `
+                  -Task ValidateRewrite `
+                  -BaseRevision $baseRevision `
+                  -PathMap $pathMapPath `
+                  -SymbolMap $symbolMapPath `
+                  -ReportPath $generatedReportPath
+              if ($LASTEXITCODE -ne 0) {
+                  throw "ValidateRewrite failed for declared rewrite '$directory'."
+              }
+              if (-not (Test-Path -LiteralPath $generatedReportPath -PathType Leaf)) {
+                  throw "ValidateRewrite did not produce a report for declared rewrite '$directory'."
+              }
+
+              $generatedReport = Get-Content -LiteralPath $generatedReportPath -Raw | ConvertFrom-Json
+              if (-not $generatedReport.Passed) {
+                  throw "Regenerated rewrite report for '$directory' does not pass."
+              }
+              if (@($generatedReport.Rows).Count -ne $expectedRows) {
+                  throw (
+                      "Regenerated rewrite report for '$directory' has {0} rows; expected {1} declared rows." -f
+                      @($generatedReport.Rows).Count,
+                      $expectedRows
+                  )
+              }
+              $actualHash = (Get-FileHash -LiteralPath $generatedReportPath -Algorithm SHA256).Hash
+              $expectedHash = (Get-FileHash -LiteralPath $committedReportPath -Algorithm SHA256).Hash
+              if ($actualHash -cne $expectedHash) {
+                  throw "Committed rewrite report '$committedReportPath' does not match regenerated evidence."
+              }
+          }

@@ -1,0 +1,1639 @@
+{
+    "SchemaVersion":  1,
+    "SensitiveWhitespace":  [
+                                {
+                                    "Rule":  "Tab",
+                                    "Path":  "Fortinet-VPN-Profile/Detect-Fortinet-VPN-Profile.ps1",
+                                    "Line":  4,
+                                    "LineSha256":  "c6a7ee76be30254dfb4651b9d913d89bd8ad81ea3c57d0066074342ddc2f15ce",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "Tab",
+                                    "Path":  "Fortinet-VPN-Profile/Detect-Fortinet-VPN-Profile.ps1",
+                                    "Line":  5,
+                                    "LineSha256":  "c52c9b726b0d2bcd0f715e9ae1bda50cc220079982af4c799fddaafe64266138",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "Tab",
+                                    "Path":  "Fortinet-VPN-Profile/Detect-Fortinet-VPN-Profile.ps1",
+                                    "Line":  6,
+                                    "LineSha256":  "1e1e31a1facfa16efec19c1b398d591680d28c9d2ef5659d6b8c6d22d4d328b7",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "TrailingWhitespace",
+                                    "Path":  "Fortinet-VPN-Profile/Detect-Fortinet-VPN-Profile.ps1",
+                                    "Line":  9,
+                                    "LineSha256":  "6c179f21e6f62b629055d8ab40f454ed02e48b68563913473b857d3638e23b28",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "Tab",
+                                    "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                    "Line":  4,
+                                    "LineSha256":  "c6a7ee76be30254dfb4651b9d913d89bd8ad81ea3c57d0066074342ddc2f15ce",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "Tab",
+                                    "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                    "Line":  5,
+                                    "LineSha256":  "c52c9b726b0d2bcd0f715e9ae1bda50cc220079982af4c799fddaafe64266138",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "Tab",
+                                    "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                    "Line":  6,
+                                    "LineSha256":  "d693d92f7f38469dad1314fbaecadd8ed53c76cb0214c030d3317de948ff79d7",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "TrailingWhitespace",
+                                    "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                    "Line":  9,
+                                    "LineSha256":  "6c179f21e6f62b629055d8ab40f454ed02e48b68563913473b857d3638e23b28",
+                                    "Reason":  "Binding-sensitive comment-based help content."
+                                },
+                                {
+                                    "Rule":  "TrailingWhitespace",
+                                    "Path":  "Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1",
+                                    "Line":  89,
+                                    "LineSha256":  "3846f0b636eb1a9acb6d07c85422de80b772a8e7ed9e71d74017e1c743072eb3",
+                                    "Reason":  "Binding-sensitive here-string value."
+                                },
+                                {
+                                    "Rule":  "TrailingWhitespace",
+                                    "Path":  "Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1",
+                                    "Line":  94,
+                                    "LineSha256":  "3846f0b636eb1a9acb6d07c85422de80b772a8e7ed9e71d74017e1c743072eb3",
+                                    "Reason":  "Binding-sensitive here-string value."
+                                }
+                            ],
+    "LongLines":  [
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Add-Winget-App/Remediate-Add-Winget-App.ps1",
+                          "Line":  22,
+                          "Length":  139,
+                          "LineSha256":  "ca20927c06cc04c708e6d2f96cf7d98e76e0a5fe0d6546c8a5fe34e50303c7d6",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Autologon/Remediate-Autologon.ps1",
+                          "Line":  6,
+                          "Length":  128,
+                          "LineSha256":  "d6075a1b2163aa58b85ded930372416dc55ab32fef92b5e0c2531874d51df0b5",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "AutomaticTimezone/Remediate-AutomaticTimezone.ps1",
+                          "Line":  28,
+                          "Length":  122,
+                          "LineSha256":  "b1e060cefeec1c05e09d83d4a475681eb267a53b95a718f16665f4e5b995dc5f",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "AutomaticTimezone/Remediate-AutomaticTimezone.ps1",
+                          "Line":  29,
+                          "Length":  125,
+                          "LineSha256":  "c3517e4b792abc7969c537e4b1bd26fa756a0ff9476ae79fb0796eac74b16b55",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "BlackLotus-Mitigation/Remediate-BlackLotus-Mitigation.ps1",
+                          "Line":  8,
+                          "Length":  154,
+                          "LineSha256":  "470cead068b6b8fe77feed93081b3e7ed1f4bfd7a8b46523d48d9650dff5f31a",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "BlockAADWorkplaceJoin/Detect-BlockAADWorkplaceJoin.ps1",
+                          "Line":  2,
+                          "Length":  155,
+                          "LineSha256":  "d9e9bd26da2f28bb86a4fa5d943561a808386d70fa960e1b994ee9347befbf8f",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Change-MultipleRegistryKeys/Remediate-Change-MultipleRegistryKeys.ps1",
+                          "Line":  92,
+                          "Length":  158,
+                          "LineSha256":  "68c48e3377c4e2dab63e9ed34baf8f1cfb3fa32dd501841bde88cadbe3d6c081",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Change-Registry-Key-Generic/Remediate-Change-Registry-Key-Generic.ps1",
+                          "Line":  28,
+                          "Length":  122,
+                          "LineSha256":  "b1e060cefeec1c05e09d83d4a475681eb267a53b95a718f16665f4e5b995dc5f",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Check-PNPDevices/Detect-Check-PNPDevices.ps1",
+                          "Line":  38,
+                          "Length":  156,
+                          "LineSha256":  "0f10384614c9501336218d52ce5c114b28b8d178e863a4328d4969c4ab65a36c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Check-PNPDevices/Detect-Check-PNPDevices.ps1",
+                          "Line":  40,
+                          "Length":  126,
+                          "LineSha256":  "739d7a1f76612b00bcd3b33ebfc54f8d785f5bf2a3a8b1cc350e1feaab05e8c2",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Clear-OutlookCache/Remediate-Clear-OutlookCache.ps1",
+                          "Line":  16,
+                          "Length":  137,
+                          "LineSha256":  "2dca560df2bdf3effec9d3dee0e66bd53c093cec90554b0c5994cd5373887e83",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1",
+                          "Line":  34,
+                          "Length":  160,
+                          "LineSha256":  "2f19dbf63d08bb32e739f3a27e299bf764b6528d4f9b1581628a0084d0cf8c82",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Create-Laps-LocalAdmin/Remediate-Create-Laps-LocalAdmin.ps1",
+                          "Line":  10,
+                          "Length":  174,
+                          "LineSha256":  "9a3d2885f1277261a2ccf1db44a8359002c1ecc6ade6dcf1426a2291204140f0",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Device-Auto-Syncer/Detect-Device-Auto-Syncer.ps1",
+                          "Line":  9,
+                          "Length":  130,
+                          "LineSha256":  "3568e95d2bf6c72d7d630e9a3b10d4ca72dc2a0022c78faedd0362b7f16f0122",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Disable-Coinstaller/Remediate-Disable-Coinstaller.ps1",
+                          "Line":  26,
+                          "Length":  122,
+                          "LineSha256":  "b1e060cefeec1c05e09d83d4a475681eb267a53b95a718f16665f4e5b995dc5f",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Disable-Fastboot/Remediate-Disable-Fastboot.ps1",
+                          "Line":  16,
+                          "Length":  175,
+                          "LineSha256":  "c34a44d3a02aa8895b50b385f2f371534012172d67d694d69c5082cad876867c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Enable-RDP/Remediate-Enable-RDP.ps1",
+                          "Line":  32,
+                          "Length":  150,
+                          "LineSha256":  "0a2457f6ccbd9b7cb8a2da28f0bcceac6c846025907b4b8a8d7eea24a60066c5",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Enforce-BitLocker/Detect-Enforce-BitLocker.ps1",
+                          "Line":  18,
+                          "Length":  156,
+                          "LineSha256":  "b44a066b45de1c120e94dea76eb649adde264515857612a926e6a21889b58eef",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Enforce-BitLocker/Remediate-Enforce-BitLocker.ps1",
+                          "Line":  25,
+                          "Length":  127,
+                          "LineSha256":  "fa46e62d64b2a4193b1c7bf4be6a4215a7487514fc6c8f36fb274127aae473f7",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Fix-SearchIndex/Remediate-Fix-SearchIndex.ps1",
+                          "Line":  22,
+                          "Length":  147,
+                          "LineSha256":  "31e0c61ff8a4c6e6d21fa8cef13fda2182ae277c54c301e1836e70244f16f1c4",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                          "Line":  21,
+                          "Length":  177,
+                          "LineSha256":  "30e381c022ccb0d6531bd56ec3cf131e559833e10bdd85eef2b0f8512c5b5676",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                          "Line":  22,
+                          "Length":  171,
+                          "LineSha256":  "8e34400045c74b05c0b610cef63fc27123b5442f8bd848f88db9e16d2672f1a8",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                          "Line":  23,
+                          "Length":  172,
+                          "LineSha256":  "8bcdf3efa9ad38e79819c106da03752a74f6674aec45b09f57938f90a2f8ad37",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                          "Line":  24,
+                          "Length":  175,
+                          "LineSha256":  "9086eefe5a957549c3dc2943cbac2aec3685c2dcd4f066d058ea67cdca22947e",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                          "Line":  25,
+                          "Length":  171,
+                          "LineSha256":  "1cf04a2948836a43b0fe41dd8475c797ea004761a484a641c693d42e1f21f4ad",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-AdobeDC-Java/Remediate-Get-AdobeDC-Java.ps1",
+                          "Line":  16,
+                          "Length":  179,
+                          "LineSha256":  "6b3cde11de4e07841f530d4f182a6008f4c778461a60845e72f9236b25214f0d",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-AdobeReader-Flash/Remediate-Get-AdobeReader-Flash.ps1",
+                          "Line":  16,
+                          "Length":  174,
+                          "LineSha256":  "50716692b4fc0ca2018c28eb4ae256f33e03fa29ea4fb5d7ef0c9aedc3c1b726",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-AdobeReader-Java/Remediate-Get-AdobeReader-Java.ps1",
+                          "Line":  16,
+                          "Length":  180,
+                          "LineSha256":  "8e3dea2dbf1172c45486d29b784e3443ce7c9cc3f4d2edd5dee6b381d331ff8d",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                          "Line":  11,
+                          "Length":  183,
+                          "LineSha256":  "8c5474a0e1f0b1bf08f98a7bab2d07bcd140e15e73a05ddbd7b6a7ed8619c28c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                          "Line":  12,
+                          "Length":  205,
+                          "LineSha256":  "e9ab2a93d91e99c3c58ee7c584783af56894a8625441bd3926abfd5bf25dc8cc",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                          "Line":  13,
+                          "Length":  204,
+                          "LineSha256":  "a136ee76f91f5bdd205d9c9692fc868b7a74424051e36f00412eb3a978cf59d6",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                          "Line":  14,
+                          "Length":  207,
+                          "LineSha256":  "ea540f6b5cfc21d32cf2f2af0b8a742972cb981ef3ee8809dc35c6c62a0a67ed",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-Device-Uptime-And-Reboot/Detect-Get-Device-Uptime-And-Reboot.ps1",
+                          "Line":  9,
+                          "Length":  132,
+                          "LineSha256":  "dfc602f8b19b28af9e6a381d851b6d9b770a07a96c7aefd3e9877eaddbb4c57d",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1",
+                          "Line":  9,
+                          "Length":  132,
+                          "LineSha256":  "dfc602f8b19b28af9e6a381d851b6d9b770a07a96c7aefd3e9877eaddbb4c57d",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Get-WH4BEnrolledMethods/Detect-Get-WH4BEnrolledMethods.ps1",
+                          "Line":  40,
+                          "Length":  141,
+                          "LineSha256":  "098905823938845ae515b307efd06ec9c9d0ac8b9403193c5fef0fd1ee8c7cfc",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  18,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  19,
+                          "Length":  133,
+                          "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  20,
+                          "Length":  129,
+                          "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  21,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  32,
+                          "Length":  142,
+                          "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  15,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  16,
+                          "Length":  133,
+                          "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  17,
+                          "Length":  129,
+                          "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  18,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                          "Line":  29,
+                          "Length":  142,
+                          "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Install-WindowsUpdates/Remediate-Install-WindowsUpdates.ps1",
+                          "Line":  41,
+                          "Length":  130,
+                          "LineSha256":  "dbea68ab58e89ab1956a4f96c950f8cfd7a42c1c855745a16da3b9d2adcac6c9",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Make-Speedtest/Remediate-Make-Speedtest.ps1",
+                          "Line":  85,
+                          "Length":  122,
+                          "LineSha256":  "abbcaf0ff11c260cae76e18dcf1aaf333c7c3ff3d794a676c1cc8a3a21d968b0",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Monitor-DiskSpace-Trend/Remediate-Monitor-DiskSpace-Trend.ps1",
+                          "Line":  39,
+                          "Length":  140,
+                          "LineSha256":  "0d8348bce100b6e8ae658d128ffea3d7b0e91f6309d482ecb51ae6972d3557f8",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Profile-Backup/Remediate-Profile-Backup.ps1",
+                          "Line":  53,
+                          "Length":  135,
+                          "LineSha256":  "71056b2069c348affcddc4cdcfa76e8c36bb781f21a52c7070a85c045251d7c5",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ProxySettings/Remediate-Remove-ProxySettings.ps1",
+                          "Line":  16,
+                          "Length":  129,
+                          "LineSha256":  "09f3510c5a44db92b37c011ea22c7be9667d381eb14bb4c7bdb09f74c5069365",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ProxySettings/Remediate-Remove-ProxySettings.ps1",
+                          "Line":  17,
+                          "Length":  131,
+                          "LineSha256":  "66d7e398aa6adfb59680644fa21984abf3c42eeccccfd9795ae5d7994ac3e66e",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ReinstallMSI/Detect-Remove-ReinstallMSI.ps1",
+                          "Line":  21,
+                          "Length":  122,
+                          "LineSha256":  "3a73ca8824018a7904814598d85d5fbaf371dfb67108816d1a779a554c36f3fe",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                          "Line":  24,
+                          "Length":  126,
+                          "LineSha256":  "2a9b2683f9a9ef5793e89fd8cdf0932453861fa6e04ad5b2828d116602ab958e",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                          "Line":  34,
+                          "Length":  123,
+                          "LineSha256":  "93f8698d0fb60fdd83a7fa00fa39f8cf65598b6bc41e6ddfcd0a697672cdf481",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                          "Line":  38,
+                          "Length":  134,
+                          "LineSha256":  "26e171126bfb9f7efed14871188cb5218374758a23e8e496be0192cdfad4b779",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                          "Line":  45,
+                          "Length":  128,
+                          "LineSha256":  "913ba78839d16dea0afe01db3b0394db2a7fdf72a054e44bcd59009420cc7c00",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-StaticRoutes/Remediate-Remove-StaticRoutes.ps1",
+                          "Line":  20,
+                          "Length":  129,
+                          "LineSha256":  "a76a87810838e646951ebe485e43a440284fabfdbb35abc630703734c1b112ea",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-Teams-Chat/Remediate-Remove-Teams-Chat.ps1",
+                          "Line":  53,
+                          "Length":  129,
+                          "LineSha256":  "4eeb642e5beebf56ecb50dcbca26d0d3bffdf7a2d5af34a66ef8ebbaef7b022c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-Teams-Chat/Remediate-Remove-Teams-Chat.ps1",
+                          "Line":  54,
+                          "Length":  130,
+                          "LineSha256":  "b0306b5ba8be35793eaf0f61b8b204796f7dce53679616dbae3aad64a0f2ebb1",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Remove-WindowsBackup/Remediate-Remove-WindowsBackup.ps1",
+                          "Line":  1,
+                          "Length":  133,
+                          "LineSha256":  "daac97273d4170dbe82cf5b19bd3291ca62d97a54925bd54436572cc9ac966d3",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Reset-OneDriveSync/Remediate-Reset-OneDriveSync.ps1",
+                          "Line":  26,
+                          "Length":  135,
+                          "LineSha256":  "6fe0c6cc85e37f59ce408a01eec7623b95ef7f8ae0f8484688859c1ccb8da143",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Reset-SoftwareDistributionFolder/Detect-Reset-SoftwareDistributionFolder.ps1",
+                          "Line":  6,
+                          "Length":  179,
+                          "LineSha256":  "164aba038dc8e5ae9163313d93bf68cddf02c43d9c29241dcc3e0530f657fcdf",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Reset-SoftwareDistributionFolder/Remediate-Reset-SoftwareDistributionFolder.ps1",
+                          "Line":  6,
+                          "Length":  179,
+                          "LineSha256":  "164aba038dc8e5ae9163313d93bf68cddf02c43d9c29241dcc3e0530f657fcdf",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Reset-StartMenu/Remediate-Reset-StartMenu.ps1",
+                          "Line":  14,
+                          "Length":  128,
+                          "LineSha256":  "2cfd6fe81601b8801e2ee0f8d731c3b281e9c05623f5645997d83cbce9be219c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Reset-StartMenu/Remediate-Reset-StartMenu.ps1",
+                          "Line":  18,
+                          "Length":  128,
+                          "LineSha256":  "2cfd6fe81601b8801e2ee0f8d731c3b281e9c05623f5645997d83cbce9be219c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Set-Cached-Logon-Count-0/Detect-Set-Cached-Logon-Count-0.ps1",
+                          "Line":  6,
+                          "Length":  235,
+                          "LineSha256":  "9147dfaa5052ef70036f214d5bf417ec3794fa98e96a6f8172380bc3a8661a89",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Set-Cached-Logon-Count-0/Remediate-Set-Cached-Logon-Count-0.ps1",
+                          "Line":  6,
+                          "Length":  235,
+                          "LineSha256":  "9147dfaa5052ef70036f214d5bf417ec3794fa98e96a6f8172380bc3a8661a89",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Set-CanaryToken-RegistryKey/Remediate-Set-CanaryToken-RegistryKey.ps1",
+                          "Line":  16,
+                          "Length":  240,
+                          "LineSha256":  "7f9808f248442c8ab02018483e46adb03c33ff6c7bada338be7a195f7dae0691",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Set-CanaryToken-RegistryKey/Remediate-Set-CanaryToken-RegistryKey.ps1",
+                          "Line":  28,
+                          "Length":  312,
+                          "LineSha256":  "89a12d92f1677881ee87b2c46531f1a62877f8316a01d7b007015d66c9403a20",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Set-DefaultBrowser/Remediate-Set-DefaultBrowser.ps1",
+                          "Line":  28,
+                          "Length":  134,
+                          "LineSha256":  "fa945b1339d9e9561314e3fad1aeaacc67031a9c3f7a3d1e424b6bba2b4ccfd0",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Set-MTU-Optimal/Detect-Set-MTU-Optimal.ps1",
+                          "Line":  21,
+                          "Length":  121,
+                          "LineSha256":  "fde8e0638794729473ca2cefa2d8fff3876901fd26e47c9ace2e36fc6cb6190c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Show-MessageCenterMessage/Detect-Show-MessageCenterMessage.ps1",
+                          "Line":  15,
+                          "Length":  130,
+                          "LineSha256":  "abc3dcf2d378166199248d04c45ff739f5737ae1cf9bc76ff996e79d13f199d6",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Test-LAPSUser/Detect-Test-LAPSUser.ps1",
+                          "Line":  10,
+                          "Length":  136,
+                          "LineSha256":  "c376826a79dad81da84a6bf0175d05a318c309bf17e23da05abbaf8699829516",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Test-LAPSUser/Detect-Test-LAPSUser.ps1",
+                          "Line":  18,
+                          "Length":  156,
+                          "LineSha256":  "93365f738634a82fa1eba2f711f63b623876500c124b86d3f4db10be5b8dc507",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Test-LAPSUser/Remediate-Test-LAPSUser.ps1",
+                          "Line":  80,
+                          "Length":  156,
+                          "LineSha256":  "93365f738634a82fa1eba2f711f63b623876500c124b86d3f4db10be5b8dc507",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Test-LAPSUser/Remediate-Test-LAPSUser.ps1",
+                          "Line":  82,
+                          "Length":  247,
+                          "LineSha256":  "f61f1958507007c75ef6e9abc8f4e80b79268b2ef3a30adde974e6d651582f23",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1",
+                          "Line":  34,
+                          "Length":  121,
+                          "LineSha256":  "5ab698c5eac75f89cf82d7aa32213df4c83cdf38be3dbb440c1eb1f00ba54a44",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1",
+                          "Line":  57,
+                          "Length":  148,
+                          "LineSha256":  "e568f7e337248caad9b513a2f90ee2653dbefc9521e9018308435d85ce341694",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Toast-UpdateReminder/Remediate-Toast-UpdateReminder.ps1",
+                          "Line":  13,
+                          "Length":  122,
+                          "LineSha256":  "c8d3c49b3bfdc1556ba6d207f5762f2b382a41a07b10874618820062688f7e5c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Toast-UpdateReminder/Remediate-Toast-UpdateReminder.ps1",
+                          "Line":  21,
+                          "Length":  137,
+                          "LineSha256":  "8d1a1a87aa1e58036d58ba1c3ffba2dfb8e472a4ad8bdb88011f02009cf9207a",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  15,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  16,
+                          "Length":  133,
+                          "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  17,
+                          "Length":  129,
+                          "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  18,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  29,
+                          "Length":  142,
+                          "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  17,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  18,
+                          "Length":  133,
+                          "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  19,
+                          "Length":  129,
+                          "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  20,
+                          "Length":  133,
+                          "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                          "Line":  31,
+                          "Length":  142,
+                          "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Update-ChocolateyApps/Remediate-Update-ChocolateyApps.ps1",
+                          "Line":  41,
+                          "Length":  124,
+                          "LineSha256":  "432f9302da4ad229486e42d531a465714ff5914df9824931d48632f0b2fc6f88",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Update-MicrosoftTeams/Detect-Update-MicrosoftTeams.ps1",
+                          "Line":  25,
+                          "Length":  126,
+                          "LineSha256":  "2a9b2683f9a9ef5793e89fd8cdf0932453861fa6e04ad5b2828d116602ab958e",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      },
+                      {
+                          "Rule":  "PSAvoidLongLines",
+                          "Path":  "Update-MicrosoftTeams/Remediate-Update-MicrosoftTeams.ps1",
+                          "Line":  28,
+                          "Length":  124,
+                          "LineSha256":  "2f1bcd857f96e53cdb936d089b9841f229c8ffeaad983185f5ec7b0ae25a33e3",
+                          "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                      }
+                  ],
+    "AnalyzerLongLines":  [
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Add-Winget-App/Remediate-Add-Winget-App.ps1",
+                                  "Line":  22,
+                                  "Length":  139,
+                                  "LineSha256":  "ca20927c06cc04c708e6d2f96cf7d98e76e0a5fe0d6546c8a5fe34e50303c7d6",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Autologon/Remediate-Autologon.ps1",
+                                  "Line":  6,
+                                  "Length":  128,
+                                  "LineSha256":  "d6075a1b2163aa58b85ded930372416dc55ab32fef92b5e0c2531874d51df0b5",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "AutomaticTimezone/Remediate-AutomaticTimezone.ps1",
+                                  "Line":  28,
+                                  "Length":  122,
+                                  "LineSha256":  "b1e060cefeec1c05e09d83d4a475681eb267a53b95a718f16665f4e5b995dc5f",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "AutomaticTimezone/Remediate-AutomaticTimezone.ps1",
+                                  "Line":  29,
+                                  "Length":  125,
+                                  "LineSha256":  "c3517e4b792abc7969c537e4b1bd26fa756a0ff9476ae79fb0796eac74b16b55",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "BlackLotus-Mitigation/Remediate-BlackLotus-Mitigation.ps1",
+                                  "Line":  8,
+                                  "Length":  154,
+                                  "LineSha256":  "470cead068b6b8fe77feed93081b3e7ed1f4bfd7a8b46523d48d9650dff5f31a",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "BlockAADWorkplaceJoin/Detect-BlockAADWorkplaceJoin.ps1",
+                                  "Line":  2,
+                                  "Length":  155,
+                                  "LineSha256":  "d9e9bd26da2f28bb86a4fa5d943561a808386d70fa960e1b994ee9347befbf8f",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Change-MultipleRegistryKeys/Remediate-Change-MultipleRegistryKeys.ps1",
+                                  "Line":  92,
+                                  "Length":  158,
+                                  "LineSha256":  "68c48e3377c4e2dab63e9ed34baf8f1cfb3fa32dd501841bde88cadbe3d6c081",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Change-Registry-Key-Generic/Remediate-Change-Registry-Key-Generic.ps1",
+                                  "Line":  28,
+                                  "Length":  122,
+                                  "LineSha256":  "b1e060cefeec1c05e09d83d4a475681eb267a53b95a718f16665f4e5b995dc5f",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Check-PNPDevices/Detect-Check-PNPDevices.ps1",
+                                  "Line":  38,
+                                  "Length":  156,
+                                  "LineSha256":  "0f10384614c9501336218d52ce5c114b28b8d178e863a4328d4969c4ab65a36c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Check-PNPDevices/Detect-Check-PNPDevices.ps1",
+                                  "Line":  40,
+                                  "Length":  126,
+                                  "LineSha256":  "739d7a1f76612b00bcd3b33ebfc54f8d785f5bf2a3a8b1cc350e1feaab05e8c2",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Clear-OutlookCache/Remediate-Clear-OutlookCache.ps1",
+                                  "Line":  16,
+                                  "Length":  137,
+                                  "LineSha256":  "2dca560df2bdf3effec9d3dee0e66bd53c093cec90554b0c5994cd5373887e83",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1",
+                                  "Line":  19,
+                                  "Length":  169,
+                                  "LineSha256":  "4a733af8bdfc2016f4acda486a966610578fbd728e4c756fe930d623f4a29c0d",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Clear-TeamsCache/Remediate-Clear-TeamsCache.ps1",
+                                  "Line":  34,
+                                  "Length":  160,
+                                  "LineSha256":  "2f19dbf63d08bb32e739f3a27e299bf764b6528d4f9b1581628a0084d0cf8c82",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Create-Laps-LocalAdmin/Remediate-Create-Laps-LocalAdmin.ps1",
+                                  "Line":  10,
+                                  "Length":  174,
+                                  "LineSha256":  "9a3d2885f1277261a2ccf1db44a8359002c1ecc6ade6dcf1426a2291204140f0",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Device-Auto-Syncer/Detect-Device-Auto-Syncer.ps1",
+                                  "Line":  9,
+                                  "Length":  130,
+                                  "LineSha256":  "3568e95d2bf6c72d7d630e9a3b10d4ca72dc2a0022c78faedd0362b7f16f0122",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Disable-Coinstaller/Remediate-Disable-Coinstaller.ps1",
+                                  "Line":  26,
+                                  "Length":  122,
+                                  "LineSha256":  "b1e060cefeec1c05e09d83d4a475681eb267a53b95a718f16665f4e5b995dc5f",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Disable-Fastboot/Remediate-Disable-Fastboot.ps1",
+                                  "Line":  16,
+                                  "Length":  175,
+                                  "LineSha256":  "c34a44d3a02aa8895b50b385f2f371534012172d67d694d69c5082cad876867c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Enable-RDP/Remediate-Enable-RDP.ps1",
+                                  "Line":  32,
+                                  "Length":  150,
+                                  "LineSha256":  "0a2457f6ccbd9b7cb8a2da28f0bcceac6c846025907b4b8a8d7eea24a60066c5",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Enforce-BitLocker/Detect-Enforce-BitLocker.ps1",
+                                  "Line":  18,
+                                  "Length":  156,
+                                  "LineSha256":  "b44a066b45de1c120e94dea76eb649adde264515857612a926e6a21889b58eef",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Enforce-BitLocker/Remediate-Enforce-BitLocker.ps1",
+                                  "Line":  25,
+                                  "Length":  127,
+                                  "LineSha256":  "fa46e62d64b2a4193b1c7bf4be6a4215a7487514fc6c8f36fb274127aae473f7",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Enforce-SMB-Signing/Detect-Enforce-SMB-Signing.ps1",
+                                  "Line":  6,
+                                  "Length":  134,
+                                  "LineSha256":  "6eee182c000c131f88628653bf584f6fdd13024e51b5520b51d2aaac1e9b67ca",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Enforce-SMB-Signing/Remediate-Enforce-SMB-Signing.ps1",
+                                  "Line":  6,
+                                  "Length":  134,
+                                  "LineSha256":  "6eee182c000c131f88628653bf584f6fdd13024e51b5520b51d2aaac1e9b67ca",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Fix-SearchIndex/Remediate-Fix-SearchIndex.ps1",
+                                  "Line":  22,
+                                  "Length":  147,
+                                  "LineSha256":  "31e0c61ff8a4c6e6d21fa8cef13fda2182ae277c54c301e1836e70244f16f1c4",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                  "Line":  21,
+                                  "Length":  177,
+                                  "LineSha256":  "30e381c022ccb0d6531bd56ec3cf131e559833e10bdd85eef2b0f8512c5b5676",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                  "Line":  22,
+                                  "Length":  171,
+                                  "LineSha256":  "8e34400045c74b05c0b610cef63fc27123b5442f8bd848f88db9e16d2672f1a8",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                  "Line":  23,
+                                  "Length":  172,
+                                  "LineSha256":  "8bcdf3efa9ad38e79819c106da03752a74f6674aec45b09f57938f90a2f8ad37",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                  "Line":  24,
+                                  "Length":  175,
+                                  "LineSha256":  "9086eefe5a957549c3dc2943cbac2aec3685c2dcd4f066d058ea67cdca22947e",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Fortinet-VPN-Profile/Remediate-Fortinet-VPN-Profile.ps1",
+                                  "Line":  25,
+                                  "Length":  171,
+                                  "LineSha256":  "1cf04a2948836a43b0fe41dd8475c797ea004761a484a641c693d42e1f21f4ad",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-AdobeDC-Java/Remediate-Get-AdobeDC-Java.ps1",
+                                  "Line":  16,
+                                  "Length":  179,
+                                  "LineSha256":  "6b3cde11de4e07841f530d4f182a6008f4c778461a60845e72f9236b25214f0d",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-AdobeReader-Flash/Remediate-Get-AdobeReader-Flash.ps1",
+                                  "Line":  16,
+                                  "Length":  174,
+                                  "LineSha256":  "50716692b4fc0ca2018c28eb4ae256f33e03fa29ea4fb5d7ef0c9aedc3c1b726",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-AdobeReader-Java/Remediate-Get-AdobeReader-Java.ps1",
+                                  "Line":  16,
+                                  "Length":  180,
+                                  "LineSha256":  "8e3dea2dbf1172c45486d29b784e3443ce7c9cc3f4d2edd5dee6b381d331ff8d",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                                  "Line":  11,
+                                  "Length":  183,
+                                  "LineSha256":  "8c5474a0e1f0b1bf08f98a7bab2d07bcd140e15e73a05ddbd7b6a7ed8619c28c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                                  "Line":  12,
+                                  "Length":  205,
+                                  "LineSha256":  "e9ab2a93d91e99c3c58ee7c584783af56894a8625441bd3926abfd5bf25dc8cc",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                                  "Line":  13,
+                                  "Length":  204,
+                                  "LineSha256":  "a136ee76f91f5bdd205d9c9692fc868b7a74424051e36f00412eb3a978cf59d6",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-CleanUpDisk/Remediate-Get-CleanUpDisk.ps1",
+                                  "Line":  14,
+                                  "Length":  207,
+                                  "LineSha256":  "ea540f6b5cfc21d32cf2f2af0b8a742972cb981ef3ee8809dc35c6c62a0a67ed",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-Device-Uptime-And-Reboot/Detect-Get-Device-Uptime-And-Reboot.ps1",
+                                  "Line":  9,
+                                  "Length":  132,
+                                  "LineSha256":  "dfc602f8b19b28af9e6a381d851b6d9b770a07a96c7aefd3e9877eaddbb4c57d",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-Device-Uptime-And-Reboot/Remediate-Get-Device-Uptime-And-Reboot.ps1",
+                                  "Line":  9,
+                                  "Length":  132,
+                                  "LineSha256":  "dfc602f8b19b28af9e6a381d851b6d9b770a07a96c7aefd3e9877eaddbb4c57d",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Get-WH4BEnrolledMethods/Detect-Get-WH4BEnrolledMethods.ps1",
+                                  "Line":  40,
+                                  "Length":  141,
+                                  "LineSha256":  "098905823938845ae515b307efd06ec9c9d0ac8b9403193c5fef0fd1ee8c7cfc",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-CMTrace/Remediate-Install-CMTrace.ps1",
+                                  "Line":  16,
+                                  "Length":  163,
+                                  "LineSha256":  "1ba30cb69fbf6b17fe077a352315594a5f5615b9458a3f40728fe46c399a7b1b",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  18,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  19,
+                                  "Length":  133,
+                                  "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  20,
+                                  "Length":  129,
+                                  "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  21,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Detect-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  32,
+                                  "Length":  142,
+                                  "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  15,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  16,
+                                  "Length":  133,
+                                  "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  17,
+                                  "Length":  129,
+                                  "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  18,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WinGet-Apps-From-Url/Remediate-Install-WinGet-Apps-From-Url.ps1",
+                                  "Line":  29,
+                                  "Length":  142,
+                                  "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Install-WindowsUpdates/Remediate-Install-WindowsUpdates.ps1",
+                                  "Line":  41,
+                                  "Length":  130,
+                                  "LineSha256":  "dbea68ab58e89ab1956a4f96c950f8cfd7a42c1c855745a16da3b9d2adcac6c9",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Make-Speedtest/Remediate-Make-Speedtest.ps1",
+                                  "Line":  21,
+                                  "Length":  171,
+                                  "LineSha256":  "8dc988516f4e74d345d1fe69850fa365ed3680b535dacbb6cbf76fd7ce84fca0",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Make-Speedtest/Remediate-Make-Speedtest.ps1",
+                                  "Line":  85,
+                                  "Length":  122,
+                                  "LineSha256":  "abbcaf0ff11c260cae76e18dcf1aaf333c7c3ff3d794a676c1cc8a3a21d968b0",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Monitor-DiskSpace-Trend/Remediate-Monitor-DiskSpace-Trend.ps1",
+                                  "Line":  39,
+                                  "Length":  140,
+                                  "LineSha256":  "0d8348bce100b6e8ae658d128ffea3d7b0e91f6309d482ecb51ae6972d3557f8",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Profile-Backup/Remediate-Profile-Backup.ps1",
+                                  "Line":  53,
+                                  "Length":  135,
+                                  "LineSha256":  "71056b2069c348affcddc4cdcfa76e8c36bb781f21a52c7070a85c045251d7c5",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Profile-Cleanup/Remediate-Profile-Cleanup.ps1",
+                                  "Line":  47,
+                                  "Length":  218,
+                                  "LineSha256":  "5d86c0c7aee56519ff115b2b5ac1032fed9432fce6cb85601750d744944be4ce",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Profile-Cleanup/Remediate-Profile-Cleanup.ps1",
+                                  "Line":  53,
+                                  "Length":  220,
+                                  "LineSha256":  "039e22f18b7aba735f948f3abc27d4e5fa5987cf22e9d18555e802677bc9aa98",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ProxySettings/Remediate-Remove-ProxySettings.ps1",
+                                  "Line":  16,
+                                  "Length":  129,
+                                  "LineSha256":  "09f3510c5a44db92b37c011ea22c7be9667d381eb14bb4c7bdb09f74c5069365",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ProxySettings/Remediate-Remove-ProxySettings.ps1",
+                                  "Line":  17,
+                                  "Length":  131,
+                                  "LineSha256":  "66d7e398aa6adfb59680644fa21984abf3c42eeccccfd9795ae5d7994ac3e66e",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ReinstallMSI/Detect-Remove-ReinstallMSI.ps1",
+                                  "Line":  21,
+                                  "Length":  122,
+                                  "LineSha256":  "3a73ca8824018a7904814598d85d5fbaf371dfb67108816d1a779a554c36f3fe",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                                  "Line":  24,
+                                  "Length":  126,
+                                  "LineSha256":  "2a9b2683f9a9ef5793e89fd8cdf0932453861fa6e04ad5b2828d116602ab958e",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                                  "Line":  34,
+                                  "Length":  123,
+                                  "LineSha256":  "93f8698d0fb60fdd83a7fa00fa39f8cf65598b6bc41e6ddfcd0a697672cdf481",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                                  "Line":  38,
+                                  "Length":  134,
+                                  "LineSha256":  "26e171126bfb9f7efed14871188cb5218374758a23e8e496be0192cdfad4b779",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-ReinstallMSI/Remediate-Remove-ReinstallMSI.ps1",
+                                  "Line":  45,
+                                  "Length":  128,
+                                  "LineSha256":  "913ba78839d16dea0afe01db3b0394db2a7fdf72a054e44bcd59009420cc7c00",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-StaticRoutes/Remediate-Remove-StaticRoutes.ps1",
+                                  "Line":  20,
+                                  "Length":  129,
+                                  "LineSha256":  "a76a87810838e646951ebe485e43a440284fabfdbb35abc630703734c1b112ea",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-Teams-Chat/Remediate-Remove-Teams-Chat.ps1",
+                                  "Line":  52,
+                                  "Length":  203,
+                                  "LineSha256":  "bba7be036818127f44b8cc4def7c465fbfe45aef9906d1bfd2bcdfc6ce449384",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-Teams-Chat/Remediate-Remove-Teams-Chat.ps1",
+                                  "Line":  53,
+                                  "Length":  129,
+                                  "LineSha256":  "4eeb642e5beebf56ecb50dcbca26d0d3bffdf7a2d5af34a66ef8ebbaef7b022c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-Teams-Chat/Remediate-Remove-Teams-Chat.ps1",
+                                  "Line":  54,
+                                  "Length":  130,
+                                  "LineSha256":  "b0306b5ba8be35793eaf0f61b8b204796f7dce53679616dbae3aad64a0f2ebb1",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Remove-WindowsBackup/Remediate-Remove-WindowsBackup.ps1",
+                                  "Line":  1,
+                                  "Length":  133,
+                                  "LineSha256":  "daac97273d4170dbe82cf5b19bd3291ca62d97a54925bd54436572cc9ac966d3",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Reset-OneDriveSync/Remediate-Reset-OneDriveSync.ps1",
+                                  "Line":  26,
+                                  "Length":  135,
+                                  "LineSha256":  "6fe0c6cc85e37f59ce408a01eec7623b95ef7f8ae0f8484688859c1ccb8da143",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Reset-SoftwareDistributionFolder/Detect-Reset-SoftwareDistributionFolder.ps1",
+                                  "Line":  6,
+                                  "Length":  179,
+                                  "LineSha256":  "164aba038dc8e5ae9163313d93bf68cddf02c43d9c29241dcc3e0530f657fcdf",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Reset-SoftwareDistributionFolder/Remediate-Reset-SoftwareDistributionFolder.ps1",
+                                  "Line":  6,
+                                  "Length":  179,
+                                  "LineSha256":  "164aba038dc8e5ae9163313d93bf68cddf02c43d9c29241dcc3e0530f657fcdf",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Reset-StartMenu/Remediate-Reset-StartMenu.ps1",
+                                  "Line":  14,
+                                  "Length":  128,
+                                  "LineSha256":  "2cfd6fe81601b8801e2ee0f8d731c3b281e9c05623f5645997d83cbce9be219c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Reset-StartMenu/Remediate-Reset-StartMenu.ps1",
+                                  "Line":  18,
+                                  "Length":  128,
+                                  "LineSha256":  "2cfd6fe81601b8801e2ee0f8d731c3b281e9c05623f5645997d83cbce9be219c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-Cached-Logon-Count-0/Detect-Set-Cached-Logon-Count-0.ps1",
+                                  "Line":  6,
+                                  "Length":  235,
+                                  "LineSha256":  "9147dfaa5052ef70036f214d5bf417ec3794fa98e96a6f8172380bc3a8661a89",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-Cached-Logon-Count-0/Remediate-Set-Cached-Logon-Count-0.ps1",
+                                  "Line":  6,
+                                  "Length":  235,
+                                  "LineSha256":  "9147dfaa5052ef70036f214d5bf417ec3794fa98e96a6f8172380bc3a8661a89",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-CanaryToken-RegistryKey/Remediate-Set-CanaryToken-RegistryKey.ps1",
+                                  "Line":  6,
+                                  "Length":  252,
+                                  "LineSha256":  "05664e336d635e82115a59a169dc80a707c556fb74962da54a5cf69a83151fd5",
+                                  "Reason":  "Approved URL exception."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-CanaryToken-RegistryKey/Remediate-Set-CanaryToken-RegistryKey.ps1",
+                                  "Line":  16,
+                                  "Length":  240,
+                                  "LineSha256":  "7f9808f248442c8ab02018483e46adb03c33ff6c7bada338be7a195f7dae0691",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-CanaryToken-RegistryKey/Remediate-Set-CanaryToken-RegistryKey.ps1",
+                                  "Line":  28,
+                                  "Length":  312,
+                                  "LineSha256":  "89a12d92f1677881ee87b2c46531f1a62877f8316a01d7b007015d66c9403a20",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-DefaultBrowser/Remediate-Set-DefaultBrowser.ps1",
+                                  "Line":  28,
+                                  "Length":  134,
+                                  "LineSha256":  "fa945b1339d9e9561314e3fad1aeaacc67031a9c3f7a3d1e424b6bba2b4ccfd0",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Set-MTU-Optimal/Detect-Set-MTU-Optimal.ps1",
+                                  "Line":  21,
+                                  "Length":  121,
+                                  "LineSha256":  "fde8e0638794729473ca2cefa2d8fff3876901fd26e47c9ace2e36fc6cb6190c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Show-MessageCenterMessage/Detect-Show-MessageCenterMessage.ps1",
+                                  "Line":  15,
+                                  "Length":  130,
+                                  "LineSha256":  "abc3dcf2d378166199248d04c45ff739f5737ae1cf9bc76ff996e79d13f199d6",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Test-LAPSUser/Detect-Test-LAPSUser.ps1",
+                                  "Line":  10,
+                                  "Length":  136,
+                                  "LineSha256":  "c376826a79dad81da84a6bf0175d05a318c309bf17e23da05abbaf8699829516",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Test-LAPSUser/Detect-Test-LAPSUser.ps1",
+                                  "Line":  18,
+                                  "Length":  156,
+                                  "LineSha256":  "93365f738634a82fa1eba2f711f63b623876500c124b86d3f4db10be5b8dc507",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Test-LAPSUser/Remediate-Test-LAPSUser.ps1",
+                                  "Line":  80,
+                                  "Length":  156,
+                                  "LineSha256":  "93365f738634a82fa1eba2f711f63b623876500c124b86d3f4db10be5b8dc507",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Test-LAPSUser/Remediate-Test-LAPSUser.ps1",
+                                  "Line":  82,
+                                  "Length":  247,
+                                  "LineSha256":  "f61f1958507007c75ef6e9abc8f4e80b79268b2ef3a30adde974e6d651582f23",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1",
+                                  "Line":  34,
+                                  "Length":  121,
+                                  "LineSha256":  "5ab698c5eac75f89cf82d7aa32213df4c83cdf38be3dbb440c1eb1f00ba54a44",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1",
+                                  "Line":  57,
+                                  "Length":  148,
+                                  "LineSha256":  "e568f7e337248caad9b513a2f90ee2653dbefc9521e9018308435d85ce341694",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Toast-UpdateReminder/Remediate-Toast-UpdateReminder.ps1",
+                                  "Line":  13,
+                                  "Length":  122,
+                                  "LineSha256":  "c8d3c49b3bfdc1556ba6d207f5762f2b382a41a07b10874618820062688f7e5c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Toast-UpdateReminder/Remediate-Toast-UpdateReminder.ps1",
+                                  "Line":  21,
+                                  "Length":  137,
+                                  "LineSha256":  "8d1a1a87aa1e58036d58ba1c3ffba2dfb8e472a4ad8bdb88011f02009cf9207a",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  15,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  16,
+                                  "Length":  133,
+                                  "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  17,
+                                  "Length":  129,
+                                  "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  18,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Detect-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  29,
+                                  "Length":  142,
+                                  "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  17,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  18,
+                                  "Length":  133,
+                                  "LineSha256":  "93808d0f159cce01a12e9bac43df59cd0dfa44abfeb267c326ee5113b65aa257",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  19,
+                                  "Length":  129,
+                                  "LineSha256":  "d209b879fe44a8598b337d93ffc4170403566677a33ed18a207c7be337181c4a",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  20,
+                                  "Length":  133,
+                                  "LineSha256":  "45784033eea04edebca09d9120fa255b8b09bc308582052669f80409994f713c",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Uninstall-WinGet-Apps-From-Url/Remediate-Uninstall-WinGet-Apps-From-Url.ps1",
+                                  "Line":  31,
+                                  "Length":  142,
+                                  "LineSha256":  "7620a9d73e8d36e1c5d95cd4b9869fb915c323aab854df3a35b570545c199ae2",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Update-ChocolateyApps/Remediate-Update-ChocolateyApps.ps1",
+                                  "Line":  41,
+                                  "Length":  124,
+                                  "LineSha256":  "432f9302da4ad229486e42d531a465714ff5914df9824931d48632f0b2fc6f88",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Update-MicrosoftTeams/Detect-Update-MicrosoftTeams.ps1",
+                                  "Line":  25,
+                                  "Length":  126,
+                                  "LineSha256":  "2a9b2683f9a9ef5793e89fd8cdf0932453861fa6e04ad5b2828d116602ab958e",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              },
+                              {
+                                  "Rule":  "PSAvoidLongLines",
+                                  "Path":  "Update-MicrosoftTeams/Remediate-Update-MicrosoftTeams.ps1",
+                                  "Line":  28,
+                                  "Length":  124,
+                                  "LineSha256":  "2f1bcd857f96e53cdb936d089b9841f229c8ffeaad983185f5ec7b0ae25a33e3",
+                                  "Reason":  "No Windows PowerShell 5.1 parser- and rewrite-gate-equivalent token-boundary break exists by column 120."
+                              }
+                          ]
+}

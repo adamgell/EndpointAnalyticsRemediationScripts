@@ -1,10 +1,10 @@
-# Remove Consumer Apps
+# Remove consumer apps
 
-This script removes apps for all users by a given list of app names and app package names. It also removes the provisioned packages for new users.
+This script removes apps for all users by a given list of app names and package names. It also removes provisioned packages for new users.
 
-## Usage/Examples
+## Usage and examples
 
-In **Remove-ConsumerAppsDetection.ps1** and **Remove-ConsumerAppsRemediation.ps1** change the list of apps to remove:
+In [`Detect-Remove-ConsumerApps.ps1`](Detect-Remove-ConsumerApps.ps1) and [`Remediate-Remove-ConsumerApps.ps1`](Remediate-Remove-ConsumerApps.ps1), change the list of apps to remove:
 
 ```powershell
 $ConsumerApps = @{
