@@ -158,6 +158,48 @@ function Test-PowerShellFunctionReference {
         }
     }
 
+    $stringExpressions = @($ast.FindAll({
+        param($node)
+        $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
+            $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
+    }, $true))
+    foreach ($stringExpression in $stringExpressions) {
+        if ($stringExpression -is [System.Management.Automation.Language.ExpandableStringExpressionAst]) {
+            $literalCharacters = $stringExpression.Extent.Text.ToCharArray()
+            foreach ($nestedExpression in @($stringExpression.NestedExpressions)) {
+                $relativeStart = $nestedExpression.Extent.StartOffset - $stringExpression.Extent.StartOffset
+                $relativeEnd = $nestedExpression.Extent.EndOffset - $stringExpression.Extent.StartOffset
+                for ($index = $relativeStart; $index -lt $relativeEnd; $index++) {
+                    $literalCharacters[$index] = ' '
+                }
+            }
+            $literalTokens = $null
+            $literalErrors = $null
+            $literalAst = [System.Management.Automation.Language.Parser]::ParseInput(
+                (-join $literalCharacters),
+                [ref] $literalTokens,
+                [ref] $literalErrors
+            )
+            $parsedLiteralExpressions = @($literalAst.FindAll({
+                param($node)
+                $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
+                    $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
+            }, $true))
+            if (@($literalErrors).Count -eq 0 -and $parsedLiteralExpressions.Count -eq 1) {
+                $literalText = [string] $parsedLiteralExpressions[0].Value
+            }
+            else {
+                $literalText = -join $literalCharacters
+            }
+        }
+        else {
+            $literalText = [string] $stringExpression.Value
+        }
+        if ([regex]::IsMatch($literalText, $symbolPattern)) {
+            return $true
+        }
+    }
+
     return $false
 }
 

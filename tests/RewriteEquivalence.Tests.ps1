@@ -4,6 +4,65 @@ BeforeAll {
     $wrapperPath = "$PSScriptRoot/../tools/Test-PowerShellRewrite.ps1"
     $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
     $foundationSymbolMap = Import-PowerShellDataFile -Path (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1')
+
+    function Invoke-CatalogFunctionReferenceGate {
+        param(
+            [Parameter(Mandatory)] [string] $Root,
+            [Parameter(Mandatory)] [string] $CandidateSource
+        )
+
+        $tools = Join-Path $Root 'tools'
+        $catalog = Join-Path $Root 'Catalog'
+        New-Item -ItemType Directory -Path $tools, $catalog -Force | Out-Null
+        Copy-Item -LiteralPath "$PSScriptRoot/../tools/RewriteEquivalence.psm1" -Destination $tools
+        Copy-Item -LiteralPath $wrapperPath -Destination $tools
+
+        $catalogPath = Join-Path $catalog 'Script.ps1'
+        @"
+function IsMember {}
+IsMember
+$CandidateSource
+"@ | Set-Content -LiteralPath $catalogPath -Encoding utf8
+        & git -C $Root init --quiet
+        & git -C $Root config core.autocrlf false
+        & git -C $Root config user.email 'rewrite-gate@example.invalid'
+        & git -C $Root config user.name 'Rewrite Gate Test'
+        & git -C $Root add Catalog
+        & git -C $Root commit --quiet -m baseline
+        $baseRevision = (& git -C $Root rev-parse HEAD).Trim()
+
+        @"
+function Test-GroupMembership {}
+Test-GroupMembership
+$CandidateSource
+"@ | Set-Content -LiteralPath $catalogPath -Encoding utf8
+        $pathMap = Join-Path $Root 'PathMap.psd1'
+        "@{ Paths = @(@{ BasePath = 'Catalog/Script.ps1'; NewPath = 'Catalog/Script.ps1' }) }" |
+            Set-Content -LiteralPath $pathMap -Encoding ascii
+        $symbolMap = Join-Path $Root 'SymbolMap.psd1'
+        @"
+@{
+    Commands = @()
+    Aliases = @()
+    Functions = @(
+        @{ Path = 'Catalog/Script.ps1'; OldName = 'IsMember'; NewName = 'Test-GroupMembership' }
+    )
+}
+"@ | Set-Content -LiteralPath $symbolMap -Encoding ascii
+        $reportPath = Join-Path $Root 'RewriteReport.json'
+
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+            -BaseRevision $baseRevision `
+            -PathMap $pathMap `
+            -SymbolMap $symbolMap `
+            -ReportPath $reportPath
+        $exitCode = $LASTEXITCODE
+
+        return [pscustomobject]@{
+            ExitCode = $exitCode
+            Report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        }
+    }
 }
 
 Describe 'PowerShell rewrite equivalence' {
@@ -314,6 +373,52 @@ function Get-SecondValue { param([string] $Name) $Name }
 Describe 'PowerShell rewrite wrapper' {
     AfterEach {
         Remove-Item Env:REWRITE_EXECUTION_MARKER -ErrorAction SilentlyContinue
+    }
+
+    It 'reports an old function name stored in a string used by indirect dynamic invocation' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'indirect-dynamic-reference') `
+            -CandidateSource '$target = ''IsMember''; & $target'
+
+        $result.ExitCode | Should -Be 1
+        $result.Report.Passed | Should -BeFalse
+        @($result.Report.Failures) | Should -Be @(
+            "Catalog file 'Catalog/Script.ps1' contains unresolved old function symbol 'IsMember'."
+        )
+    }
+
+    It 'reports an escaped old function name in an expandable dynamic target string' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'escaped-expandable-reference') `
+            -CandidateSource '$target = "Is`Member$empty"; & $target'
+
+        $result.ExitCode | Should -Be 1
+        $result.Report.Passed | Should -BeFalse
+        @($result.Report.Failures) | Should -Be @(
+            "Catalog file 'Catalog/Script.ps1' contains unresolved old function symbol 'IsMember'."
+        )
+    }
+
+    It 'reports a bare old function string expression' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'bare-string-reference') `
+            -CandidateSource "'IsMember'"
+
+        $result.ExitCode | Should -Be 1
+        $result.Report.Passed | Should -BeFalse
+        @($result.Report.Failures) | Should -Be @(
+            "Catalog file 'Catalog/Script.ps1' contains unresolved old function symbol 'IsMember'."
+        )
+    }
+
+    It 'does not report an ordinary variable named after the old function' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'ordinary-variable') `
+            -CandidateSource '$isMember = $false'
+
+        $result.ExitCode | Should -Be 0
+        $result.Report.Passed | Should -BeTrue
+        @($result.Report.Failures).Count | Should -Be 0
     }
 
     It 'validates a two-file Git rewrite, writes sorted JSON, and never executes source' {
