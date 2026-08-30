@@ -466,6 +466,27 @@ Test-GroupMembership -Group 'Administrators'
     }
 
 
+    It 'accepts a parenthesized command pipeline with a composed argument' {
+        $after = Join-Path $TestDrive 'Function.ComposedArgumentPipeline.ps1'
+        @'
+function Test-GroupMembership {
+    param([string] $Group)
+
+    return $Group -eq 'Administrators'
+}
+Test-GroupMembership -Group 'Administrators'
+& (Write-Output ('Is' + 'Member') 'Get-Date' | Select-Object -Last 1)
+'@ | Set-Content -LiteralPath $after -Encoding utf8
+        $map = @{ Aliases = @(); Functions = @(@{ OldName = 'IsMember'; NewName = 'Test-GroupMembership' }) }
+
+        $result = Compare-PowerShellSource `
+            -BeforePath "$fixtureRoot/Function.Before.ps1" `
+            -AfterPath $after `
+            -SymbolMap $map
+        $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
+    }
+
+
     It 'rejects a path map that is not a total bijection' {
         $rows = @(
             @{ BasePath = 'A.ps1'; NewPath = 'One.ps1' }
@@ -539,6 +560,17 @@ Describe 'PowerShell rewrite wrapper' {
             "Catalog file 'Catalog/Script.ps1' contains unresolved old function symbol 'IsMember'."
         )
     }
+    It 'does not report a composed argument nested in a parenthesized command pipeline' {
+        $result = Invoke-CatalogFunctionReferenceGate `
+            -Root (Join-Path $TestDrive 'composed-argument-pipeline') `
+            -CandidateSource "& (Write-Output ('Is' + 'Member') 'Get-Date' | Select-Object -Last 1)"
+
+        $result.ExitCode | Should -Be 0
+        $result.Report.Passed | Should -BeTrue
+        @($result.Report.Failures).Count | Should -Be 0
+    }
+
+
 
     It 'does not report an unknown dynamic target' {
         $result = Invoke-CatalogFunctionReferenceGate `

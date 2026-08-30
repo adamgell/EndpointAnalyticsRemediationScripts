@@ -145,12 +145,15 @@ function Get-ConstantStringExpressionValue {
         return $null
     }
     if ($Expression -is [System.Management.Automation.Language.ParenExpressionAst]) {
-        $binaryExpressions = @($Expression.FindAll({
-                    param($node)
-                    $node -is [System.Management.Automation.Language.BinaryExpressionAst]
-                }, $true))
-        if ($binaryExpressions.Count -eq 1) {
-            return Get-ConstantStringExpressionValue -Expression $binaryExpressions[0]
+        $pipeline = $Expression.Pipeline
+        if ($pipeline -is [System.Management.Automation.Language.PipelineAst] -and
+            @($pipeline.PipelineElements).Count -eq 1) {
+            $commandExpression = $pipeline.PipelineElements[0]
+            if ($commandExpression -is [System.Management.Automation.Language.CommandExpressionAst] -and
+                $commandExpression.Expression -is [System.Management.Automation.Language.BinaryExpressionAst] -and
+                $commandExpression.Expression.Operator -eq [System.Management.Automation.Language.TokenKind]::Plus) {
+                return Get-ConstantStringExpressionValue -Expression $commandExpression.Expression
+            }
         }
     }
     return $null

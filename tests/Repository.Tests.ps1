@@ -465,6 +465,31 @@ IsMember -Group 'Administrators'
         )
     }
 
+    It 'ignores a composed argument nested in a parenthesized command pipeline' {
+        $scriptContent = @'
+function IsMember {
+    param([string] $Group)
+    return $Group -eq 'Administrators'
+}
+IsMember -Group 'Administrators'
+& (Write-Output ('Is' + 'Member') 'Get-Date' | Select-Object -Last 1)
+'@
+        $fixture = New-FoundationSymbolGitFixture `
+            -Root (Join-Path $TestDrive 'composed-argument-pipeline') `
+            -ScriptContent $scriptContent `
+            -MappedBasePath 'Enable-RDP/detection_Enable-RDPDetection.ps1'
+        $outputPath = Join-Path $TestDrive 'composed-argument-pipeline-SymbolRenames.psd1'
+
+        Invoke-FoundationSymbolFixtureGenerator `
+            -Fixture $fixture `
+            -MarkerPath $fixture.MarkerPath `
+            -OutputPath $outputPath
+
+        [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
+            Should -BeExactly $expectedSymbolMapBytes
+    }
+
+
     It 'ignores repository-local Git replacement objects for the baseline revision' {
         $fixture = New-FoundationSymbolGitFixture `
             -Root (Join-Path $TestDrive 'replacement-object') `
