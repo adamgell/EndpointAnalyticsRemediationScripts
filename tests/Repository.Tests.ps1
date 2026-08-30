@@ -536,6 +536,62 @@ Describe 'Foundation symbol map baseline' -Tag 'FoundationMapBaseline' {
                 -BaseRevisionPath $baseRevisionPath
         } | Should -Throw "*Path map row '$($firstPath.BasePath)' uses indistinguishable source and destination paths.*"
     }
+    It 'rejects embedded double quotes in either path-map component before reading Git blobs' {
+        $firstPath = @($pathMap.Paths)[0]
+        $pathMapContent = [System.IO.File]::ReadAllText($pathMapPath)
+        $originalRow = @(
+            '        @{'
+            "            BasePath = '$($firstPath.BasePath)'"
+            "            NewPath = '$($firstPath.NewPath)'"
+            '        }'
+        ) -join "`n"
+        $cases = @(
+            @{
+                Name = 'quoted-source'
+                BasePath = 'Activate-Numlock/"source"/detection_Activate-Numlock.ps1'
+                NewPath = [string] $firstPath.NewPath
+            }
+            @{
+                Name = 'quoted-destination'
+                BasePath = [string] $firstPath.BasePath
+                NewPath = 'Activate-Numlock/"destination"/Detect-Activate-Numlock.ps1'
+            }
+        )
+
+        foreach ($case in $cases) {
+            $adversarialPathMap = Join-Path $TestDrive "$($case.Name)-PathMap.psd1"
+            $adversarialRow = @(
+                '        @{'
+                "            BasePath = '$($case.BasePath)'"
+                "            NewPath = '$($case.NewPath)'"
+                '        }'
+            ) -join "`n"
+            [System.IO.File]::WriteAllText(
+                $adversarialPathMap,
+                $pathMapContent.Replace($originalRow, $adversarialRow),
+                (New-Object System.Text.UTF8Encoding($false))
+            )
+
+            $outputPath = Join-Path $TestDrive "$($case.Name)-SymbolRenames.psd1"
+            $exceptionMessage = $null
+            try {
+                & $symbolGenerator `
+                    -PathMap $adversarialPathMap `
+                    -PackageData $packageDataPath `
+                    -OutputPath $outputPath `
+                    -BaseRevisionPath $baseRevisionPath
+            }
+            catch {
+                $exceptionMessage = $_.Exception.Message
+            }
+
+            $exceptionMessage | Should -BeExactly (
+                "Path map contains unsafe row '$($case.BasePath)' -> '$($case.NewPath)'."
+            )
+            [System.IO.File]::Exists($outputPath) | Should -BeFalse
+        }
+    }
+
 
 
 }

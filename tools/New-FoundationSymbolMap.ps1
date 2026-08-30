@@ -20,7 +20,8 @@ function Test-SafeRepositoryPath {
 
     if ([string]::IsNullOrWhiteSpace($Path) -or
         [System.IO.Path]::IsPathRooted($Path) -or
-        $Path.Contains('\')) {
+        $Path.Contains('\') -or
+        $Path.Contains('"')) {
         return $false
     }
     foreach ($segment in $Path.Split('/')) {
