@@ -1687,7 +1687,8 @@ Export-ModuleMember -Function *
             $runtimePath = Join-Path $root 'runtime/Script001.ps1'
             $scriptContent = @'
 if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
-    Set-Content -LiteralPath $env:BUILD_CONTRACT_SENTINEL -Value 'deployment script executed'
+    Add-Content -LiteralPath $env:BUILD_CONTRACT_SENTINEL `
+        -Value $MyInvocation.MyCommand.Path
 }
 '@
             Set-Content -LiteralPath $runtimePath -Value $scriptContent -Encoding utf8
@@ -1699,11 +1700,9 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
                     foreach ($number in 1..271) {
                         $name = 'Script{0:D3}.ps1' -f $number
                         $path = Join-Path $root "runtime/$name"
-                        if ($number -gt 1) {
-                            Set-Content -LiteralPath $path -Value '# controlled script' -Encoding utf8
-                            Set-Content -LiteralPath ([System.IO.Path]::ChangeExtension($path, '.psd1')) `
-                                -Value '@{}' -Encoding utf8
-                        }
+                        Set-Content -LiteralPath $path -Value $scriptContent -Encoding utf8
+                        Set-Content -LiteralPath ([System.IO.Path]::ChangeExtension($path, '.psd1')) `
+                            -Value '@{}' -Encoding utf8
                         "@{ NewPath = 'runtime/$name' }"
                     }
                 )
@@ -1774,7 +1773,7 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
         }
     }
 
-    It 'invokes Validate with inventory, manifest, parser, reference, and migration checks without executing scripts' `
+    It 'invokes Validate with every inventory, manifest, parser, reference, and migration check without executing scripts' `
         -Skip:(
             ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
                 -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
@@ -1783,18 +1782,183 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
         ) {
         $fixture = New-BuildContractFixture -Route Validate
         $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+        $scriptFiles = @(
+            Get-ChildItem -LiteralPath (Join-Path $fixture 'runtime') `
+                -Filter '*.ps1' -File |
+                Sort-Object -Property Name
+        )
+        $pathMap = Import-PowerShellDataFile -LiteralPath (
+            Join-Path $fixture 'evidence/foundation/PathMap.psd1'
+        )
+        $inventoryChecks = @(
+            $result.Records | Where-Object Command -eq 'Get-DeploymentScript'
+        )
+        $manifestChecks = @(
+            $result.Records |
+                Where-Object Command -eq 'Test-ScriptManifest' |
+                Sort-Object -Property Path
+        )
+        $transitionChecks = @(
+            $result.Records |
+                Where-Object Command -eq 'Test-ManifestStatusTransition'
+        )
+        $referenceChecks = @(
+            $result.Records |
+                Where-Object Command -eq 'Get-UnresolvedRepositoryReference'
+        )
 
         $result.ExitCode | Should -Be 0
         ($result.Output -join "`n") | Should -Match 'Validated 271 deployment scripts and manifests'
         (Test-Path -LiteralPath $result.SentinelPath) | Should -BeFalse
-        $result.Records.Command | Should -Contain 'Get-DeploymentScript'
-        $result.Records.Command | Should -Contain 'Test-ScriptManifest'
-        $result.Records.Command | Should -Contain 'Test-ManifestStatusTransition'
-        $result.Records.Command | Should -Contain 'Get-UnresolvedRepositoryReference'
-        ($result.Records | Where-Object Command -eq 'Get-DeploymentScript').Root |
-            Should -Be $fixture
-        ($result.Records | Where-Object Command -eq 'Get-UnresolvedRepositoryReference').Root |
-            Should -Be $fixture
+        $scriptFiles.Count | Should -Be 271
+        @(
+            $scriptFiles | Where-Object {
+                (Get-Content -LiteralPath $_.FullName -Raw) -notmatch 'BUILD_CONTRACT_SENTINEL'
+            }
+        ).Count | Should -Be 0
+        @($pathMap.Paths).Count | Should -Be 271
+        $inventoryChecks.Count | Should -Be 1
+        $inventoryChecks[0].Root | Should -Be $fixture
+        $manifestChecks.Count | Should -Be 271
+        $transitionChecks.Count | Should -Be 271
+        $referenceChecks.Count | Should -Be 1
+        $referenceChecks[0].Root | Should -Be $fixture
+        $result.Records.Count | Should -Be 544
+
+        for ($index = 0; $index -lt 271; $index++) {
+            $number = $index + 1
+            $name = 'Script{0:D3}.ps1' -f $number
+            $scriptFiles[$index].Name | Should -Be $name
+            $pathMap.Paths[$index].NewPath | Should -Be "runtime/$name"
+            $manifestChecks[$index].Path | Should -Be (
+                Join-Path $fixture "runtime/$([System.IO.Path]::ChangeExtension($name, '.psd1'))"
+            )
+            $manifestChecks[$index].SchemaPath | Should -Be (
+                Join-Path $fixture 'standards/ManifestSchema.psd1'
+            )
+            $transitionChecks[$index].Before | Should -Be 'Covered'
+            $transitionChecks[$index].After | Should -Be 'Covered'
+        }
+    }
+
+    It 'rejects an inventory whose destination path map does not match' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        $pathMapPath = Join-Path $fixture 'evidence/foundation/PathMap.psd1'
+        $pathMap = (Get-Content -LiteralPath $pathMapPath -Raw).Replace(
+            'runtime/Script271.ps1',
+            'runtime/Unexpected.ps1'
+        )
+        Set-Content -LiteralPath $pathMapPath -Value $pathMap -Encoding utf8
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'Current deployment inventory does not match the destination path map\.'
+    }
+
+    It 'rejects a deployment script with a missing manifest' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        Remove-Item -LiteralPath (Join-Path $fixture 'runtime/Script271.psd1')
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'Manifest validation failed:[\s\S]*Script271\.ps1 is missing its[\s\S]*manifest'
+    }
+
+    It 'rejects an invalid deployment manifest' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
+        $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
+            '        Valid = $true',
+            '        Valid = ($Path -notlike ''*Script001.psd1'')'
+        ).Replace(
+            '        Errors = @()',
+            '        Errors = if ($Path -like ''*Script001.psd1'') { @(''controlled invalid manifest'') } else { @() }'
+        )
+        Set-Content -LiteralPath $catalogPath -Value $catalog -Encoding utf8
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'Manifest validation failed:[\s\S]*Script001\.ps1: controlled invalid[\s\S]*manifest'
+    }
+
+    It 'rejects a deployment script with a PowerShell parser error' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        Set-Content -LiteralPath (Join-Path $fixture 'runtime/Script271.ps1') `
+            -Value 'if (' -Encoding utf8
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'PowerShell parsing failed: .*Script271\.ps1:'
+    }
+
+    It 'rejects an invalid migration transition from the catalog validator' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
+        $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
+            '    $true',
+            '    $false'
+        )
+        Set-Content -LiteralPath $catalogPath -Value $catalog -Encoding utf8
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'Manifest validation failed:[\s\S]*has an invalid migration state\.'
+    }
+
+    It 'rejects unresolved repository references from the catalog validator' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        $catalogPath = Join-Path $fixture 'tools/RepositoryCatalog.psm1'
+        $catalog = (Get-Content -LiteralPath $catalogPath -Raw).Replace(
+            "    Write-CatalogContractLog 'Get-UnresolvedRepositoryReference' @{ Root = `$Root }`n    @()`n}",
+            "    Write-CatalogContractLog 'Get-UnresolvedRepositoryReference' @{ Root = `$Root }`n    [pscustomobject]@{ Markdown = 'controlled.md'; Target = './controlled-target' }`n}"
+        )
+        Set-Content -LiteralPath $catalogPath -Value $catalog -Encoding utf8
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'Unresolved repository references: controlled\.md: \./controlled-target'
     }
 
     It 'invokes Analyze with recursive analysis and repository settings' -Skip:(
