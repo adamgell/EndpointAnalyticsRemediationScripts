@@ -64,6 +64,7 @@ Describe 'Foundation path map details' -Tag 'FoundationMap' {
 
 Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     BeforeAll {
+        Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
         $symbolGenerator = Join-Path $repositoryRoot 'tools/New-FoundationSymbolMap.ps1'
         $pathMapPath = Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1'
@@ -75,16 +76,8 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         $baseRevision = (
             Get-Content "$repositoryRoot/evidence/foundation/BaseRevision.txt" -Raw
         ).Trim()
-        $repositoryGitPath = Join-Path $repositoryRoot '.git'
-        $gitDirectory = if (Test-Path -LiteralPath $repositoryGitPath -PathType Container) {
-            $repositoryGitPath
-        }
-        else {
-            Join-Path (Split-Path (Split-Path $repositoryRoot -Parent) -Parent) '.git'
-        }
-        if (-not (Test-Path -LiteralPath $gitDirectory -PathType Container)) {
-            throw "Unable to locate the repository Git directory '$gitDirectory'."
-        }
+        $gitContext = Resolve-FoundationRepositoryGitContext -RepositoryRoot $repositoryRoot
+        $gitDirectory = $gitContext.GitDirectory
         function Copy-FoundationSymbolGenerator {
             param([Parameter(Mandatory)] [string] $Root)
 
@@ -592,35 +585,11 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
             -LiteralPath "$repositoryRoot/evidence/foundation/StaticAnalysisExclusions.json" `
             -Raw |
             ConvertFrom-Json
+        $approvedLongLineDigest = 'd43eae67fa2231aeebc5895e9e1418ca025361dca6c4643ca8c50e990c282abe'
         $scriptFiles = @(Get-DeploymentScript -Root $repositoryRoot)
-        $gitPointerPath = Join-Path $repositoryRoot '.git'
-        $gitDirectory = if (Test-Path -LiteralPath $gitPointerPath -PathType Container) {
-            $gitPointerPath
-        }
-        else {
-            $gitPointer = [System.IO.File]::ReadAllText($gitPointerPath).Trim()
-            if ($gitPointer -notmatch '^gitdir:\s+(.+)$') {
-                throw "Invalid worktree Git pointer '$gitPointerPath'."
-            }
-            $worktreeName = ($Matches[1].Replace('\', '/').Split('/'))[-1]
-            $mainGitDirectory = Join-Path (
-                Split-Path (Split-Path $repositoryRoot -Parent) -Parent
-            ) '.git'
-            Join-Path (Join-Path $mainGitDirectory 'worktrees') $worktreeName
-        }
         $trackedPowerShellPaths = @(
-            & git `
-                "--git-dir=$gitDirectory" `
-                "--work-tree=$repositoryRoot" `
-                ls-files `
-                -- `
-                '*.ps1' `
-                '*.psm1' `
-                '*.psd1'
+            Get-FoundationTrackedPowerShellPath -RepositoryRoot $repositoryRoot
         )
-        if ($LASTEXITCODE -ne 0) {
-            throw 'Unable to enumerate tracked PowerShell files.'
-        }
         $trackedPowerShellFiles = @(
             foreach ($relativePath in $trackedPowerShellPaths) {
                 $fullPath = Join-Path $repositoryRoot $relativePath
@@ -716,6 +685,38 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
             [string[]] $sorted = @($Keys)
             [System.Array]::Sort($sorted, [System.StringComparer]::Ordinal)
             return ($sorted -join "`n")
+        }
+
+        function Get-FoundationStyleKeyDigest {
+            param([Parameter(Mandatory)] [object[]] $Keys)
+
+            [string[]] $sorted = @($Keys | ForEach-Object { [string] $_ })
+            [System.Array]::Sort($sorted, [System.StringComparer]::Ordinal)
+            $encoding = New-Object System.Text.UTF8Encoding($false)
+            $hasher = [System.Security.Cryptography.SHA256]::Create()
+            try {
+                return ([BitConverter]::ToString(
+                        $hasher.ComputeHash($encoding.GetBytes(($sorted -join "`n")))
+                    )).Replace('-', '').ToLowerInvariant()
+            }
+            finally {
+                $hasher.Dispose()
+            }
+        }
+
+        function Assert-FoundationApprovedLongLineCatalog {
+            param(
+                [Parameter(Mandatory)] [object[]] $Keys,
+                [Parameter(Mandatory)] [string] $ExpectedDigest
+            )
+
+            $actualDigest = Get-FoundationStyleKeyDigest -Keys $Keys
+            if ($actualDigest -cne $ExpectedDigest) {
+                throw (
+                    "The approved long-line exception digest changed. " +
+                    "Expected '$ExpectedDigest'; actual '$actualDigest'."
+                )
+            }
         }
     }
 
@@ -997,9 +998,31 @@ Describe 'Foundation static style' -Tag 'FoundationStyle' {
             })
 
         $trackedPowerShellFiles.Count | Should -Be $trackedPowerShellPaths.Count
+        $trackedPowerShellFiles.Count | Should -Be 577
         $expected.Count | Should -Be 93
+        Assert-FoundationApprovedLongLineCatalog `
+            -Keys $expected `
+            -ExpectedDigest $approvedLongLineDigest
         Join-FoundationStyleKeys -Keys $actual |
             Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
+    }
+
+    It 'rejects a substituted long-line exception even when the row count remains 93' {
+        [string[]] $expected = @($styleExclusions.LongLines | ForEach-Object {
+                Get-FoundationStyleLineKey `
+                    -Path $_.Path `
+                    -Line $_.Line `
+                    -LineSha256 $_.LineSha256
+            })
+        [string[]] $mutated = @($expected)
+        $mutated[0] = 'Substituted/Detect-Substituted.ps1|1|{0}' -f ('0' * 64)
+
+        $mutated.Count | Should -Be 93
+        {
+            Assert-FoundationApprovedLongLineCatalog `
+                -Keys $mutated `
+                -ExpectedDigest $approvedLongLineDigest
+        } | Should -Throw '*approved long-line exception digest*'
     }
 
     It 'delegates the configured long-line rule only to the tracked-file repository test' {
@@ -1051,8 +1074,19 @@ Describe 'Foundation mover dirty-tree preconditions' -Tag 'FoundationCutover' {
                 [string[]] $Arguments
             )
 
-            $output = @(& git -C $Root @Arguments 2>&1)
-            if ($LASTEXITCODE -ne 0) {
+            $originalGitDirectory = $env:GIT_DIR
+            $originalGitWorkTree = $env:GIT_WORK_TREE
+            try {
+                $env:GIT_DIR = $null
+                $env:GIT_WORK_TREE = $null
+                $output = @(& git -C $Root @Arguments 2>&1)
+                $exitCode = $LASTEXITCODE
+            }
+            finally {
+                $env:GIT_DIR = $originalGitDirectory
+                $env:GIT_WORK_TREE = $originalGitWorkTree
+            }
+            if ($exitCode -ne 0) {
                 throw "git $($Arguments -join ' ') failed: $($output -join [Environment]::NewLine)"
             }
 
@@ -1218,5 +1252,164 @@ Describe 'Foundation mover dirty-tree preconditions' -Tag 'FoundationCutover' {
         } | Should -Throw "*$($fixture.SourceRelativePath)*"
         Test-Path -LiteralPath $fixture.SourcePath -PathType Leaf | Should -BeTrue
         Test-Path -LiteralPath $fixture.DestinationPath | Should -BeFalse
+    }
+}
+
+Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
+    BeforeAll {
+        Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
+        function Invoke-FoundationGitFixtureCommand {
+            param(
+                [Parameter(Mandatory)] [string] $Root,
+                [Parameter(Mandatory)] [string[]] $Arguments
+            )
+
+            $originalGitDirectory = $env:GIT_DIR
+            $originalGitWorkTree = $env:GIT_WORK_TREE
+            try {
+                $env:GIT_DIR = $null
+                $env:GIT_WORK_TREE = $null
+                $output = @(& git -C $Root @Arguments 2>&1)
+                $exitCode = $LASTEXITCODE
+            }
+            finally {
+                $env:GIT_DIR = $originalGitDirectory
+                $env:GIT_WORK_TREE = $originalGitWorkTree
+            }
+            if ($exitCode -ne 0) {
+                throw "git $($Arguments -join ' ') failed: $($output -join [Environment]::NewLine)"
+            }
+            return $output
+        }
+
+        function New-FoundationExternalWorktreeFixture {
+            param(
+                [Parameter(Mandatory)] [string] $Root,
+                [Parameter(Mandatory)] [string] $Name
+            )
+
+            $mainRoot = Join-Path $Root 'main'
+            $worktreeRoot = Join-Path $Root 'external-review'
+            [void] [System.IO.Directory]::CreateDirectory($mainRoot)
+            [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
+                    'init', '--quiet'
+                ))
+            [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
+                    'config', 'user.email', 'foundation-style@example.invalid'
+                ))
+            [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
+                    'config', 'user.name', 'Foundation Style Tests'
+                ))
+            [System.IO.File]::WriteAllText(
+                (Join-Path $mainRoot 'fixture.ps1'),
+                "Write-Output 'fixture'`n",
+                [System.Text.UTF8Encoding]::new($false)
+            )
+            [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
+                    'add', '--', 'fixture.ps1'
+                ))
+            [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
+                    'commit', '--quiet', '-m', 'fixture'
+                ))
+            [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
+                    'worktree', 'add', '--quiet', '-b', "review-$Name", $worktreeRoot
+                ))
+
+            $pointerPath = Join-Path $worktreeRoot '.git'
+            $pointer = [System.IO.File]::ReadAllText($pointerPath).Trim()
+            if ($pointer -notmatch '^gitdir:\s+(.+)$') {
+                throw "Invalid fixture Git pointer '$pointerPath'."
+            }
+            $gitDirectory = $Matches[1]
+            if (-not [System.IO.Path]::IsPathRooted($gitDirectory)) {
+                $gitDirectory = Join-Path (Split-Path $pointerPath -Parent) $gitDirectory
+            }
+
+            return [pscustomobject]@{
+                GitDirectory = [System.IO.Path]::GetFullPath($gitDirectory)
+                PointerPath = $pointerPath
+                WorktreeRoot = $worktreeRoot
+            }
+        }
+
+        function Set-FoundationInvalidGitPointer {
+            param([Parameter(Mandatory)] [string] $Path)
+
+            [System.IO.File]::SetAttributes($Path, [System.IO.FileAttributes]::Normal)
+            [System.IO.File]::WriteAllText(
+                $Path,
+                'gitdir: Z:\unusable\external-review',
+                [System.Text.UTF8Encoding]::new($false)
+            )
+        }
+    }
+
+    It 'uses the literal pointer for an externally located linked worktree' {
+        $originalGitDirectory = $env:GIT_DIR
+        $originalGitWorkTree = $env:GIT_WORK_TREE
+        try {
+            $env:GIT_DIR = $null
+            $env:GIT_WORK_TREE = $null
+            $fixture = New-FoundationExternalWorktreeFixture `
+                -Root (Join-Path $TestDrive 'literal-pointer') `
+                -Name 'literal'
+
+            $context = Resolve-FoundationRepositoryGitContext `
+                -RepositoryRoot $fixture.WorktreeRoot
+            $tracked = @(Get-FoundationTrackedPowerShellPath `
+                    -RepositoryRoot $fixture.WorktreeRoot)
+
+            $context.GitDirectory | Should -BeExactly $fixture.GitDirectory
+            $context.WorkTree | Should -Be $fixture.WorktreeRoot
+            $tracked | Should -Contain 'fixture.ps1'
+        }
+        finally {
+            $env:GIT_DIR = $originalGitDirectory
+            $env:GIT_WORK_TREE = $originalGitWorkTree
+        }
+    }
+
+    It 'prefers valid explicit Git environment paths over an unusable pointer' {
+        $fixture = New-FoundationExternalWorktreeFixture `
+            -Root (Join-Path $TestDrive 'explicit-environment') `
+            -Name 'environment'
+        Set-FoundationInvalidGitPointer -Path $fixture.PointerPath
+        $originalGitDirectory = $env:GIT_DIR
+        $originalGitWorkTree = $env:GIT_WORK_TREE
+        try {
+            $env:GIT_DIR = $fixture.GitDirectory
+            $env:GIT_WORK_TREE = $fixture.WorktreeRoot
+
+            $tracked = @(Get-FoundationTrackedPowerShellPath `
+                    -RepositoryRoot $fixture.WorktreeRoot)
+
+            $tracked | Should -Contain 'fixture.ps1'
+        }
+        finally {
+            $env:GIT_DIR = $originalGitDirectory
+            $env:GIT_WORK_TREE = $originalGitWorkTree
+        }
+    }
+
+    It 'throws for an unusable cross-OS pointer before returning an empty scan' {
+        $fixture = New-FoundationExternalWorktreeFixture `
+            -Root (Join-Path $TestDrive 'invalid-pointer') `
+            -Name 'invalid'
+        Set-FoundationInvalidGitPointer -Path $fixture.PointerPath
+        $originalGitDirectory = $env:GIT_DIR
+        $originalGitWorkTree = $env:GIT_WORK_TREE
+        try {
+            $env:GIT_DIR = $null
+            $env:GIT_WORK_TREE = $null
+
+            {
+                @(Get-FoundationTrackedPowerShellPath `
+                        -RepositoryRoot $fixture.WorktreeRoot)
+            } | Should -Throw '*Unable to resolve repository Git context*'
+        }
+        finally {
+            $env:GIT_DIR = $originalGitDirectory
+            $env:GIT_WORK_TREE = $originalGitWorkTree
+        }
     }
 }

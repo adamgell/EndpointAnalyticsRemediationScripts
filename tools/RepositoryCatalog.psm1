@@ -199,10 +199,208 @@ function Get-UnresolvedRepositoryReference {
     }
 }
 
+function Get-FoundationAbsolutePath {
+    param(
+        [Parameter(Mandatory)] [string] $Path,
+        [string] $BasePath
+    )
+
+    if ([System.IO.Path]::IsPathRooted($Path)) {
+        return [System.IO.Path]::GetFullPath($Path)
+    }
+    if ([string]::IsNullOrEmpty($BasePath)) {
+        return [System.IO.Path]::GetFullPath($Path)
+    }
+    return [System.IO.Path]::GetFullPath((Join-Path $BasePath $Path))
+}
+
+function Test-FoundationPathEquality {
+    param(
+        [Parameter(Mandatory)] [string] $Left,
+        [Parameter(Mandatory)] [string] $Right
+    )
+
+    $comparison = if (
+        [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
+    ) {
+        [System.StringComparison]::OrdinalIgnoreCase
+    }
+    else {
+        [System.StringComparison]::Ordinal
+    }
+    return [string]::Equals(
+        [System.IO.Path]::GetFullPath($Left).TrimEnd('\', '/'),
+        [System.IO.Path]::GetFullPath($Right).TrimEnd('\', '/'),
+        $comparison
+    )
+}
+
+function Resolve-FoundationValidatedGitContext {
+    param(
+        [Parameter(Mandatory)] [string] $GitDirectory,
+        [Parameter(Mandatory)] [string] $WorkTree
+    )
+
+    if (
+        -not (Test-Path -LiteralPath $GitDirectory -PathType Container) -or
+        -not (Test-Path -LiteralPath $WorkTree -PathType Container)
+    ) {
+        return $null
+    }
+
+    $output = @(& git `
+            "--git-dir=$GitDirectory" `
+            "--work-tree=$WorkTree" `
+            rev-parse `
+            --absolute-git-dir `
+            --show-toplevel 2>&1)
+    if ($LASTEXITCODE -ne 0 -or $output.Count -lt 2) {
+        return $null
+    }
+
+    $resolvedGitDirectory = [string] $output[0]
+    $resolvedWorkTree = [string] $output[1]
+    if (-not (Test-FoundationPathEquality -Left $resolvedWorkTree -Right $WorkTree)) {
+        return $null
+    }
+
+    return [pscustomobject]@{
+        GitDirectory = [System.IO.Path]::GetFullPath($resolvedGitDirectory)
+        WorkTree = [System.IO.Path]::GetFullPath($resolvedWorkTree)
+    }
+}
+
+function Resolve-FoundationNativeGitContext {
+    param([Parameter(Mandatory)] [string] $RepositoryRoot)
+
+    $originalGitDirectory = $env:GIT_DIR
+    $originalGitWorkTree = $env:GIT_WORK_TREE
+    try {
+        $env:GIT_DIR = $null
+        $env:GIT_WORK_TREE = $null
+        $output = @(& git `
+                -C $RepositoryRoot `
+                rev-parse `
+                --absolute-git-dir `
+                --show-toplevel 2>&1)
+        if ($LASTEXITCODE -ne 0 -or $output.Count -lt 2) {
+            return $null
+        }
+    }
+    finally {
+        $env:GIT_DIR = $originalGitDirectory
+        $env:GIT_WORK_TREE = $originalGitWorkTree
+    }
+
+    $resolvedGitDirectory = [string] $output[0]
+    $resolvedWorkTree = [string] $output[1]
+    if (-not (Test-FoundationPathEquality -Left $resolvedWorkTree -Right $RepositoryRoot)) {
+        return $null
+    }
+    return Resolve-FoundationValidatedGitContext `
+        -GitDirectory $resolvedGitDirectory `
+        -WorkTree $resolvedWorkTree
+}
+
+function Resolve-FoundationRepositoryGitContext {
+    param([Parameter(Mandatory)] [string] $RepositoryRoot)
+
+    $repositoryRootPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
+    if (-not (Test-Path -LiteralPath $repositoryRootPath -PathType Container)) {
+        throw "Repository root '$repositoryRootPath' does not exist."
+    }
+
+    $attempts = [System.Collections.Generic.List[string]]::new()
+    if (-not [string]::IsNullOrWhiteSpace($env:GIT_DIR)) {
+        try {
+            $explicitGitDirectory = Get-FoundationAbsolutePath -Path $env:GIT_DIR
+            $explicitWorkTree = if ([string]::IsNullOrWhiteSpace($env:GIT_WORK_TREE)) {
+                $repositoryRootPath
+            }
+            else {
+                Get-FoundationAbsolutePath -Path $env:GIT_WORK_TREE
+            }
+            $context = Resolve-FoundationValidatedGitContext `
+                -GitDirectory $explicitGitDirectory `
+                -WorkTree $explicitWorkTree
+            if ($null -ne $context) {
+                return $context
+            }
+            $attempts.Add('the explicit GIT_DIR and GIT_WORK_TREE values were unusable')
+        }
+        catch {
+            $attempts.Add("the explicit Git environment was invalid: $($_.Exception.Message)")
+        }
+    }
+
+    $gitPath = Join-Path $repositoryRootPath '.git'
+    if (Test-Path -LiteralPath $gitPath -PathType Container) {
+        $context = Resolve-FoundationValidatedGitContext `
+            -GitDirectory $gitPath `
+            -WorkTree $repositoryRootPath
+        if ($null -ne $context) {
+            return $context
+        }
+        $attempts.Add("the Git directory '$gitPath' was unusable")
+    }
+    elseif (Test-Path -LiteralPath $gitPath -PathType Leaf) {
+        $pointer = [System.IO.File]::ReadAllText($gitPath).Trim()
+        if ($pointer -notmatch '^gitdir:\s+(.+)$') {
+            $attempts.Add("the Git pointer '$gitPath' was invalid")
+        }
+        else {
+            try {
+                $pointerDirectory = Get-FoundationAbsolutePath `
+                    -Path $Matches[1] `
+                    -BasePath (Split-Path $gitPath -Parent)
+                $context = Resolve-FoundationValidatedGitContext `
+                    -GitDirectory $pointerDirectory `
+                    -WorkTree $repositoryRootPath
+                if ($null -ne $context) {
+                    return $context
+                }
+                $attempts.Add("the Git pointer target '$pointerDirectory' was unusable")
+            }
+            catch {
+                $attempts.Add("the Git pointer '$gitPath' was unusable: $($_.Exception.Message)")
+            }
+        }
+    }
+    else {
+        $attempts.Add("the repository has no '.git' directory or pointer")
+    }
+
+    $context = Resolve-FoundationNativeGitContext -RepositoryRoot $repositoryRootPath
+    if ($null -ne $context) {
+        return $context
+    }
+    $attempts.Add('Git-native rev-parse could not resolve this repository root')
+    throw "Unable to resolve repository Git context: $($attempts -join '; ')."
+}
+
+function Get-FoundationTrackedPowerShellPath {
+    param([Parameter(Mandatory)] [string] $RepositoryRoot)
+
+    $context = Resolve-FoundationRepositoryGitContext -RepositoryRoot $RepositoryRoot
+    $paths = @(& git `
+            "--git-dir=$($context.GitDirectory)" `
+            "--work-tree=$($context.WorkTree)" `
+            ls-files `
+            -- `
+            '*.ps1' `
+            '*.psm1' `
+            '*.psd1' 2>&1)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to enumerate tracked PowerShell files: $($paths -join [Environment]::NewLine)"
+    }
+    return $paths
+}
 Export-ModuleMember -Function @(
     'Test-ScriptManifest'
     'Test-ManifestStatusTransition'
     'Get-DeploymentScript'
     'Get-ExtensionlessPowerShellCandidate'
     'Get-UnresolvedRepositoryReference'
+    'Resolve-FoundationRepositoryGitContext'
+    'Get-FoundationTrackedPowerShellPath'
 )
