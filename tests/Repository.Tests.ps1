@@ -49,7 +49,7 @@ Describe 'Foundation path map details' -Tag 'FoundationMap' {
         )
 
         @($inventory).Count | Should -Be 271
-        Compare-Object -ReferenceObject @($map.Paths.BasePath) -DifferenceObject $inventory -CaseSensitive |
+        Compare-Object -ReferenceObject @($map.Paths.NewPath) -DifferenceObject $inventory -CaseSensitive |
             Should -BeNullOrEmpty
     }
 
@@ -196,5 +196,73 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         [string[]] $expectedFunctions = @($actualFunctions)
         [System.Array]::Sort($expectedFunctions, [System.StringComparer]::Ordinal)
         ($actualFunctions -join "`n") | Should -Be ($expectedFunctions -join "`n")
+    }
+}
+
+Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
+    BeforeAll {
+        Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
+        $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $pathMap = Import-PowerShellDataFile "$repositoryRoot/evidence/foundation/PathMap.psd1"
+    }
+
+    It 'contains exactly 271 standard ps1 deployment scripts' {
+        $scripts = @(Get-DeploymentScript -Root $repositoryRoot)
+        $scripts.Count | Should -Be 271
+        $invalid = $scripts | Where-Object {
+            $_.Name -notmatch '^(Detect|Remediate)-[A-Z][A-Za-z0-9]*(?:-[A-Z0-9][A-Za-z0-9]*)*\.ps1$'
+        }
+        $invalid | Should -BeNullOrEmpty
+    }
+
+    It 'contains no extensionless PowerShell candidates' {
+        @(Get-ExtensionlessPowerShellCandidate -Root $repositoryRoot) |
+            Should -BeNullOrEmpty
+    }
+
+    It 'contains no lowercase legacy role prefixes' {
+        $legacy = Get-ChildItem -LiteralPath $repositoryRoot -Recurse -File |
+            Where-Object Name -Match '^(detection_|remediation_)'
+        $legacy | Should -BeNullOrEmpty
+    }
+
+    It 'contains no legacy script path from the path map' {
+        $remaining = $pathMap.Paths.BasePath | Where-Object {
+            Test-Path -LiteralPath (Join-Path $repositoryRoot $_)
+        }
+        $remaining | Should -BeNullOrEmpty
+    }
+
+    It 'contains all 271 unique destinations from the path map' {
+        @($pathMap.Paths.NewPath).Count | Should -Be 271
+        @($pathMap.Paths.NewPath | Sort-Object -Unique).Count | Should -Be 271
+        $missing = $pathMap.Paths.NewPath | Where-Object {
+            -not (Test-Path -LiteralPath (Join-Path $repositoryRoot $_) -PathType Leaf)
+        }
+        $missing | Should -BeNullOrEmpty
+    }
+
+    It 'uses exact mapped destination casing' {
+        $actualPaths = Get-DeploymentScript -Root $repositoryRoot |
+            ForEach-Object {
+                $_.FullName.Substring($repositoryRoot.Length).
+                    TrimStart('\', '/').
+                    Replace('\', '/')
+            }
+        @(Compare-Object -ReferenceObject $pathMap.Paths.NewPath `
+                -DifferenceObject $actualPaths -CaseSensitive) |
+            Should -BeNullOrEmpty
+    }
+
+    It 'removes mapped source directories only after they become empty' {
+        $emptySourceDirectories = $pathMap.Paths.BasePath |
+            ForEach-Object { Split-Path -Parent $_ } |
+            Sort-Object -Unique |
+            Where-Object {
+                $directory = Join-Path $repositoryRoot $_
+                (Test-Path -LiteralPath $directory -PathType Container) -and
+                    @(Get-ChildItem -LiteralPath $directory -Force).Count -eq 0
+            }
+        $emptySourceDirectories | Should -BeNullOrEmpty
     }
 }
