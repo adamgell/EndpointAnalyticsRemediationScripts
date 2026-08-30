@@ -1478,3 +1478,107 @@ Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
         }
     }
 }
+Describe 'Build quality interface' -Tag 'BuildInterface' {
+    BeforeAll {
+        $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $buildPath = Join-Path $repositoryRoot 'build.ps1'
+        $windowsPowerShellPath = if (-not [string]::IsNullOrEmpty($env:SystemRoot)) {
+            Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+        }
+        else {
+            ''
+        }
+        $powerShellPath = if (
+            [Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            [System.IO.File]::Exists($windowsPowerShellPath)
+        ) {
+            $windowsPowerShellPath
+        }
+        else {
+            (Get-Command pwsh -ErrorAction SilentlyContinue).Path
+        }
+    }
+
+    It 'retries only a publisher mismatch without forcing a module overwrite' {
+        $fixture = Join-Path $TestDrive 'BootstrapFixture.ps1'
+        $buildLiteral = $buildPath.Replace("'", "''")
+        @"
+`$ErrorActionPreference = 'Stop'
+`$global:InstallCalls = @()
+function Get-Module {
+    param([string] `$Name, [switch] `$ListAvailable)
+    [pscustomobject]@{
+        Name = `$Name
+        Version = [version] '3.4.0'
+    }
+}
+function Install-Module {
+    param(
+        [string] `$Name,
+        [string] `$RequiredVersion,
+        [string] `$Repository,
+        [string] `$Scope,
+        [switch] `$Force,
+        [switch] `$AllowClobber,
+        [switch] `$SkipPublisherCheck
+    )
+    `$global:InstallCalls += [pscustomobject]@{
+        Name = `$Name
+        RequiredVersion = `$RequiredVersion
+        Repository = `$Repository
+        Scope = `$Scope
+        Force = `$Force.IsPresent
+        AllowClobber = `$AllowClobber.IsPresent
+        SkipPublisherCheck = `$SkipPublisherCheck.IsPresent
+    }
+    if (-not `$SkipPublisherCheck) {
+        throw 'PublishersMismatch: built-in publisher differs from requested module.'
+    }
+}
+& '$buildLiteral' -Task Bootstrap
+`$global:InstallCalls | ConvertTo-Json -Compress
+"@ | Set-Content -LiteralPath $fixture -Encoding utf8
+
+        $output = @(
+            & $powerShellPath -NoProfile -NonInteractive `
+                -ExecutionPolicy Bypass -File $fixture
+        )
+        $exitCode = $LASTEXITCODE
+
+        $exitCode | Should -Be 0
+        $calls = @($output -join '' | ConvertFrom-Json)
+        $calls.Count | Should -Be 4
+        @($calls | Where-Object SkipPublisherCheck).Count | Should -Be 2
+        @($calls | Where-Object Force).Count | Should -Be 0
+        @($calls | Where-Object { $_.Scope -ne 'CurrentUser' }).Count |
+            Should -Be 0
+        @($calls | Where-Object { $_.RequiredVersion -notin @('5.7.1', '1.25.0') }).Count |
+            Should -Be 0
+    }
+
+    It 'preloads CimCmdlets for a fresh ValidateRewrite process' -Skip:(
+        [Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT
+    ) {
+        $baseRevision = (Get-Content `
+                -LiteralPath (Join-Path $repositoryRoot 'evidence/foundation/BaseRevision.txt') `
+                -Raw).Trim()
+        $reportPath = Join-Path $TestDrive 'fresh-rewrite-report.json'
+        $output = @(
+            & $windowsPowerShellPath -NoProfile -NonInteractive `
+                -ExecutionPolicy Bypass -File $buildPath `
+                -Task ValidateRewrite `
+                -BaseRevision $baseRevision `
+                -PathMap (Join-Path $repositoryRoot 'evidence/foundation/PathMap.psd1') `
+                -SymbolMap (Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1') `
+                -ReportPath $reportPath
+        )
+        $exitCode = $LASTEXITCODE
+        $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+
+        $exitCode | Should -Be 0
+        $report.Passed | Should -BeTrue
+        @($report.Rows).Count | Should -Be 271
+        @($report.Failures).Count | Should -Be 0
+        ($output -join "`n") | Should -Not -Match 'deployment'
+    }
+}
