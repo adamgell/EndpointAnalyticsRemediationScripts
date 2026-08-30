@@ -261,6 +261,27 @@ function Get-CoveredScriptPaths {
     return $paths.ToArray()
 }
 
+function Test-PesterResultSuccess {
+    param([Parameter(Mandatory)] [psobject] $Result)
+
+    $resultProperty = $Result.PSObject.Properties['Result']
+    $failedCountProperty = $Result.PSObject.Properties['FailedCount']
+    $resultState = if ($null -ne $resultProperty) {
+        [string] $resultProperty.Value
+    }
+    else {
+        ''
+    }
+    $failedCount = if ($null -ne $failedCountProperty -and
+        $null -ne $failedCountProperty.Value) {
+        [int] $failedCountProperty.Value
+    }
+    else {
+        -1
+    }
+    return ($resultState -eq 'Passed' -and $failedCount -eq 0)
+}
+
 function Invoke-RepositoryTests {
     param([switch] $EnableCoverage)
 
@@ -282,8 +303,11 @@ function Invoke-RepositoryTests {
         $configuration.CodeCoverage.Path = $coveragePaths
     }
     $result = Invoke-Pester -Configuration $configuration
-    if ($result.FailedCount -gt 0) {
-        throw "Pester reported $($result.FailedCount) failed tests."
+    if (-not (Test-PesterResultSuccess -Result $result)) {
+        if ($result.FailedCount -gt 0) {
+            throw "Pester reported $($result.FailedCount) failed tests."
+        }
+        throw "Pester reported non-success result '$([string] $result.Result)'."
     }
     Write-Output (
         "Pester passed: $($result.PassedCount) passed, " +
@@ -298,8 +322,14 @@ function Invoke-FormatCheck {
         -Tag FoundationStyle `
         -Output Detailed `
         -PassThru
-    if ($result.FailedCount -gt 0) {
-        throw "Formatting verification reported $($result.FailedCount) failed tests."
+    if (-not (Test-PesterResultSuccess -Result $result)) {
+        if ($result.FailedCount -gt 0) {
+            throw "Formatting verification reported $($result.FailedCount) failed tests."
+        }
+        throw (
+            "Formatting verification reported non-success result " +
+            "'$([string] $result.Result)'."
+        )
     }
     Write-Output 'Formatting verification passed without rewriting files.'
 }
@@ -311,8 +341,11 @@ function Invoke-MapValidation {
         -Tag FoundationMapCurrentTree `
         -Output Detailed `
         -PassThru
-    if ($result.FailedCount -gt 0) {
-        throw "Map validation reported $($result.FailedCount) failed tests."
+    if (-not (Test-PesterResultSuccess -Result $result)) {
+        if ($result.FailedCount -gt 0) {
+            throw "Map validation reported $($result.FailedCount) failed tests."
+        }
+        throw "Map validation reported non-success result '$([string] $result.Result)'."
     }
     Write-Output 'Path-map and symbol-map validation passed.'
 }

@@ -1628,7 +1628,17 @@ function Invoke-Pester {
             $failedCount = 1
         }
     }
+    $resultState = if (-not [string]::IsNullOrWhiteSpace($env:BUILD_CONTRACT_RESULT)) {
+        [string] $env:BUILD_CONTRACT_RESULT
+    }
+    elseif ($failedCount -eq 0) {
+        'Passed'
+    }
+    else {
+        'Failed'
+    }
     [pscustomobject]@{
+        Result = $resultState
         FailedCount = $failedCount
         PassedCount = if ($failedCount -eq 0) { 1 } else { 0 }
         SkippedCount = 0
@@ -1769,7 +1779,7 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
                 Set-Content -LiteralPath (Join-Path $root 'evidence/foundation/BaseRevision.txt') `
                     -Value ('a' * 40) -Encoding ascii
                 Set-Content -LiteralPath (Join-Path $root 'evidence/foundation/SymbolRenames.psd1') `
-                    -Value '@{}' -Encoding utf8
+                    -Value '@{ Commands = @(); Aliases = @() }' -Encoding utf8
                 $rewriteGate = @'
 param(
     [string] $BaseRevision,
@@ -1798,7 +1808,8 @@ exit 0
         function Invoke-BuildContractFixture {
             param(
                 [Parameter(Mandatory)] [string] $FixtureRoot,
-                [string[]] $Arguments = @()
+                [string[]] $Arguments = @(),
+                [string] $PesterResult
             )
 
             $logPath = Join-Path $TestDrive ('BuildInterface-' + [guid]::NewGuid().ToString('N') + '.jsonl')
@@ -1807,6 +1818,7 @@ exit 0
             $originalLogPath = $env:BUILD_CONTRACT_LOG
             $originalSentinelPath = $env:BUILD_CONTRACT_SENTINEL
             $originalFailure = $env:BUILD_CONTRACT_FAILURE
+            $originalPesterResult = $env:BUILD_CONTRACT_RESULT
             $originalExecuteFixture = $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE
             try {
                 $env:PSModulePath = (
@@ -1816,6 +1828,7 @@ exit 0
                 $env:BUILD_CONTRACT_LOG = $logPath
                 $env:BUILD_CONTRACT_SENTINEL = $sentinelPath
                 $env:BUILD_CONTRACT_FAILURE = $null
+                $env:BUILD_CONTRACT_RESULT = $PesterResult
                 $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE = '1'
                 $output = @(
                     & $powerShellPath -NoProfile -NonInteractive `
@@ -1829,6 +1842,7 @@ exit 0
                 $env:BUILD_CONTRACT_LOG = $originalLogPath
                 $env:BUILD_CONTRACT_SENTINEL = $originalSentinelPath
                 $env:BUILD_CONTRACT_FAILURE = $originalFailure
+                $env:BUILD_CONTRACT_RESULT = $originalPesterResult
                 $env:BUILD_CONTRACT_EXECUTE_TEST_FIXTURE = $originalExecuteFixture
             }
             $records = @()
@@ -2193,6 +2207,30 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         $rewriteInvocations[0].SymbolMap | Should -Be $symbolMapPath
         $rewriteInvocations[0].ReportPath | Should -Be $reportPath
     }
+    It 'fails every Pester-bearing route when Result is non-success despite zero failed tests' `
+        -Skip:(
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+        -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+        $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
+        foreach ($route in @(
+                @{ Name = 'Validate'; Arguments = @('-Task', 'Validate') }
+                @{ Name = 'Test'; Arguments = @('-Task', 'Test') }
+                @{ Name = 'CheckFormat'; Arguments = @('-Task', 'CheckFormat') }
+            )) {
+            $fixture = New-BuildContractFixture -Route $route.Name
+            $result = Invoke-BuildContractFixture `
+                -FixtureRoot $fixture `
+                -Arguments $route.Arguments `
+                -PesterResult 'Failed'
+
+            $result.ExitCode | Should -Not -Be 0
+            ($result.Output -join "`n") | Should -Match `
+                "non-success result 'Failed'"
+        }
+    }
+
     It 'invokes Analyze with recursive analysis and repository settings' -Skip:(
         ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
         -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
