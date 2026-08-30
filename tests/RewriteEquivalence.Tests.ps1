@@ -62,7 +62,8 @@ $CandidateSource
 "@ | Set-Content -LiteralPath $symbolMap -Encoding ascii
         $reportPath = Join-Path $Root 'RewriteReport.json'
 
-        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
+        & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File `
+            (Join-Path $tools 'Test-PowerShellRewrite.ps1') `
             -BaseRevision $baseRevision `
             -PathMap $pathMap `
             -SymbolMap $symbolMap `
