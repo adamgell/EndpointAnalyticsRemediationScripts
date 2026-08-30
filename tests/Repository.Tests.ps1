@@ -2258,7 +2258,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         )
         $beforeTree = @(
             foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
-            Sort-Object -Property FullName)) {
+                Sort-Object -Property FullName)) {
                 $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
                 "$($file.FullName):$($hash.Hash)"
             }
@@ -2272,7 +2272,7 @@ if (@($Tag) -contains 'FoundationMap' -or @($Tag) -contains 'FoundationMapBaseli
         )
         $afterTree = @(
             foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
-            Sort-Object -Property FullName)) {
+                Sort-Object -Property FullName)) {
                 $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
                 "$($file.FullName):$($hash.Hash)"
             }
