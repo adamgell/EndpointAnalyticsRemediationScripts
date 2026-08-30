@@ -112,7 +112,7 @@ jobs:
           )
           $rewriteDirectories = @(
               $rewriteFiles |
-                  ForEach-Object { Split-Path -Parent ([string] $_) } |
+                  ForEach-Object { (Split-Path -Parent ([string] $_)).Replace('\', '/') } |
                   Sort-Object -Unique
           )
           $reportIndex = 0

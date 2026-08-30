@@ -191,8 +191,17 @@ function Get-UnresolvedRepositoryReference {
             $target = $match.Groups['target'].Value.Trim().Trim('<', '>')
             if ($target -match '^(?:https?|mailto):' -or $target.StartsWith('#')) { continue }
             $decoded = [uri]::UnescapeDataString($target)
-            $resolved = Join-Path $markdown.DirectoryName $decoded
-            if (-not (Test-Path -LiteralPath $resolved)) {
+            try {
+                $resolved = Join-Path -Path $markdown.DirectoryName -ChildPath $decoded
+                $exists = Test-Path -LiteralPath $resolved
+            }
+            catch {
+                throw (
+                    "Invalid repository reference target '$target' in " +
+                    "'$($markdown.FullName)': $($_.Exception.Message)"
+                )
+            }
+            if (-not $exists) {
                 [pscustomobject]@{ Markdown = $markdown.FullName; Target = $target }
             }
         }
