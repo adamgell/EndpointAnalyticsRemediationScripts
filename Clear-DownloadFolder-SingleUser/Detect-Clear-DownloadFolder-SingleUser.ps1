@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,16 +11,16 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User
 Context: 64 Bit
-#> 
+#>
 
 ##Check if there is anything in there
 $path = "$env:USERPROFILE\Downloads"
 $content = Get-ChildItem $path
 if ($content.count -gt 0) {
-    write-host "things to remove"
+    Write-Host "things to remove"
     exit 1
 }
 else {
-    write-host "nothing to remove"
+    Write-Host "nothing to remove"
     exit 0
 }

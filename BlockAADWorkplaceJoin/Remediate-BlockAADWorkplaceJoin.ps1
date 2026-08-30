@@ -1,4 +1,4 @@
-#Function Region
+﻿#Function Region
 Function New-Reg ($registryPath, $name, $Value, $type) {
     if (!(Test-Path $registryPath)) {
         New-Item -Path $registryPath -Force | Out-Null

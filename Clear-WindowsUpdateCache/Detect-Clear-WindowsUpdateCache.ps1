@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-windowsupdatecache.ps1
@@ -14,7 +14,8 @@ $MaxSizeMB = 1024
 try {
     $CachePath = "$env:SystemRoot\SoftwareDistribution\Download"
     if (Test-Path $CachePath) {
-        $Size = (Get-ChildItem -Path $CachePath -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+        $Size = (Get-ChildItem -Path $CachePath -Recurse -Force -ErrorAction SilentlyContinue |
+                Measure-Object -Property Length -Sum).Sum
         $SizeMB = [math]::Round($Size / 1MB, 2)
 
         if ($SizeMB -gt $MaxSizeMB) {

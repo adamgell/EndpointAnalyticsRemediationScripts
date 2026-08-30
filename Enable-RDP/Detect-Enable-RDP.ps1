@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,33 +11,33 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 # Always trigger
-function IsMember
-{
-  param(
+function Test-GroupMembership {
+    param(
         [String]$GroupSID = "",
-        [String]$UserSID = ""     
-        )
+        [String]$UserSID = ""
+    )
     $memebers = Get-LocalGroupMember -SID $GroupSID
     $isMember = $false
-    foreach ($memeber in $memebers)
-    {
-        if($memeber.sid -eq $UserSID) {$isMember = $true}
+    foreach ($memeber in $memebers) {
+        if ($memeber.sid -eq $UserSID) { $isMember = $true }
     }
     return $isMember
 }
 
 
-if((Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\' -Name 'fDenyTSConnections').fDenyTSConnections){
+if ((Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\' -Name 'fDenyTSConnections').
+    fDenyTSConnections) {
     Write-Host "RDP is disabled"
     return 1
-}else{
+}
+else {
     Write-Host "RDP is enabled"
 }
 
-if(IsMember -GroupSID S-1-5-32-555 -UserSID S-1-1-0){
+if (Test-GroupMembership -GroupSID S-1-5-32-555 -UserSID S-1-1-0) {
     Write-Host "User is member of the RDP group"
     exit 0
 }

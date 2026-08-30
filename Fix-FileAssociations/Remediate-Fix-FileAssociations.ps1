@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: fix-fileassociations.ps1
@@ -11,16 +11,16 @@ Context: 64 Bit
 
 try {
     $DefaultAssociations = @{
-        ".txt"  = "txtfile"
-        ".pdf"  = "MSEdgePDF"
-        ".jpg"  = "PhotoViewer.FileAssoc.Jpeg"
+        ".txt" = "txtfile"
+        ".pdf" = "MSEdgePDF"
+        ".jpg" = "PhotoViewer.FileAssoc.Jpeg"
         ".jpeg" = "PhotoViewer.FileAssoc.Jpeg"
-        ".png"  = "PhotoViewer.FileAssoc.Png"
-        ".gif"  = "PhotoViewer.FileAssoc.Gif"
-        ".mp4"  = "WMP11.AssocFile.MP4"
-        ".zip"  = "CompressedFolder"
-        ".xml"  = "xmlfile"
-        ".log"  = "txtfile"
+        ".png" = "PhotoViewer.FileAssoc.Png"
+        ".gif" = "PhotoViewer.FileAssoc.Gif"
+        ".mp4" = "WMP11.AssocFile.MP4"
+        ".zip" = "CompressedFolder"
+        ".xml" = "xmlfile"
+        ".log" = "txtfile"
     }
 
     foreach ($Ext in $DefaultAssociations.Keys) {

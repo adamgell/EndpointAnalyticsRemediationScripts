@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: optimize-disk.ps1
@@ -13,7 +13,9 @@ try {
     $Volumes = Get-Volume | Where-Object { $_.DriveLetter -and $_.DriveType -eq "Fixed" }
 
     foreach ($Vol in $Volumes) {
-        $PhysicalDisk = Get-PhysicalDisk | Where-Object { $_.DeviceId -eq (Get-Partition -DriveLetter $Vol.DriveLetter -ErrorAction SilentlyContinue).DiskNumber } -ErrorAction SilentlyContinue
+        $PhysicalDisk = Get-PhysicalDisk | Where-Object { $_.DeviceId -eq (
+                Get-Partition -DriveLetter $Vol.DriveLetter -ErrorAction SilentlyContinue).DiskNumber
+        } -ErrorAction SilentlyContinue
 
         if ($PhysicalDisk.MediaType -eq "SSD") {
             Optimize-Volume -DriveLetter $Vol.DriveLetter -ReTrim -ErrorAction Stop

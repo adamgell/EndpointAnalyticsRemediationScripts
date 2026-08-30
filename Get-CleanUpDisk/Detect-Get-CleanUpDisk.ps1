@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,11 +11,11 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 $storageThreshold = 15
 
-$utilization = (Get-PSDrive | Where {$_.name -eq "C"}).free
+$utilization = (Get-PSDrive | Where-Object { $_.name -eq "C" }).free
 
-if(($storageThreshold *1GB) -lt $utilization){exit 0}
-else{exit 1}
+if (($storageThreshold * 1GB) -lt $utilization) { exit 0 }
+else { exit 1 }

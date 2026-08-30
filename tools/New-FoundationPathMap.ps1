@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $PackageData,
     [Parameter(Mandatory)] [string] $OutputPath
@@ -53,9 +53,9 @@ function Add-PathRow {
     }
 
     $Rows.Add([pscustomobject][ordered]@{
-        BasePath = $BasePath
-        NewPath = $newPath
-    })
+            BasePath = $BasePath
+            NewPath = $newPath
+        })
 }
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -161,9 +161,9 @@ foreach ($split in @($data.SplitPackages)) {
     $null = $splitSourcePackages.Add($sourcePackage)
 
     foreach ($roleDefinition in @(
-        @{ Role = 'Detection'; FileName = [string] $split.Detection }
-        @{ Role = 'Remediation'; FileName = [string] $split.Remediation }
-    )) {
+            @{ Role = 'Detection'; FileName = [string] $split.Detection }
+            @{ Role = 'Remediation'; FileName = [string] $split.Remediation }
+        )) {
         $fileName = $roleDefinition.FileName
         if ([string]::IsNullOrWhiteSpace($fileName) -or
             $fileName -ne [System.IO.Path]::GetFileName($fileName)) {

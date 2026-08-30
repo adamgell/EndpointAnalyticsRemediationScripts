@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -25,7 +25,8 @@ try {
     }
 
     # Check disk space on system drive
-    $SystemDrive = Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='$($env:SystemDrive)'" -ErrorAction SilentlyContinue
+    $SystemDrive =
+    Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='$($env:SystemDrive)'" -ErrorAction SilentlyContinue
     if ($SystemDrive) {
         $FreeSpacePercent = [math]::Round(($SystemDrive.FreeSpace / $SystemDrive.Size) * 100, 2)
         if ($FreeSpacePercent -lt 10) {

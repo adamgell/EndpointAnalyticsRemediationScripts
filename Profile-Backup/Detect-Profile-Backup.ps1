@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,17 +11,17 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User
 Context: 64 Bit
-#> 
+#>
 $todaysdate = Get-Date -Format "dd-MM-yyyy-HH"
 $dir = $env:APPDATA + "\backup-restore"
 
 ##Open File to check contents
 $backupfile = $dir + "\backup.txt"
 $backupdate = Get-Content -Path $backupfile
-$checkdate = (get-date $backupdate -Format "dd-MM-yyyy-HH")
+$checkdate = (Get-Date $backupdate -Format "dd-MM-yyyy-HH")
 ##Check if date is more than 1 hour ago
 if ($checkdate -lt $todaysdate) {
-    write-host "Run again"
+    Write-Host "Run again"
     exit 1
 }
 else {

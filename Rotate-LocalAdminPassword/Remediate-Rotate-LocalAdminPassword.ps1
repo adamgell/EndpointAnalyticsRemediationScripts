@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: rotate-localadminpassword.ps1
@@ -19,12 +19,12 @@ try {
     # [System.Web.Security.Membership]::GeneratePassword is known to produce biased
     # output (and is unavailable on PowerShell 7 without System.Web). Use a CSPRNG
     # over an explicit, well-defined character set instead.
-    $upper   = [char[]](65..90)
-    $lower   = [char[]](97..122)
-    $digits  = [char[]](48..57)
+    $upper = [char[]](65..90)
+    $lower = [char[]](97..122)
+    $digits = [char[]](48..57)
     $special = [char[]]'!@#$%^&*()-_=+[]{}'
     $charSet = $upper + $lower + $digits + $special
-    $length  = 24
+    $length = 24
 
     function Get-SecureRandomUInt32 {
         param([System.Security.Cryptography.RandomNumberGenerator]$Rng)

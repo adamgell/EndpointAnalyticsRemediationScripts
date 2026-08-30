@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -18,23 +18,23 @@ Author:
 Replace -ProcessName teams with -ProcessName ms-teams
 #Microsoft documentation for cache files : https://learn.microsoft.com/en-us/microsoftteams/troubleshoot/teams-administration/clear-teams-cache#method-2-delete-the-files
 Change files to delete following the documentation and add "-Confirm:$false -recurse -force" to Remove-Item
-#> 
+#>
 
 Write-Host "Microsoft Teams will be quit now in order to clear the cache."
-try{
+try {
     Get-Process -ProcessName ms-teams | Stop-Process -Force
     Start-Sleep -Seconds 5
     Write-Host "Microsoft Teams has been successfully quit."
 }
-catch{
-    echo $_
+catch {
+    Write-Output $_
 }
 # The cache is now being cleared.
-try{
-Get-ChildItem -Path $env:userprofile\appdata\local\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams | Remove-Item -Confirm:$false -recurse -force
+try {
+    Get-ChildItem -Path $env:userprofile\appdata\local\Packages\MSTeams_8wekyb3d8bbwe\LocalCache\Microsoft\MSTeams | Remove-Item -Confirm:$false -recurse -force
 }
-catch{
-    echo $_
+catch {
+    Write-Output $_
 }
- 
-write-host "The Microsoft Teams cache has been successfully cleared."
+
+Write-Host "The Microsoft Teams cache has been successfully cleared."

@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-browserextensions.ps1
@@ -20,7 +20,7 @@ try {
         $ChromeExtPath = Join-Path $Profile.FullName "AppData\Local\Google\Chrome\User Data\Default\Extensions"
         if (Test-Path $ChromeExtPath) {
             $Exts = (Get-ChildItem -Path $ChromeExtPath -Directory -ErrorAction SilentlyContinue |
-                Where-Object { $_.Name -notin $ApprovedExtensions -and $_.Name -ne "Temp" }).Count
+                    Where-Object { $_.Name -notin $ApprovedExtensions -and $_.Name -ne "Temp" }).Count
             if ($Exts -gt 0) {
                 Write-Warning "Not Compliant - $Exts unapproved Chrome extensions for $($Profile.Name)"
                 $UnapprovedFound = $true
@@ -30,7 +30,7 @@ try {
         $EdgeExtPath = Join-Path $Profile.FullName "AppData\Local\Microsoft\Edge\User Data\Default\Extensions"
         if (Test-Path $EdgeExtPath) {
             $Exts = (Get-ChildItem -Path $EdgeExtPath -Directory -ErrorAction SilentlyContinue |
-                Where-Object { $_.Name -notin $ApprovedExtensions -and $_.Name -ne "Temp" }).Count
+                    Where-Object { $_.Name -notin $ApprovedExtensions -and $_.Name -ne "Temp" }).Count
             if ($Exts -gt 0) {
                 Write-Warning "Not Compliant - $Exts unapproved Edge extensions for $($Profile.Name)"
                 $UnapprovedFound = $true

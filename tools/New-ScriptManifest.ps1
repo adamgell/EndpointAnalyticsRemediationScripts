@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $PathMap,
     [Parameter(Mandatory)] [string] $Metadata,
@@ -37,7 +37,7 @@ function Assert-MetadataKey {
         throw "$Context.$Key metadata is required."
     }
 
-    return ,($Value[$Key])
+    return , ($Value[$Key])
 }
 
 function Assert-NonEmptyString {
@@ -225,11 +225,11 @@ function ConvertTo-MetadataRecord {
     $configuration = [System.Collections.Generic.List[object]]::new()
     for ($index = 0; $index -lt $configurationValues.Count; $index += 4) {
         $configuration.Add(@{
-            Name = $configurationValues[$index]
-            Required = $configurationValues[$index + 1]
-            Secret = $configurationValues[$index + 2]
-            Description = $configurationValues[$index + 3]
-        })
+                Name = $configurationValues[$index]
+                Required = $configurationValues[$index + 1]
+                Secret = $configurationValues[$index + 2]
+                Description = $configurationValues[$index + 3]
+            })
     }
 
     return @{
@@ -322,7 +322,8 @@ function New-VersionFiveGuid {
     $sha1 = [Security.Cryptography.SHA1]::Create()
     try {
         $hash = $sha1.ComputeHash($inputBytes)
-    } finally {
+    }
+    finally {
         $sha1.Dispose()
     }
 
@@ -373,7 +374,8 @@ function New-ManifestContent {
     $lines.Add('    }')
     if (@($MetadataRecord.Configuration).Count -eq 0) {
         $lines.Add('    Configuration = @()')
-    } else {
+    }
+    else {
         $lines.Add('    Configuration = @(')
         foreach ($setting in @($MetadataRecord.Configuration)) {
             $lines.Add('        @{')
@@ -425,14 +427,17 @@ if (-not [guid]::TryParse([string] $metadataData.ManifestNamespaceGuid, [ref] $n
 }
 if ($metadataData.Contains('ScriptMetadata')) {
     $scriptMetadata = $metadataData.ScriptMetadata
-} elseif ($metadataData.Contains('ScriptMetadataJson')) {
+}
+elseif ($metadataData.Contains('ScriptMetadataJson')) {
     Assert-NonEmptyString -Value $metadataData.ScriptMetadataJson -Context 'ScriptMetadataJson'
     try {
         $scriptMetadata = ConvertFrom-Json -InputObject $metadataData.ScriptMetadataJson -ErrorAction Stop
-    } catch {
+    }
+    catch {
         throw "ScriptMetadataJson is invalid: $($_.Exception.Message)"
     }
-} else {
+}
+else {
     throw 'ScriptMetadata or ScriptMetadataJson is required.'
 }
 $metadataByPath = ConvertTo-ScriptMetadataIndex -Value $scriptMetadata
@@ -480,9 +485,11 @@ foreach ($newPath in $mappedPaths) {
     $scriptName = [IO.Path]::GetFileNameWithoutExtension($newPath)
     $role = if ($scriptName.StartsWith('Detect-', [StringComparison]::Ordinal)) {
         'Detection'
-    } elseif ($scriptName.StartsWith('Remediate-', [StringComparison]::Ordinal)) {
+    }
+    elseif ($scriptName.StartsWith('Remediate-', [StringComparison]::Ordinal)) {
         'Remediation'
-    } else {
+    }
+    else {
         throw "Mapped script '$newPath' does not use a standard role basename."
     }
     $expectedScriptName = if ($role -eq 'Detection') { "Detect-$packageName" } else { "Remediate-$packageName" }
@@ -496,15 +503,17 @@ foreach ($newPath in $mappedPaths) {
             throw "Standalone package '$packageName' must contain a detection script."
         }
         $counterpart = ''
-    } elseif ($packageRows.Count -eq 2) {
+    }
+    elseif ($packageRows.Count -eq 2) {
         $packageRoles = @($packageRows | ForEach-Object {
-            [IO.Path]::GetFileNameWithoutExtension($_.NewPath).Split('-')[0]
-        })
+                [IO.Path]::GetFileNameWithoutExtension($_.NewPath).Split('-')[0]
+            })
         if (@($packageRoles | Sort-Object -Unique).Count -ne 2 -or 'Detect' -notin $packageRoles -or 'Remediate' -notin $packageRoles) {
             throw "Package '$packageName' must contain one detection and one remediation script."
         }
         $counterpart = @($packageRows | Where-Object NewPath -CNE $newPath)[0].NewPath
-    } else {
+    }
+    else {
         throw "Package '$packageName' maps $($packageRows.Count) scripts; only pairs or detection-only packages are allowed."
     }
 
@@ -540,9 +549,9 @@ foreach ($newPath in $mappedPaths) {
         Test = $record.Test
     }
     $plannedFiles.Add([pscustomobject]@{
-        Path = Join-Path $resolvedOutputRoot ([IO.Path]::ChangeExtension($newPath, '.psd1'))
-        Content = New-ManifestContent -Manifest $manifest -MetadataRecord $record
-    })
+            Path = Join-Path $resolvedOutputRoot ([IO.Path]::ChangeExtension($newPath, '.psd1'))
+            Content = New-ManifestContent -Manifest $manifest -MetadataRecord $record
+        })
 }
 
 $utf8NoBom = [Text.UTF8Encoding]::new($false)

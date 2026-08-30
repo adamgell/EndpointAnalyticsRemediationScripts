@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $PathMap,
     [Parameter(Mandatory)] [string] $PackageData,
@@ -110,17 +110,17 @@ function Get-CommandRecords {
 
     $records = New-Object 'System.Collections.Generic.List[object]'
     foreach ($command in @($Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.CommandAst]
-    }, $true))) {
+                    param($node)
+                    $node -is [System.Management.Automation.Language.CommandAst]
+                }, $true))) {
         $name = $command.GetCommandName()
         if ($null -eq $name -or $command.CommandElements.Count -eq 0) {
             continue
         }
         $records.Add([pscustomobject]@{
-            Name = [string] $name
-            NameOffset = $command.CommandElements[0].Extent.StartOffset
-        })
+                Name = [string] $name
+                NameOffset = $command.CommandElements[0].Extent.StartOffset
+            })
     }
     return $records.ToArray()
 }
@@ -161,7 +161,7 @@ function Add-SymbolMapLine {
     }
 }
 
-function Sort-SymbolRows {
+function Set-SymbolRowOrder {
     param(
         [Parameter(Mandatory)] [AllowEmptyCollection()]
         [System.Collections.Generic.List[object]] $Rows,
@@ -272,16 +272,16 @@ foreach ($pathRow in $pathRows) {
     }
 
     $parsedByDestination.Add($newPath, [pscustomobject]@{
-        BasePath = $basePath
-        NewPath = $newPath
-        Ast = $ast
-        Tokens = @($tokens)
-        Commands = @(Get-CommandRecords -Ast $ast)
-        Functions = @($ast.FindAll({
-            param($node)
-            $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
-        }, $true))
-    })
+            BasePath = $basePath
+            NewPath = $newPath
+            Ast = $ast
+            Tokens = @($tokens)
+            Commands = @(Get-CommandRecords -Ast $ast)
+            Functions = @($ast.FindAll({
+                        param($node)
+                        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+                    }, $true))
+        })
 }
 
 $canonicalCmdlets = [System.Collections.Generic.Dictionary[string, string]]::new(
@@ -341,11 +341,11 @@ foreach ($mapping in @($packageDataContent.AliasMappings)) {
         throw "Alias mapping '$path|$oldName|$occurrence' is duplicated."
     }
     $configuredAliases.Add($key, [pscustomobject]@{
-        Path = $path
-        OldName = $oldName
-        NewName = $newName
-        Occurrence = $occurrence
-    })
+            Path = $path
+            OldName = $oldName
+            NewName = $newName
+            Occurrence = $occurrence
+        })
 }
 if ($configuredAliases.Count -ne $expectedAliasCount) {
     throw "Expected $expectedAliasCount reviewed alias mappings; found $($configuredAliases.Count)."
@@ -404,11 +404,11 @@ foreach ($parsed in $parsedByDestination.Values) {
             }
             $commandOccurrences[$occurrenceKey] = $occurrence
             $commandRows.Add([pscustomobject]@{
-                Path = [string] $parsed.NewPath
-                OldName = $name
-                NewName = $canonicalCmdlets[$name]
-                Occurrence = $occurrence
-            })
+                    Path = [string] $parsed.NewPath
+                    OldName = $name
+                    NewName = $canonicalCmdlets[$name]
+                    Occurrence = $occurrence
+                })
         }
     }
 }
@@ -491,18 +491,18 @@ foreach ($mapping in @($packageDataContent.FunctionMappings)) {
     }
 
     $functionRows.Add([pscustomobject]@{
-        Path = $path
-        OldName = $oldName
-        NewName = $newName
-    })
+            Path = $path
+            OldName = $oldName
+            NewName = $newName
+        })
 }
 if ($functionRows.Count -ne $expectedFunctionCount) {
     throw "Expected $expectedFunctionCount reviewed function mappings; found $($functionRows.Count)."
 }
 
-Sort-SymbolRows -Rows $commandRows -HasOccurrence $true
-Sort-SymbolRows -Rows $aliasRows -HasOccurrence $true
-Sort-SymbolRows -Rows $functionRows -HasOccurrence $false
+Set-SymbolRowOrder -Rows $commandRows -HasOccurrence $true
+Set-SymbolRowOrder -Rows $aliasRows -HasOccurrence $true
+Set-SymbolRowOrder -Rows $functionRows -HasOccurrence $false
 
 $lines = New-Object 'System.Collections.Generic.List[string]'
 $lines.Add('@{')

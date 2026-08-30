@@ -1,4 +1,4 @@
-# dectection script for SCCM 
+﻿# dectection script for SCCM
 
 # Define the path to ccmsetup.exe
 $ccmSetupPath = "$env:windir\ccmsetup\ccmsetup.exe"

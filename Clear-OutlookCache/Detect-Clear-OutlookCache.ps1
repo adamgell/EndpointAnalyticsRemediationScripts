@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,10 +11,11 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
-if(Test-Path -Path 'C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE'){
+if (Test-Path -Path 'C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE') {
     return 1
-}else{
+}
+else {
     return 0
 }

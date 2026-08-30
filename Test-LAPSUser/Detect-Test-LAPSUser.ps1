@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Joey Verlinden (joeyverlinden.com)
@@ -14,11 +14,16 @@ Run as: User/Admin
 Context: 32 & 64 Bit
 #>
 
-$AdminAccountName = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -Name 'AdministratorAccountName' -ErrorAction SilentlyContinue).AdministratorAccountName
+$AdminAccountName = (
+    Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Policies\LAPS' -Name 'AdministratorAccountName' -ErrorAction SilentlyContinue).AdministratorAccountName
 $item = Get-LocalUser -Name $AdminAccountName -ErrorAction SilentlyContinue
 
-if ($null -eq $item -and $null -ne $AdminAccountName -and ((Get-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\LAPS' -Name 'BackupDirectory' -ErrorAction SilentlyContinue).BackupDirectory) -ne '0' -and (Get-Item -Path ($env:windir + '\system32\laps.dll') -ErrorAction SilentlyContinue)) {
+if ($null -eq $item -and $null -ne $AdminAccountName -and ((
+            Get-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\LAPS' -Name 'BackupDirectory' -ErrorAction SilentlyContinue
+        ).BackupDirectory) -ne '0' -and (Get-Item -Path ($env:windir +
+            '\system32\laps.dll') -ErrorAction SilentlyContinue)) {
     exit 1
-}else{
+}
+else {
     exit 0
 }

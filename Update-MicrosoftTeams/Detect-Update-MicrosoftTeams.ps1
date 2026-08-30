@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -21,11 +21,13 @@ try {
     }
 
     # Check for classic Teams Machine-Wide Installer
-    $TeamsMWI = Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
+    $TeamsMWI =
+    Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
         Where-Object { $_.DisplayName -like "*Teams Machine-Wide Installer*" }
 
     if (-not $TeamsMWI) {
-        $TeamsMWI = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
+        $TeamsMWI =
+        Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
             Where-Object { $_.DisplayName -like "*Teams Machine-Wide Installer*" }
     }
 
@@ -35,7 +37,9 @@ try {
     }
 
     # Check if winget has an update available for Teams
-    $Winget = Get-ChildItem -Path (Join-Path -Path (Join-Path -Path $env:ProgramFiles -ChildPath "WindowsApps") -ChildPath "Microsoft.DesktopAppInstaller*_x64*\winget.exe") |
+    $Winget = Get-ChildItem -Path (Join-Path -Path (
+            Join-Path -Path $env:ProgramFiles -ChildPath "WindowsApps"
+        ) -ChildPath "Microsoft.DesktopAppInstaller*_x64*\winget.exe") |
         Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName
 
     if ($Winget) {

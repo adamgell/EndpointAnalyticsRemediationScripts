@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,7 +11,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 
 function Save-VerifiedDownload {
     param (
@@ -35,27 +35,27 @@ function Save-VerifiedDownload {
 }
 
 $days = 30
-$profiles = (get-CimInstance win32_userprofile | Where-Object {$_.LastUseTime -lt $(Get-Date).Date.AddDays(-$days)})
+$profiles = (Get-CimInstance win32_userprofile | Where-Object { $_.LastUseTime -lt $(Get-Date).Date.AddDays(-$days) })
 $profilecount = $profiles.Count
 if ($profilecount -gt 0) {
-write-host "There are profiles to remove" -ForegroundColor Red
-##Temp location to use
-$tempdir = $env:TEMP
-##Comment out whichever version you don't want to use
+    Write-Host "There are profiles to remove" -ForegroundColor Red
+    ##Temp location to use
+    $tempdir = $env:TEMP
+    ##Comment out whichever version you don't want to use
 
-##Download DelProf1
-Save-VerifiedDownload -Uri "https://github.com/andrew-s-taylor/public/raw/main/delprof/delprof.exe" -OutFile "$tempdir\delprof.exe" -ExpectedSha256 "1da35d3bc379f57de9384fef2ce8f9a29cea9f5e8a6550a5023f29f39bf327ad"
-##Run DelProf1
-Start-Process -FilePath "$tempdir\delprof.exe" -ArgumentList /Q /D:$days
-Remove-Item "$tempdir\delprof.exe"
+    ##Download DelProf1
+    Save-VerifiedDownload -Uri "https://github.com/andrew-s-taylor/public/raw/main/delprof/delprof.exe" -OutFile "$tempdir\delprof.exe" -ExpectedSha256 "1da35d3bc379f57de9384fef2ce8f9a29cea9f5e8a6550a5023f29f39bf327ad"
+    ##Run DelProf1
+    Start-Process -FilePath "$tempdir\delprof.exe" -ArgumentList /Q /D:$days
+    Remove-Item "$tempdir\delprof.exe"
 
-##Download DelProf2
-Save-VerifiedDownload -Uri "https://github.com/andrew-s-taylor/public/raw/main/delprof/DelProf2.exe" -OutFile "$tempdir\delprof2.exe" -ExpectedSha256 "b456e05c6825dea9f854e3ae37deb36e7f5f2d847fc2c7f053327559a9414ed6"
-##Run DelProf2
-Start-Process -FilePath "$tempdir\delprof2.exe" -ArgumentList /q /d:$days
-remove-item "$tempdir\delprof2.exe"
+    ##Download DelProf2
+    Save-VerifiedDownload -Uri "https://github.com/andrew-s-taylor/public/raw/main/delprof/DelProf2.exe" -OutFile "$tempdir\delprof2.exe" -ExpectedSha256 "b456e05c6825dea9f854e3ae37deb36e7f5f2d847fc2c7f053327559a9414ed6"
+    ##Run DelProf2
+    Start-Process -FilePath "$tempdir\delprof2.exe" -ArgumentList /q /d:$days
+    Remove-Item "$tempdir\delprof2.exe"
 
 }
 else {
-write-host "No old profiles to remove" -ForegroundColor Green
+    Write-Host "No old profiles to remove" -ForegroundColor Green
 }

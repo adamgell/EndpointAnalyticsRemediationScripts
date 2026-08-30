@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Joey Verlinden (joeyverlinden.com)
@@ -27,7 +27,8 @@ if (($null -ne $ServiceObject) -and ($ServiceObject.$serviceOption -eq $serviceO
 if ($checkarray -ne 0) {
     Write-Host "Service is available and correctly configured"
     exit 0
-} else {
+}
+else {
     Write-Host "Service is not available or correctly configured"
     exit 1
 }

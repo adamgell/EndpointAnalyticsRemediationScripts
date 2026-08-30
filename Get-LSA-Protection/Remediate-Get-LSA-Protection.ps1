@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,11 +11,11 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 32 & 64 Bit
-#> 
+#>
 
 $Path = "HKLM:\SYSTEM\CurrentControlSet\Control\Lsa"
 $Name = "RunAsPPL"
 $Type = "DWORD"
 $Value = 1
 
-Set-ItemProperty -Path $Path -Name $Name -Type $Type -Value $Value 
+Set-ItemProperty -Path $Path -Name $Name -Type $Type -Value $Value

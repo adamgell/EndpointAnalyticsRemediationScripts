@@ -1,4 +1,4 @@
-Describe 'Foundation path map' -Tag 'FoundationMap' {
+﻿Describe 'Foundation path map' -Tag 'FoundationMap' {
     BeforeAll {
         $map = Import-PowerShellDataFile "$PSScriptRoot/../evidence/foundation/PathMap.psd1"
     }
@@ -72,6 +72,19 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         $symbolMapPath = Join-Path $repositoryRoot 'evidence/foundation/SymbolRenames.psd1'
         $expectedSymbolMapBytes = [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($symbolMapPath))
         $symbolMap = Import-PowerShellDataFile $symbolMapPath
+        $baseRevision = (
+            Get-Content "$repositoryRoot/evidence/foundation/BaseRevision.txt" -Raw
+        ).Trim()
+        $repositoryGitPath = Join-Path $repositoryRoot '.git'
+        $gitDirectory = if (Test-Path -LiteralPath $repositoryGitPath -PathType Container) {
+            $repositoryGitPath
+        }
+        else {
+            Join-Path (Split-Path (Split-Path $repositoryRoot -Parent) -Parent) '.git'
+        }
+        if (-not (Test-Path -LiteralPath $gitDirectory -PathType Container)) {
+            throw "Unable to locate the repository Git directory '$gitDirectory'."
+        }
         function Copy-FoundationSymbolGenerator {
             param([Parameter(Mandatory)] [string] $Root)
 
@@ -86,13 +99,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             param(
                 [Parameter(Mandatory)] [string] $Root,
                 [Parameter(Mandatory)] [string] $SourceRelativePath,
-                [Parameter(Mandatory)] [string] $TargetRelativePath
+                [Parameter(Mandatory)] [string] $TargetRelativePath,
+                [switch] $FromBaseline
             )
 
-            $sourcePath = Join-Path $repositoryRoot $SourceRelativePath.Replace(
-                '/',
-                [System.IO.Path]::DirectorySeparatorChar
-            )
             $targetPath = Join-Path $Root $TargetRelativePath.Replace(
                 '/',
                 [System.IO.Path]::DirectorySeparatorChar
@@ -100,7 +110,24 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             [System.IO.Directory]::CreateDirectory(
                 [System.IO.Path]::GetDirectoryName($targetPath)
             ) | Out-Null
-            [System.IO.File]::Copy($sourcePath, $targetPath, $false)
+            if ($FromBaseline) {
+                $gitOutput = @(& git `
+                        "--git-dir=$gitDirectory" `
+                        show `
+                        "${baseRevision}:$SourceRelativePath" 2>&1)
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Unable to read baseline '$SourceRelativePath': $($gitOutput -join [Environment]::NewLine)"
+                }
+                $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+                [System.IO.File]::WriteAllLines($targetPath, $gitOutput, $utf8NoBom)
+            }
+            else {
+                $sourcePath = Join-Path $repositoryRoot $SourceRelativePath.Replace(
+                    '/',
+                    [System.IO.Path]::DirectorySeparatorChar
+                )
+                [System.IO.File]::Copy($sourcePath, $targetPath, $false)
+            }
             return $targetPath
         }
 
@@ -114,10 +141,17 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
 
             $fixtureGenerator = Copy-FoundationSymbolGenerator -Root $Root
             foreach ($pathRow in @($pathMap.Paths)) {
+                $sourceRelativePath = if ($Layout -eq 'BasePath') {
+                    [string] $pathRow.BasePath
+                }
+                else {
+                    [string] $pathRow.NewPath
+                }
                 $null = Copy-FoundationMappedFile `
                     -Root $Root `
-                    -SourceRelativePath ([string] $pathRow.NewPath) `
-                    -TargetRelativePath ([string] $pathRow[$Layout])
+                    -SourceRelativePath $sourceRelativePath `
+                    -TargetRelativePath ([string] $pathRow[$Layout]) `
+                    -FromBaseline:($Layout -eq 'BasePath')
             }
             return $fixtureGenerator
         }
@@ -137,17 +171,24 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             foreach ($pathRow in @($pathMap.Paths)) {
                 $targetRelativePath = [string] $pathRow[$Layout]
                 if ($targetRelativePath.StartsWith(
-                    $approvedPrefix,
-                    [System.StringComparison]::Ordinal
-                )) {
+                        $approvedPrefix,
+                        [System.StringComparison]::Ordinal
+                    )) {
                     $targetRelativePath = $ActualDirectory + $targetRelativePath.Substring(
                         $ApprovedDirectory.Length
                     )
                 }
+                $sourceRelativePath = if ($Layout -eq 'BasePath') {
+                    [string] $pathRow.BasePath
+                }
+                else {
+                    [string] $pathRow.NewPath
+                }
                 $null = Copy-FoundationMappedFile `
                     -Root $Root `
-                    -SourceRelativePath ([string] $pathRow.NewPath) `
-                    -TargetRelativePath $targetRelativePath
+                    -SourceRelativePath $sourceRelativePath `
+                    -TargetRelativePath $targetRelativePath `
+                    -FromBaseline:($Layout -eq 'BasePath')
             }
             return $fixtureGenerator
         }
@@ -156,10 +197,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     It 'records every canonical cmdlet-casing rewrite' {
         @($symbolMap.Commands).Count | Should -Be 81
         $invalid = @($symbolMap.Commands | Where-Object {
-            $_.OldName -ceq $_.NewName -or
+                $_.OldName -ceq $_.NewName -or
                 $_.OldName -ine $_.NewName -or
                 [int] $_.Occurrence -lt 1
-        })
+            })
         $invalid | Should -BeNullOrEmpty
     }
 
@@ -179,8 +220,8 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1|where|Where-Object|2'
         )
         $actual = @($symbolMap.Aliases | ForEach-Object {
-            '{0}|{1}|{2}|{3}' -f $_.Path, $_.OldName, $_.NewName, $_.Occurrence
-        })
+                '{0}|{1}|{2}|{3}' -f $_.Path, $_.OldName, $_.NewName, $_.Occurrence
+            })
 
         @($actual).Count | Should -Be 12
         @($symbolMap.Aliases.Path | Sort-Object -Unique).Count | Should -Be 9
@@ -190,10 +231,10 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
 
     It 'preserves both lowercase Toast aliases with source-exact casing' {
         $actual = @($symbolMap.Aliases | Where-Object {
-            $_.Path -ceq 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
-        } | ForEach-Object {
-            '{0}|{1}' -f $_.OldName, $_.Occurrence
-        })
+                $_.Path -ceq 'Toast-RebootMessage/Remediate-Toast-RebootMessage.ps1'
+            } | ForEach-Object {
+                '{0}|{1}' -f $_.OldName, $_.Occurrence
+            })
 
         ($actual -join "`n") | Should -BeExactly "where|1`nwhere|2"
     }
@@ -284,8 +325,9 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     }
 
     It 'regenerates byte-identically when live command discovery is unavailable' {
-        $outputPath = Join-Path $TestDrive 'without-live-discovery.psd1'
-
+        $fixtureRoot = Join-Path $TestDrive 'without-live-discovery'
+        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
+        $outputPath = Join-Path $fixtureRoot 'SymbolRenames.psd1'
         & {
             function Get-Command {
                 throw 'Live command discovery is unavailable.'
@@ -294,7 +336,7 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 throw 'Live alias discovery is unavailable.'
             }
 
-            & $symbolGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
+            & $fixtureGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
         }
 
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
@@ -302,8 +344,9 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     }
 
     It 'regenerates byte-identically when live command discovery is polluted' {
-        $outputPath = Join-Path $TestDrive 'with-polluted-live-discovery.psd1'
-
+        $fixtureRoot = Join-Path $TestDrive 'with-polluted-live-discovery'
+        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
+        $outputPath = Join-Path $fixtureRoot 'SymbolRenames.psd1'
         & {
             function Get-Command {
                 [CmdletBinding()]
@@ -321,7 +364,7 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
                 }
             }
 
-            & $symbolGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
+            & $fixtureGenerator -PathMap $pathMapPath -PackageData $packageDataPath -OutputPath $outputPath
         }
 
         [Convert]::ToBase64String([System.IO.File]::ReadAllBytes($outputPath)) |
@@ -414,8 +457,8 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
             'Make-Speedtest/Remediate-Make-Speedtest.ps1|Post-LogAnalyticsData|Send-LogAnalyticsData'
         )
         $actual = @($symbolMap.Functions | ForEach-Object {
-            '{0}|{1}|{2}' -f $_.Path, $_.OldName, $_.NewName
-        })
+                '{0}|{1}|{2}' -f $_.Path, $_.OldName, $_.NewName
+            })
 
         @($actual).Count | Should -Be 5
         Compare-Object -ReferenceObject $expected -DifferenceObject $actual -CaseSensitive |
@@ -425,16 +468,16 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
     It 'uses deterministic ordinal path and occurrence ordering' {
         foreach ($name in 'Commands', 'Aliases') {
             [string[]] $actual = @($symbolMap[$name] | ForEach-Object {
-                '{0}`0{1:D8}`0{2}`0{3}' -f $_.Path, [int] $_.Occurrence, $_.OldName, $_.NewName
-            })
+                    '{0}`0{1:D8}`0{2}`0{3}' -f $_.Path, [int] $_.Occurrence, $_.OldName, $_.NewName
+                })
             [string[]] $expected = @($actual)
             [System.Array]::Sort($expected, [System.StringComparer]::Ordinal)
             ($actual -join "`n") | Should -Be ($expected -join "`n")
         }
 
         [string[]] $actualFunctions = @($symbolMap.Functions | ForEach-Object {
-            '{0}`0{1}`0{2}' -f $_.Path, $_.OldName, $_.NewName
-        })
+                '{0}`0{1}`0{2}' -f $_.Path, $_.OldName, $_.NewName
+            })
         [string[]] $expectedFunctions = @($actualFunctions)
         [System.Array]::Sort($expectedFunctions, [System.StringComparer]::Ordinal)
         ($actualFunctions -join "`n") | Should -Be ($expectedFunctions -join "`n")
@@ -488,8 +531,8 @@ Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
         $actualPaths = Get-DeploymentScript -Root $repositoryRoot |
             ForEach-Object {
                 $_.FullName.Substring($repositoryRoot.Length).
-                    TrimStart('\', '/').
-                    Replace('\', '/')
+                TrimStart('\', '/').
+                Replace('\', '/')
             }
         @(Compare-Object -ReferenceObject $pathMap.Paths.NewPath `
                 -DifferenceObject $actualPaths -CaseSensitive) |
@@ -503,9 +546,427 @@ Describe 'Post-cutover repository inventory' -Tag 'FoundationCutover' {
             Where-Object {
                 $directory = Join-Path $repositoryRoot $_
                 (Test-Path -LiteralPath $directory -PathType Container) -and
-                    @(Get-ChildItem -LiteralPath $directory -Force).Count -eq 0
+                @(Get-ChildItem -LiteralPath $directory -Force).Count -eq 0
             }
         $emptySourceDirectories | Should -BeNullOrEmpty
+    }
+}
+
+Describe 'Foundation static style' -Tag 'FoundationStyle' {
+    BeforeAll {
+        Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
+        $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+        $packageData = Import-PowerShellDataFile "$repositoryRoot/standards/FoundationPackages.psd1"
+        $styleExclusions = Get-Content `
+            -LiteralPath "$repositoryRoot/evidence/foundation/StaticAnalysisExclusions.json" `
+            -Raw |
+            ConvertFrom-Json
+        $scriptFiles = @(Get-DeploymentScript -Root $repositoryRoot)
+        $parsedScripts = @{}
+        $approvedVerbs = [System.Collections.Generic.HashSet[string]]::new(
+            [System.StringComparer]::OrdinalIgnoreCase
+        )
+        foreach ($verb in Get-Verb) {
+            $null = $approvedVerbs.Add([string] $verb.Verb)
+        }
+
+        foreach ($scriptFile in $scriptFiles) {
+            $relativePath = $scriptFile.FullName.Substring($repositoryRoot.Length).
+            TrimStart('\', '/').
+            Replace('\', '/')
+            $tokens = $null
+            $parseErrors = $null
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+                $scriptFile.FullName,
+                [ref] $tokens,
+                [ref] $parseErrors
+            )
+            $parsedScripts[$relativePath] = [pscustomobject]@{
+                Ast = $ast
+                Errors = @($parseErrors)
+                File = $scriptFile
+                Path = $relativePath
+                Tokens = @($tokens)
+            }
+        }
+
+        function Get-FoundationStyleBytes {
+            param([Parameter(Mandatory)] [System.IO.FileInfo] $File)
+
+            return [System.IO.File]::ReadAllBytes($File.FullName)
+        }
+
+        function ConvertFrom-FoundationStyleBytes {
+            param([Parameter(Mandatory)] [byte[]] $Bytes)
+
+            $offset = if (
+                $Bytes.Length -ge 3 -and
+                $Bytes[0] -eq 0xEF -and
+                $Bytes[1] -eq 0xBB -and
+                $Bytes[2] -eq 0xBF
+            ) {
+                3
+            }
+            else {
+                0
+            }
+            $encoding = New-Object System.Text.UTF8Encoding($false, $true)
+            return $encoding.GetString($Bytes, $offset, $Bytes.Length - $offset)
+        }
+
+        function Get-FoundationStyleLineHash {
+            param([Parameter(Mandatory)] [string] $Text)
+
+            $encoding = New-Object System.Text.UTF8Encoding($false)
+            $hasher = [System.Security.Cryptography.SHA256]::Create()
+            try {
+                return ([BitConverter]::ToString(
+                        $hasher.ComputeHash($encoding.GetBytes($Text))
+                    )).Replace('-', '').ToLowerInvariant()
+            }
+            finally {
+                $hasher.Dispose()
+            }
+        }
+
+        function Get-FoundationStyleLineKey {
+            param(
+                [Parameter(Mandatory)] [string] $Path,
+                [Parameter(Mandatory)] [int] $Line,
+                [Parameter(Mandatory)] [string] $LineSha256
+            )
+
+            return '{0}|{1}|{2}' -f $Path, $Line, $LineSha256
+        }
+
+        function Join-FoundationStyleKeys {
+            param([Parameter(Mandatory)] [object[]] $Keys)
+
+            [string[]] $sorted = @($Keys)
+            [System.Array]::Sort($sorted, [System.StringComparer]::Ordinal)
+            return ($sorted -join "`n")
+        }
+    }
+
+    It 'parses all 271 deployment scripts without errors' {
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                foreach ($parseError in $parsed.Errors) {
+                    '{0}:{1}: {2}' -f `
+                        $parsed.Path,
+                    $parseError.Extent.StartLineNumber,
+                    $parseError.Message
+                }
+            }
+        )
+
+        @($parsedScripts.Values).Count | Should -Be 271
+        @($failures).Count | Should -Be 0 -Because (
+            "parser errors must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'uses no cmdlet aliases' {
+        $knownAliases = [System.Collections.Generic.HashSet[string]]::new(
+            [System.StringComparer]::OrdinalIgnoreCase
+        )
+        foreach ($aliasName in $packageData.CanonicalAliases.Keys) {
+            $null = $knownAliases.Add([string] $aliasName)
+        }
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                foreach ($command in $parsed.Ast.FindAll({
+                            param($node)
+                            $node -is [System.Management.Automation.Language.CommandAst]
+                        }, $true)) {
+                    $commandName = $command.GetCommandName()
+                    if (
+                        -not [string]::IsNullOrEmpty($commandName) -and
+                        $knownAliases.Contains($commandName)
+                    ) {
+                        '{0}:{1}: {2}' -f `
+                            $parsed.Path,
+                        $command.Extent.StartLineNumber,
+                        $commandName
+                    }
+                }
+            }
+        )
+
+        @($failures).Count | Should -Be 0 -Because (
+            "aliases must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'uses approved verbs for every local function' {
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                foreach ($function in $parsed.Ast.FindAll({
+                            param($node)
+                            $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+                        }, $true)) {
+                    $separator = $function.Name.IndexOf('-')
+                    $verb = if ($separator -gt 0) {
+                        $function.Name.Substring(0, $separator)
+                    }
+                    else {
+                        $function.Name
+                    }
+                    if ($separator -lt 1 -or -not $approvedVerbs.Contains($verb)) {
+                        '{0}:{1}: {2}' -f `
+                            $parsed.Path,
+                        $function.Extent.StartLineNumber,
+                        $function.Name
+                    }
+                }
+            }
+        )
+
+        @($failures).Count | Should -Be 0 -Because (
+            "unapproved local function verbs must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'uses canonical casing for every reviewed cmdlet' {
+        $canonicalCmdlets = [System.Collections.Generic.Dictionary[string, string]]::new(
+            [System.StringComparer]::OrdinalIgnoreCase
+        )
+        foreach ($canonicalName in $packageData.CanonicalCmdlets) {
+            $canonicalCmdlets.Add([string] $canonicalName, [string] $canonicalName)
+        }
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                foreach ($command in $parsed.Ast.FindAll({
+                            param($node)
+                            $node -is [System.Management.Automation.Language.CommandAst]
+                        }, $true)) {
+                    $commandName = $command.GetCommandName()
+                    if (
+                        -not [string]::IsNullOrEmpty($commandName) -and
+                        $canonicalCmdlets.ContainsKey($commandName) -and
+                        $commandName -cne $canonicalCmdlets[$commandName]
+                    ) {
+                        '{0}:{1}: {2} -> {3}' -f `
+                            $parsed.Path,
+                        $command.Extent.StartLineNumber,
+                        $commandName,
+                        $canonicalCmdlets[$commandName]
+                    }
+                }
+            }
+        )
+
+        @($failures).Count | Should -Be 0 -Because (
+            "cmdlet casing differences must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'uses UTF-8 with BOM for every deployment script' {
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $bytes = Get-FoundationStyleBytes -File $parsed.File
+                if (
+                    $bytes.Length -lt 3 -or
+                    $bytes[0] -ne 0xEF -or
+                    $bytes[1] -ne 0xBB -or
+                    $bytes[2] -ne 0xBF
+                ) {
+                    $parsed.Path
+                    continue
+                }
+                try {
+                    $null = ConvertFrom-FoundationStyleBytes -Bytes $bytes
+                }
+                catch {
+                    '{0}: {1}' -f $parsed.Path, $_.Exception.Message
+                }
+            }
+        )
+
+        @($failures).Count | Should -Be 0 -Because (
+            "non-BOM or invalid UTF-8 scripts must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'uses LF line endings' {
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $bytes = Get-FoundationStyleBytes -File $parsed.File
+                if ($bytes -contains 0x0D) {
+                    $parsed.Path
+                }
+            }
+        )
+
+        @($failures).Count | Should -Be 0 -Because (
+            "scripts containing non-LF line endings must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'matches the exact preserved tab exceptions in two comment-help blocks' {
+        $actual = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $text = ConvertFrom-FoundationStyleBytes -Bytes (
+                    Get-FoundationStyleBytes -File $parsed.File
+                )
+                $lineNumber = 0
+                foreach ($line in $text.Split("`n")) {
+                    $lineNumber++
+                    if ($line.Contains("`t")) {
+                        Get-FoundationStyleLineKey `
+                            -Path $parsed.Path `
+                            -Line $lineNumber `
+                            -LineSha256 (Get-FoundationStyleLineHash -Text $line)
+                    }
+                }
+            }
+        )
+        $expected = @($styleExclusions.SensitiveWhitespace |
+                Where-Object Rule -CEQ 'Tab' |
+                ForEach-Object {
+                    Get-FoundationStyleLineKey `
+                        -Path $_.Path `
+                        -Line $_.Line `
+                        -LineSha256 $_.LineSha256
+                })
+
+        $expected.Count | Should -Be 6
+        Join-FoundationStyleKeys -Keys $actual |
+            Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
+    }
+
+    It 'matches the exact preserved trailing whitespace in help and here-string content' {
+        $actual = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $text = ConvertFrom-FoundationStyleBytes -Bytes (
+                    Get-FoundationStyleBytes -File $parsed.File
+                )
+                $lineNumber = 0
+                foreach ($line in $text.Split("`n")) {
+                    $lineNumber++
+                    if ($line -match '[ \t]+$') {
+                        Get-FoundationStyleLineKey `
+                            -Path $parsed.Path `
+                            -Line $lineNumber `
+                            -LineSha256 (Get-FoundationStyleLineHash -Text $line)
+                    }
+                }
+            }
+        )
+        $expected = @($styleExclusions.SensitiveWhitespace |
+                Where-Object Rule -CEQ 'TrailingWhitespace' |
+                ForEach-Object {
+                    Get-FoundationStyleLineKey `
+                        -Path $_.Path `
+                        -Line $_.Line `
+                        -LineSha256 $_.LineSha256
+                })
+
+        $expected.Count | Should -Be 4
+        Join-FoundationStyleKeys -Keys $actual |
+            Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
+    }
+
+    It 'ends every deployment script with an LF newline' {
+        $failures = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $bytes = Get-FoundationStyleBytes -File $parsed.File
+                if (
+                    $bytes.Length -eq 0 -or
+                    $bytes[$bytes.Length - 1] -ne 0x0A
+                ) {
+                    $parsed.Path
+                }
+            }
+        )
+
+        @($failures).Count | Should -Be 0 -Because (
+            "scripts without a final LF newline must be zero; found {0}: {1}" -f
+            @($failures).Count,
+            ($failures -join '; ')
+        )
+    }
+
+    It 'matches the exact approved long-line analyzer exclusions' {
+        $actual = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $text = ConvertFrom-FoundationStyleBytes -Bytes (
+                    Get-FoundationStyleBytes -File $parsed.File
+                )
+                $lineNumber = 0
+                foreach ($line in $text.Split("`n")) {
+                    $lineNumber++
+                    if (
+                        $line.Length -gt 120 -and
+                        $line -notmatch 'https?://' -and
+                        $line -notmatch '(?i)\b[0-9a-f]{64,}\b'
+                    ) {
+                        Get-FoundationStyleLineKey `
+                            -Path $parsed.Path `
+                            -Line $lineNumber `
+                            -LineSha256 (Get-FoundationStyleLineHash -Text $line)
+                    }
+                }
+            }
+        )
+        $expected = @($styleExclusions.LongLines | ForEach-Object {
+                Get-FoundationStyleLineKey `
+                    -Path $_.Path `
+                    -Line $_.Line `
+                    -LineSha256 $_.LineSha256
+            })
+
+        $expected.Count | Should -Be 93
+        Join-FoundationStyleKeys -Keys $actual |
+            Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
+    }
+
+    It 'returns zero analyzer findings while locking every long-line exception' {
+        Import-Module PSScriptAnalyzer -RequiredVersion 1.25.0 -Force
+        $settingsPath = Join-Path $repositoryRoot 'PSScriptAnalyzerSettings.psd1'
+        $findings = @(
+            Invoke-ScriptAnalyzer `
+                -Path $repositoryRoot `
+                -Recurse `
+                -Settings $settingsPath
+        )
+        $actual = @(
+            foreach ($parsed in $parsedScripts.Values) {
+                $lines = [IO.File]::ReadAllLines($parsed.File.FullName)
+                for ($index = 0; $index -lt $lines.Count; $index++) {
+                    $line = [string] $lines[$index]
+                    if ($line.Length -gt 120) {
+                        Get-FoundationStyleLineKey `
+                            -Path $parsed.Path `
+                            -Line ($index + 1) `
+                            -LineSha256 (Get-FoundationStyleLineHash -Text $line)
+                    }
+                }
+            }
+        )
+        $expected = @($styleExclusions.AnalyzerLongLines | ForEach-Object {
+                Get-FoundationStyleLineKey `
+                    -Path $_.Path `
+                    -Line $_.Line `
+                    -LineSha256 $_.LineSha256
+            })
+
+        $findings | Should -BeNullOrEmpty
+        $expected.Count | Should -Be 102
+        Join-FoundationStyleKeys -Keys $actual |
+            Should -BeExactly (Join-FoundationStyleKeys -Keys $expected)
     }
 }
 

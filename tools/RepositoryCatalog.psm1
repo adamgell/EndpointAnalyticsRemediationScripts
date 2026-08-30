@@ -1,4 +1,4 @@
-function Test-ManifestStatusTransition {
+﻿function Test-ManifestStatusTransition {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)] [ValidateSet('PendingMigration', 'Covered')] [string] $Before,
@@ -65,7 +65,7 @@ function Test-ScriptManifest {
 
         if ($entry.Value -is [string] -and [string]::IsNullOrEmpty($entry.Value)) {
             $allowsEmptyValue = $entry.Key -eq 'Identity.Source' -or
-                ($entry.Key -eq 'Identity.Counterpart' -and $manifest.Identity.Role -eq 'Detection')
+            ($entry.Key -eq 'Identity.Counterpart' -and $manifest.Identity.Role -eq 'Detection')
             if (-not $allowsEmptyValue) {
                 $errors.Add("$($entry.Key) is required.")
             }

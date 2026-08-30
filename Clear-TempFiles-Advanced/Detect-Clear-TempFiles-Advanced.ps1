@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-tempfiles.ps1
@@ -23,7 +23,8 @@ try {
     $TotalSize = 0
     foreach ($Path in $TempPaths) {
         if (Test-Path $Path) {
-            $Size = (Get-ChildItem -Path $Path -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+            $Size = (Get-ChildItem -Path $Path -Recurse -Force -ErrorAction SilentlyContinue |
+                    Measure-Object -Property Length -Sum).Sum
             $TotalSize += $Size
         }
     }

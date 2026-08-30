@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: reset-onedrivesync.ps1
@@ -22,7 +22,8 @@ try {
     }
 
     if (-not $OneDriveExe) {
-        $UserOneDrive = Get-ChildItem "C:\Users\*\AppData\Local\Microsoft\OneDrive\onedrive.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+        $UserOneDrive =
+        Get-ChildItem "C:\Users\*\AppData\Local\Microsoft\OneDrive\onedrive.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($UserOneDrive) { $OneDriveExe = $UserOneDrive.FullName }
     }
 

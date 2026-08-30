@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $BaseRevision,
     [Parameter(Mandatory)] [string] $PathMap,
@@ -61,7 +61,7 @@ function Get-GitBlobBytes {
         if ($process.ExitCode -ne 0) {
             throw "Could not read Git blob '$Revision`:$Path': $errorText"
         }
-        return ,($memory.ToArray())
+        return , ($memory.ToArray())
     }
     finally {
         $memory.Dispose()
@@ -97,7 +97,7 @@ function Get-OrdinalSortedPathRows {
         )
     }
     $sortedRows.Sort($comparison)
-    return ,($sortedRows.ToArray())
+    return , ($sortedRows.ToArray())
 }
 
 function Test-FunctionCommandName {
@@ -133,18 +133,18 @@ function Test-PowerShellFunctionReference {
         [ref] $parseErrors
     )
     $functions = @($ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+            }, $true))
     if (@($functions | Where-Object { $_.Name -ieq $FunctionName }).Count -gt 0) {
         return $true
     }
 
     $symbolPattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($FunctionName) + '(?![A-Za-z0-9_-])'
     $commands = @($ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.CommandAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.CommandAst]
+            }, $true))
     foreach ($command in $commands) {
         $commandName = $command.GetCommandName()
         if ($null -ne $commandName -and
@@ -159,12 +159,12 @@ function Test-PowerShellFunctionReference {
     }
 
     $stringExpressions = @($ast.FindAll({
-        param($node)
-        ($node -is [System.Management.Automation.Language.StringConstantExpressionAst] -and
-            -not ($node.Parent -is [System.Management.Automation.Language.MemberExpressionAst] -and
-                [object]::ReferenceEquals($node.Parent.Member, $node))) -or
-            $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
-    }, $true))
+                param($node)
+                ($node -is [System.Management.Automation.Language.StringConstantExpressionAst] -and
+                -not ($node.Parent -is [System.Management.Automation.Language.MemberExpressionAst] -and
+                    [object]::ReferenceEquals($node.Parent.Member, $node))) -or
+                $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
+            }, $true))
     foreach ($stringExpression in $stringExpressions) {
         if ($stringExpression -is [System.Management.Automation.Language.ExpandableStringExpressionAst]) {
             $literalCharacters = $stringExpression.Extent.Text.ToCharArray()
@@ -183,10 +183,10 @@ function Test-PowerShellFunctionReference {
                 [ref] $literalErrors
             )
             $parsedLiteralExpressions = @($literalAst.FindAll({
-                param($node)
-                $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
-                    $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
-            }, $true))
+                        param($node)
+                        $node -is [System.Management.Automation.Language.StringConstantExpressionAst] -or
+                        $node -is [System.Management.Automation.Language.ExpandableStringExpressionAst]
+                    }, $true))
             if (@($literalErrors).Count -eq 0 -and $parsedLiteralExpressions.Count -eq 1) {
                 $literalText = [string] $parsedLiteralExpressions[0].Value
             }
@@ -229,13 +229,13 @@ try {
         throw "Could not enumerate base revision '$fullRevision': $($treeOutput -join ' ')"
     }
     $baseInventory = @($treeOutput | Where-Object {
-        $path = [string] $_
-        if ($path -notmatch '/') { return $false }
-        $topLevel = $path.Split('/')[0]
-        if ($topLevel -in $infrastructureDirectories) { return $false }
-        $extension = [System.IO.Path]::GetExtension($path)
-        return $extension -eq '.ps1' -or [string]::IsNullOrEmpty($extension)
-    } | Sort-Object)
+            $path = [string] $_
+            if ($path -notmatch '/') { return $false }
+            $topLevel = $path.Split('/')[0]
+            if ($topLevel -in $infrastructureDirectories) { return $false }
+            $extension = [System.IO.Path]::GetExtension($path)
+            return $extension -eq '.ps1' -or [string]::IsNullOrEmpty($extension)
+        } | Sort-Object)
 
     $currentInventory = New-Object 'System.Collections.Generic.List[string]'
     foreach ($directory in Get-ChildItem -LiteralPath $repositoryRoot -Directory) {
@@ -288,8 +288,8 @@ try {
                 $allMappings = @($symbolMapData[$mappingType])
             }
             $scopedSymbolMap[$mappingType] = @($allMappings | Where-Object {
-                (Get-SymbolMapEntryPath -Row $_) -ceq [string] $pathRow.NewPath
-            })
+                    (Get-SymbolMapEntryPath -Row $_) -ceq [string] $pathRow.NewPath
+                })
         }
 
         $beforeBytes = Get-GitBlobBytes `
@@ -302,11 +302,11 @@ try {
         }
 
         $comparisonRows.Add((Compare-PowerShellSource `
-            -BeforePath ([string] $pathRow.BasePath) `
-            -AfterPath ([string] $pathRow.NewPath) `
-            -BeforeBytes $beforeBytes `
-            -AfterBytes ([System.IO.File]::ReadAllBytes($afterPath)) `
-            -SymbolMap $scopedSymbolMap))
+                    -BeforePath ([string] $pathRow.BasePath) `
+                    -AfterPath ([string] $pathRow.NewPath) `
+                    -BeforeBytes $beforeBytes `
+                    -AfterBytes ([System.IO.File]::ReadAllBytes($afterPath)) `
+                    -SymbolMap $scopedSymbolMap))
     }
     $rows = $comparisonRows.ToArray()
 
@@ -327,9 +327,9 @@ try {
             if ($file.Extension -in @('.ps1', '.psd1', '.md')) {
                 $relativePath = $file.FullName.Substring($repositoryRoot.Length).TrimStart('\', '/').Replace('\', '/')
                 $catalogReferences.Add([pscustomobject]@{
-                    File = $file
-                    RelativePath = $relativePath
-                })
+                        File = $file
+                        RelativePath = $relativePath
+                    })
             }
         }
     }

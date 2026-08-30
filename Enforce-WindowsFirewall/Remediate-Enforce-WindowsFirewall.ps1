@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: enforce-windowsfirewall.ps1
@@ -10,7 +10,7 @@ Context: 64 Bit
 #>
 
 try {
-    Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True -ErrorAction Stop
+    Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True -ErrorAction Stop
     Write-Output "Windows Firewall enabled on all profiles successfully"
     exit 0
 }

@@ -1,4 +1,4 @@
-[CmdletBinding()]
+﻿[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
     [string] $PathMap
@@ -139,7 +139,7 @@ $unexpectedDirtyPaths = @(@(
         $modifiedOrStagedPaths | Where-Object { $_ -cnotin $allowedDirtyPaths }
         $untrackedPaths | Where-Object {
             $_ -cnotin $allowedDirtyPaths -and
-                -not $exactMappedSourcePaths.Contains([string] $_)
+            -not $exactMappedSourcePaths.Contains([string] $_)
         }
     ) | Sort-Object -Unique)
 if ($unexpectedDirtyPaths.Count -ne 0) {
@@ -183,9 +183,9 @@ foreach ($destinationDirectory in $destinationDirectories) {
     $destinationDirectoryPath = Join-Path $repositoryRoot $destinationDirectory
     $actualDirectory = Get-Item -LiteralPath $destinationDirectoryPath
     $actualRelativePath = $actualDirectory.FullName.
-        Substring($repositoryRoot.Length).
-        TrimStart('\', '/').
-        Replace('\', '/')
+    Substring($repositoryRoot.Length).
+    TrimStart('\', '/').
+    Replace('\', '/')
     if ([string]::Equals(
             $actualRelativePath,
             $destinationDirectory,
@@ -207,7 +207,7 @@ foreach ($destinationDirectory in $destinationDirectories) {
             Split-Path -Leaf ([string] $_.NewPath)
         })
     $unexpectedItems = @(Get-ChildItem -LiteralPath $actualDirectory.FullName -Force |
-        Where-Object { $_.PSIsContainer -or $_.Name -cnotin $expectedFileNames })
+            Where-Object { $_.PSIsContainer -or $_.Name -cnotin $expectedFileNames })
     if ($unexpectedItems.Count -ne 0) {
         throw "Cannot normalize destination directory casing because it contains unmapped items: $actualRelativePath"
     }

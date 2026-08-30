@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -12,14 +12,15 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User
 Context: 64 Bit
-#> 
+#>
 
 $blacklistapps = @(
     "Google Chrome"
 )
 
 $counter = 0
-$InstalledSoftware = Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" | Get-ItemProperty | Select-Object -Property DisplayName, UninstallString, DisplayName_Localized
+$InstalledSoftware = Get-ChildItem "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall" |
+    Get-ItemProperty | Select-Object -Property DisplayName, UninstallString, DisplayName_Localized
 foreach ($obj in $InstalledSoftware) {
     $name = $obj.DisplayName
     if ($null -eq $name) {
@@ -32,10 +33,10 @@ foreach ($obj in $InstalledSoftware) {
 }
 
 if ($counter -eq 0) {
-    write-output "Per-User Chrome Not detected"
+    Write-Output "Per-User Chrome Not detected"
     exit 0
 }
 else {
-    write-output "Per-User Chrome Detected. Switching the device over to the Enterprise version."
+    Write-Output "Per-User Chrome Detected. Switching the device over to the Enterprise version."
     exit 1
 }

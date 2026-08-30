@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Joey Verlinden (joeyverlinden.com)
@@ -18,8 +18,8 @@ $servicename = "ServiceName"
 $serviceOption = 'serviceOption'
 $serviceOptionValue = 'serviceOptionValue'
 $SetServiceSplat = @{
-	Name = $ServiceName
-	$serviceOption = $serviceOptionValue
+    Name = $ServiceName
+    $serviceOption = $serviceOptionValue
 }
 
 Set-Service @SetServiceSplat

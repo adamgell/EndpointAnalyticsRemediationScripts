@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-credentialguard.ps1
@@ -10,7 +10,8 @@ Context: 64 Bit
 #>
 
 try {
-    $DevGuard = Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard -ErrorAction Stop
+    $DevGuard =
+    Get-CimInstance -ClassName Win32_DeviceGuard -Namespace root\Microsoft\Windows\DeviceGuard -ErrorAction Stop
     if ($DevGuard.SecurityServicesRunning -contains 1) {
         Write-Output "Compliant - Credential Guard is running"
         exit 0

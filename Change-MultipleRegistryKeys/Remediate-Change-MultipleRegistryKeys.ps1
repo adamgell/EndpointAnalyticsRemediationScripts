@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -12,7 +12,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User/Admin
 Context: 64 Bit
-#> 
+#>
 
 # Description: This script creates the registry keys defined below.
 # Output: (single line)
@@ -25,27 +25,27 @@ Context: 64 Bit
 # Action: "Update" to create/update the key, "Delete" to remove the key
 $RegistrySettingsToValidate = @(
     [pscustomobject]@{
-        Hive   = 'HKLM:\'
-        Key    = 'SOFTWARE\Contoso\Product'
-        Name   = 'ImportantKey'
-        Type   = 'REG_DWORD'
-        Value  = 1
+        Hive = 'HKLM:\'
+        Key = 'SOFTWARE\Contoso\Product'
+        Name = 'ImportantKey'
+        Type = 'REG_DWORD'
+        Value = 1
         Action = 'Update'
     },
     [pscustomobject]@{
-        Hive   = 'HKLM:\'
-        Key    = 'SOFTWARE\Contoso\Product'
-        Name   = 'AnotherKey'
-        Type   = 'REG_SZ'
-        Value  = "SomeValue"
+        Hive = 'HKLM:\'
+        Key = 'SOFTWARE\Contoso\Product'
+        Name = 'AnotherKey'
+        Type = 'REG_SZ'
+        Value = "SomeValue"
         Action = 'Update'
     },
     [pscustomobject]@{
-        Hive   = 'HKLM:\'
-        Key    = 'SOFTWARE\Contoso\Product'
-        Name   = 'OldKey'
-        Type   = 'REG_DWORD'
-        Value  = 0
+        Hive = 'HKLM:\'
+        Key = 'SOFTWARE\Contoso\Product'
+        Name = 'OldKey'
+        Type = 'REG_DWORD'
+        Value = 0
         Action = 'Delete'
     }
 )
@@ -69,20 +69,23 @@ $DeletedNames = @()
 $ExitCode = 1
 Foreach ($reg in $RegistrySettingsToValidate) {
 
-    $DesiredPath          = "$($reg.Hive)$($reg.Key)"
-    $DesiredName          = $reg.Name
-    $DesiredType          = $RegTypeMap[$reg.Type]
-    $DesiredValue         = $reg.Value
-    $Action               = if ($reg.PSObject.Properties['Action']) { $reg.Action } else { 'Update' }
+    $DesiredPath = "$($reg.Hive)$($reg.Key)"
+    $DesiredName = $reg.Name
+    $DesiredType = $RegTypeMap[$reg.Type]
+    $DesiredValue = $reg.Value
+    $Action = if ($reg.PSObject.Properties['Action']) { $reg.Action } else { 'Update' }
 
     if ($Action -eq 'Delete') {
-        if ((Test-Path -Path $DesiredPath) -and (Get-ItemProperty -Path $DesiredPath -Name $DesiredName -ErrorAction SilentlyContinue)) {
+        if ((Test-Path -Path $DesiredPath) -and (
+                Get-ItemProperty -Path $DesiredPath -Name $DesiredName -ErrorAction SilentlyContinue)) {
             Remove-ItemProperty -Path $DesiredPath -Name $DesiredName -Force -ErrorAction SilentlyContinue
             $DeletedNames += $DesiredName
-        } else {
+        }
+        else {
             $DeletedNames += $DesiredName
         }
-    } else {
+    }
+    else {
         If (-not (Test-Path -Path $DesiredPath)) {
             New-Item -Path $DesiredPath -Force | Out-Null
         }
@@ -100,7 +103,8 @@ If ($TotalProcessed -eq $RegistrySettingsToValidate.count) {
     if ($DeletedNames.count -gt 0) { $OutputParts += "Deleted: $($DeletedNames -join ', ')" }
     $Output = "All OK | $($OutputParts -join ' | ')"
     $ExitCode = 0
-} else {
+}
+else {
     $Output = "Something went wrong :-( | Created: $($CreatedNames -join ', ') | Deleted: $($DeletedNames -join ', ')"
     $ExitCode = 1
 }

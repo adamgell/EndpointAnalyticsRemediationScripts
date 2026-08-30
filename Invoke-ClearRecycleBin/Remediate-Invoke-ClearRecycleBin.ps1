@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -9,8 +9,8 @@ Script: Invoke-ClearRecycleBin
 Description:
 Hint: This is a community script. There is no guarantee for this. Please check thoroughly before running.
 Version 1.0: Init
-Run as: User 
+Run as: User
 Context: 64 Bit
-#> 
+#>
 
 Clear-RecycleBin -Force

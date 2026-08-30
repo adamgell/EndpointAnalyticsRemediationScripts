@@ -1,4 +1,4 @@
-<#
+﻿<#
 
 Author       : Sven Wick
 Script       : Detect-Browser-Passwords.ps1
@@ -16,13 +16,14 @@ Run script in 64-bit PowerShell: Yes
 #>
 
 # Path to the sqlite3 executable
-$sqlitePath = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\SQLite.SQLite_Microsoft.Winget.Source_8wekyb3d8bbwe\sqlite3.exe"
+$sqlitePath =
+"$env:LOCALAPPDATA\Microsoft\WinGet\Packages\SQLite.SQLite_Microsoft.Winget.Source_8wekyb3d8bbwe\sqlite3.exe"
 
 $found_some_passwords = $false
-$found_sqlite_binary  = $false
-$message              = @()
-$profilePaths         = @()
-$filePaths            = @()
+$found_sqlite_binary = $false
+$message = @()
+$profilePaths = @()
+$filePaths = @()
 
 # Check for sqlite3 binary
 if (Test-Path $sqlitePath) {
@@ -47,7 +48,8 @@ $firefoxBasedAppDataPaths = @(
 foreach ( $browserAppDataPath in $chromeBasedAppDataPaths ) {
 
     # Get all folders that match "Default" or "Profile *"
-    $profileFolders = Get-ChildItem -Path $browserAppDataPath -Directory | Where-Object { $_.Name -eq "Default" -or $_.Name -like "Profile *" }
+    $profileFolders = Get-ChildItem -Path $browserAppDataPath -Directory | Where-Object { $_.Name -eq
+        "Default" -or $_.Name -like "Profile *" }
 
     foreach ($folder in $profileFolders) {
         $profilePaths = $profilePaths + $($folder.FullName)
@@ -77,10 +79,11 @@ foreach ( $browserAppDataPath in $firefoxBasedAppDataPaths ) {
 
 foreach ( $profilePath in $profilePaths ) {
 
-    $loginFiles = Get-ChildItem -Path $profilePath -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -in @("logins.json", "Login Data") }
+    $loginFiles = Get-ChildItem -Path $profilePath -Recurse -File -ErrorAction SilentlyContinue | Where-Object {
+        $_.Name -in @("logins.json", "Login Data") }
 
     foreach ($file in $loginFiles) {
-          $filePaths = $filePaths + $($file.FullName)
+        $filePaths = $filePaths + $($file.FullName)
     }
 
 }
@@ -111,8 +114,8 @@ foreach ($filePath in $filePaths) {
                 $countLogins = $jsonContent.logins.Count
 
                 if ($countLogins -gt 0) {
-                  $found_some_passwords = $true
-                  $message = $message + "${countLogins} password(s) detected : ${filePath}"
+                    $found_some_passwords = $true
+                    $message = $message + "${countLogins} password(s) detected : ${filePath}"
                 }
             }
         }
@@ -147,7 +150,7 @@ foreach ($filePath in $filePaths) {
             if ($countLogins -gt 0) {
                 $found_some_passwords = $true
                 $message = $message + "${countLogins} password(s) detected : ${filePath}"
-	        }
+            }
 
             # Remove the temporary file
             Remove-Item -Path $tempFilePath
@@ -162,11 +165,12 @@ if (-not ($found_sqlite_binary)) {
 
 if ($found_some_passwords) {
 
-    $output  = $message -join " | "
+    $output = $message -join " | "
     Write-Output $output
     Exit 1
 
-} else {
+}
+else {
 
     Write-Output "Compliant"
     Exit 0

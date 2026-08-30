@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,21 +11,24 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
-if($true){
+if ($true) {
     return 1
-}else{
+}
+else {
     return 0
 }
 
-$events=Get-WinEvent -FilterHashtable @{LogName="System"; id="11"} -MaxEvents 2 -EA SilentlyContinue| ?{$_.providername -match "Disk" -and $_.Message -match "Harddisk0"}
+$events = Get-WinEvent -FilterHashtable @{LogName = "System"; id = "11" } -MaxEvents 2 -EA SilentlyContinue |
+    Where-Object { $_.providername -match "Disk" -and $_.Message -match "Harddisk0" }
 
 
 If ($events) {
     Write-Host "Disk error events found"
     Exit 1
-}else {
+}
+else {
     Write-Host "No disk error events found"
     Exit 0
 }

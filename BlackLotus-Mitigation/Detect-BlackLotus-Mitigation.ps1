@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -28,7 +28,8 @@ try {
 
     # Check for the KB5025885 mitigation registry key
     $MitigationPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot"
-    $AvailableUpdates = (Get-ItemProperty -Path $MitigationPath -Name "AvailableUpdates" -ErrorAction SilentlyContinue).AvailableUpdates
+    $AvailableUpdates = (
+        Get-ItemProperty -Path $MitigationPath -Name "AvailableUpdates" -ErrorAction SilentlyContinue).AvailableUpdates
 
     # Value 0x40 (64) indicates the revocation has been applied
     if (-not $AvailableUpdates -or ($AvailableUpdates -band 0x40) -ne 0x40) {
@@ -38,7 +39,9 @@ try {
 
     # Check the boot manager revocation list (DBX)
     $DBXPath = "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State"
-    $UEFISecureBootState = (Get-ItemProperty -Path $DBXPath -Name "UEFISecureBootEnabled" -ErrorAction SilentlyContinue).UEFISecureBootEnabled
+    $UEFISecureBootState = (
+        Get-ItemProperty -Path $DBXPath -Name "UEFISecureBootEnabled" -ErrorAction SilentlyContinue).
+    UEFISecureBootEnabled
 
     if ($Vulnerable) {
         Write-Output "System may be vulnerable to BlackLotus: $($Issues -join ' | ')"

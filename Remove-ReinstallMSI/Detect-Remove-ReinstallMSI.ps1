@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -14,9 +14,11 @@ Context: 64 Bit
 $AppName = "YourApplicationName"  # Display name of the MSI app (supports wildcards)
 $DesiredVersion = ""               # Leave empty to just detect presence, or set e.g. "2.0.0" to check version
 
-$Uninstall64 = Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
+$Uninstall64 =
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
     Where-Object { $_.DisplayName -like "*$AppName*" }
-$Uninstall32 = Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
+$Uninstall32 =
+Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
     Where-Object { $_.DisplayName -like "*$AppName*" }
 
 $InstalledApp = @($Uninstall64) + @($Uninstall32) | Where-Object { $_ -ne $null } | Select-Object -First 1

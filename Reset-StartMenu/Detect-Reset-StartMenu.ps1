@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-startmenu.ps1
@@ -16,9 +16,11 @@ try {
     $NonCompliant = $false
 
     foreach ($Profile in $UserProfiles) {
-        $TileDataPath = Join-Path $Profile.FullName "AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy"
+        $TileDataPath =
+        Join-Path $Profile.FullName "AppData\Local\Packages\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy"
         if (Test-Path $TileDataPath) {
-            $Size = (Get-ChildItem -Path $TileDataPath -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+            $Size = (Get-ChildItem -Path $TileDataPath -Recurse -Force -ErrorAction SilentlyContinue |
+                    Measure-Object -Property Length -Sum).Sum
             $SizeMB = [math]::Round($Size / 1MB, 2)
             if ($SizeMB -gt $MaxSizeMB) {
                 Write-Warning "Not Compliant - Start Menu data for $($Profile.Name) is $SizeMB MB"

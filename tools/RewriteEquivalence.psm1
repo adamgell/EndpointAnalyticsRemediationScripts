@@ -1,4 +1,4 @@
-Set-StrictMode -Version Latest
+﻿Set-StrictMode -Version Latest
 
 function Get-PropertyValue {
     param(
@@ -219,9 +219,9 @@ function Get-TokenIdentity {
         $normalizedKind = Get-PropertyValue -InputObject $normalization -Name 'Kind'
         if ($null -ne $normalizedKind) {
             return '{0}|{1}|{2}' -f
-                $normalizedKind,
-                (Get-PropertyValue -InputObject $normalization -Name 'Flags'),
-                (Get-PropertyValue -InputObject $normalization -Name 'Value')
+            $normalizedKind,
+            (Get-PropertyValue -InputObject $normalization -Name 'Flags'),
+            (Get-PropertyValue -InputObject $normalization -Name 'Value')
         }
         $value = [string] $normalization
     }
@@ -279,10 +279,10 @@ function Get-HelpKeywordStructure {
 
     $entries = New-Object 'System.Collections.Generic.List[string]'
     foreach ($propertyName in @(
-        'Synopsis', 'Description', 'Notes', 'Component', 'Role', 'Functionality',
-        'ForwardHelpTargetName', 'ForwardHelpCategory', 'RemoteHelpRunspace',
-        'MamlHelpFile', 'ExternalHelpFile'
-    )) {
+            'Synopsis', 'Description', 'Notes', 'Component', 'Role', 'Functionality',
+            'ForwardHelpTargetName', 'ForwardHelpCategory', 'RemoteHelpRunspace',
+            'MamlHelpFile', 'ExternalHelpFile'
+        )) {
         $property = $HelpContent.PSObject.Properties[$propertyName]
         if ($null -ne $property -and $null -ne $property.Value -and
             -not [string]::IsNullOrWhiteSpace([string] $property.Value)) {
@@ -352,9 +352,9 @@ function Get-CommentAnchorFingerprint {
     $helpEntries = New-Object 'System.Collections.Generic.List[string]'
     $helpOwners = @([pscustomobject]@{ Name = '<SCRIPT>'; Ast = $ParsedScript.Ast })
     $functions = @($ParsedScript.Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+            }, $true))
     foreach ($function in $functions) {
         $name = [string] $function.Name
         if ($null -ne $FunctionNames -and $FunctionNames.ContainsKey($name.ToLowerInvariant())) {
@@ -391,9 +391,9 @@ function Get-HereStringFingerprint {
     $entries = New-Object 'System.Collections.Generic.List[string]'
     foreach ($token in $ParsedScript.Tokens) {
         if ($token.Kind -notin @(
-            [System.Management.Automation.Language.TokenKind]::HereStringExpandable,
-            [System.Management.Automation.Language.TokenKind]::HereStringLiteral
-        )) {
+                [System.Management.Automation.Language.TokenKind]::HereStringExpandable,
+                [System.Management.Automation.Language.TokenKind]::HereStringLiteral
+            )) {
             continue
         }
 
@@ -457,9 +457,9 @@ function Get-LineContinuationFingerprint {
         }
 
         $entries.Add(('{0}|PREV={1}|NEXT={2}' -f
-            (ConvertTo-NormalizedNewline -Value ([string] $tokens[$index].Text)),
-            $previous,
-            $next))
+                (ConvertTo-NormalizedNewline -Value ([string] $tokens[$index].Text)),
+                $previous,
+                $next))
     }
 
     $entryArray = $entries.ToArray()
@@ -479,9 +479,9 @@ function Get-DynamicInvocationFingerprint {
 
     $entries = New-Object 'System.Collections.Generic.List[string]'
     $commands = @($ParsedScript.Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.CommandAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.CommandAst]
+            }, $true))
 
     foreach ($command in $commands) {
         if ($command.InvocationOperator -eq [System.Management.Automation.Language.TokenKind]::Unknown) {
@@ -502,14 +502,14 @@ function Get-DynamicInvocationFingerprint {
         $redirections = New-Object 'System.Collections.Generic.List[string]'
         foreach ($redirection in @($command.Redirections)) {
             $redirections.Add(('{0}|{1}' -f
-                $redirection.GetType().FullName,
-                (ConvertTo-NormalizedNewline -Value ([string] $redirection.Extent.Text))))
+                    $redirection.GetType().FullName,
+                    (ConvertTo-NormalizedNewline -Value ([string] $redirection.Extent.Text))))
         }
 
         $entries.Add(('{0}|TOKENS={1}|REDIRECTIONS={2}' -f
-            $command.InvocationOperator,
-            ([string]::Join(';', $tokens.ToArray())),
-            ([string]::Join(';', $redirections.ToArray()))))
+                $command.InvocationOperator,
+                ([string]::Join(';', $tokens.ToArray())),
+                ([string]::Join(';', $redirections.ToArray()))))
     }
 
     $entryArray = $entries.ToArray()
@@ -524,9 +524,9 @@ function Get-CommandRecords {
     param([Parameter(Mandatory)] $ParsedScript)
 
     $commands = @($ParsedScript.Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.CommandAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.CommandAst]
+            }, $true))
     $records = New-Object 'System.Collections.Generic.List[object]'
     for ($index = 0; $index -lt $commands.Count; $index++) {
         $command = $commands[$index]
@@ -535,11 +535,11 @@ function Get-CommandRecords {
             continue
         }
         $records.Add([pscustomobject]@{
-            Index = $index
-            Name = [string] $name
-            Ast = $command
-            NameOffset = $command.CommandElements[0].Extent.StartOffset
-        })
+                Index = $index
+                Name = [string] $name
+                Ast = $command
+                NameOffset = $command.CommandElements[0].Extent.StartOffset
+            })
     }
     return $records.ToArray()
 }
@@ -577,11 +577,12 @@ function Add-CommandMapEntry {
     }
 
     $beforeRecord = $matches[$occurrence - 1]
-    if ($beforeRecord.Index -ge $afterRecords.Count) {
+    $matchingAfterRecords = @($afterRecords | Where-Object Index -EQ $beforeRecord.Index)
+    if ($matchingAfterRecords.Count -ne 1) {
         $State.Failures.Add("$Type mapping '$oldName' occurrence $occurrence has no corresponding after command.")
         return
     }
-    $afterRecord = $afterRecords[$beforeRecord.Index]
+    $afterRecord = $matchingAfterRecords[0]
     if ($afterRecord.Name -cne $newName) {
         $State.Failures.Add("$Type mapping '$oldName' occurrence $occurrence does not map to '$newName' at the same callsite.")
         return
@@ -590,7 +591,7 @@ function Add-CommandMapEntry {
     if ($Type -eq 'Alias') {
         $alias = @(Get-Alias -ErrorAction SilentlyContinue | Where-Object Name -IEQ $oldName)
         $replacement = @(Get-Command -ListImported -CommandType Cmdlet -ErrorAction SilentlyContinue |
-            Where-Object Name -CEQ $newName)
+                Where-Object Name -CEQ $newName)
         if ($alias.Count -ne 1 -or $replacement.Count -ne 1 -or
             $replacement[0].CommandType -eq [System.Management.Automation.CommandTypes]::Alias -or
             $alias[0].ResolvedCommandName -ine $replacement[0].Name) {
@@ -634,11 +635,11 @@ function Add-CommandMapEntry {
     $State.Before[$beforeOffset] = $normalization
     $State.After[$afterOffset] = $normalization
     $State.Applied.Add([pscustomobject][ordered]@{
-        Type = $Type
-        OldName = $oldName
-        NewName = $newName
-        Occurrence = $occurrence
-    })
+            Type = $Type
+            OldName = $oldName
+            NewName = $newName
+            Occurrence = $occurrence
+        })
 }
 
 function Resolve-AliasMapping {
@@ -717,9 +718,9 @@ function Test-HasUnresolvedDynamicFunctionReference {
 
     $symbolPattern = '(?i)(?<![A-Za-z0-9_-])' + [regex]::Escape($FunctionName) + '(?![A-Za-z0-9_-])'
     $commands = @($ParsedScript.Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.CommandAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.CommandAst]
+            }, $true))
     foreach ($command in $commands) {
         if ($command.InvocationOperator -eq [System.Management.Automation.Language.TokenKind]::Unknown -or
             $command.CommandElements.Count -eq 0 -or $null -ne $command.GetCommandName()) {
@@ -743,13 +744,13 @@ function Test-FunctionRenameMapping {
     )
 
     $beforeFunctions = @($BeforeScript.Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+            }, $true))
     $afterFunctions = @($AfterScript.Ast.FindAll({
-        param($node)
-        $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
-    }, $true))
+                param($node)
+                $node -is [System.Management.Automation.Language.FunctionDefinitionAst]
+            }, $true))
     $beforeCommands = @(Get-CommandRecords -ParsedScript $BeforeScript)
     $afterCommands = @(Get-CommandRecords -ParsedScript $AfterScript)
 
@@ -783,11 +784,11 @@ function Test-FunctionRenameMapping {
         }
 
         $oldCalls = @($beforeCommands | Where-Object {
-            $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $oldName -NewName $newName)
-        })
+                $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $oldName -NewName $newName)
+            })
         $newCalls = @($afterCommands | Where-Object {
-            $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $newName -NewName $newName)
-        })
+                $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $newName -NewName $newName)
+            })
         if ($oldCalls.Count -ne $newCalls.Count) {
             $State.Failures.Add("Function mapping '$oldName' to '$newName' does not preserve the static callsite count.")
             continue
@@ -843,8 +844,8 @@ function Test-FunctionRenameMapping {
 
         $hasUnresolvedDefinition = @($afterFunctions | Where-Object { $_.Name -ieq $oldName }).Count -gt 0
         $hasUnresolvedCall = @($afterCommands | Where-Object {
-            $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $oldName -NewName $oldName)
-        }).Count -gt 0
+                $null -ne (Get-RenamedFunctionCommandName -CommandName $_.Name -OldName $oldName -NewName $oldName)
+            }).Count -gt 0
         $hasUnresolvedDynamicCall = Test-HasUnresolvedDynamicFunctionReference `
             -ParsedScript $AfterScript `
             -FunctionName $oldName
@@ -853,12 +854,12 @@ function Test-FunctionRenameMapping {
         }
 
         $State.Applied.Add([pscustomobject][ordered]@{
-            Type = 'Function'
-            OldName = $oldName
-            NewName = $newName
-            Occurrence = $null
-            StaticCallsites = $oldCalls.Count
-        })
+                Type = 'Function'
+                OldName = $oldName
+                NewName = $newName
+                Occurrence = $null
+                StaticCallsites = $oldCalls.Count
+            })
     }
 
     return $State
@@ -908,21 +909,21 @@ function New-RewriteReportRow {
     )
 
     $beforeParserErrors = @($BeforeScript.Errors | ForEach-Object {
-        [pscustomobject][ordered]@{
-            Message = $_.Message
-            ErrorId = $_.ErrorId
-            StartLine = $_.Extent.StartLineNumber
-            StartColumn = $_.Extent.StartColumnNumber
-        }
-    })
+            [pscustomobject][ordered]@{
+                Message = $_.Message
+                ErrorId = $_.ErrorId
+                StartLine = $_.Extent.StartLineNumber
+                StartColumn = $_.Extent.StartColumnNumber
+            }
+        })
     $afterParserErrors = @($AfterScript.Errors | ForEach-Object {
-        [pscustomobject][ordered]@{
-            Message = $_.Message
-            ErrorId = $_.ErrorId
-            StartLine = $_.Extent.StartLineNumber
-            StartColumn = $_.Extent.StartColumnNumber
-        }
-    })
+            [pscustomobject][ordered]@{
+                Message = $_.Message
+                ErrorId = $_.ErrorId
+                StartLine = $_.Extent.StartLineNumber
+                StartColumn = $_.Extent.StartColumnNumber
+            }
+        })
 
     return [pscustomobject][ordered]@{
         BasePath = $BeforePath

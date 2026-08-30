@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -34,7 +34,8 @@ try {
     }
 
     # Set AvailableUpdates to trigger the Code Integrity Boot Policy update
-    $CurrentValue = (Get-ItemProperty -Path $MitigationPath -Name "AvailableUpdates" -ErrorAction SilentlyContinue).AvailableUpdates
+    $CurrentValue = (
+        Get-ItemProperty -Path $MitigationPath -Name "AvailableUpdates" -ErrorAction SilentlyContinue).AvailableUpdates
     if (-not $CurrentValue) { $CurrentValue = 0 }
 
     # Enable the mitigation flags: 0x10 (Code Integrity) + 0x20 (Boot Manager) + 0x40 (Revocation)

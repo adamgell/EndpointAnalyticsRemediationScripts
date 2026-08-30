@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,7 +11,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 #####################################################################################################################################
 #                            LIST URL                                                                                               #
 #                                                                                                                               #
@@ -37,33 +37,33 @@ $templateFilePath = "C:\ProgramData\AppList\uninstall-apps.txt"
 
 ##Download the list
 Invoke-WebRequest `
--Uri $installuri `
--OutFile $templateFilePath `
--UseBasicParsing `
--Headers @{"Cache-Control"="no-cache"}
+    -Uri $installuri `
+    -OutFile $templateFilePath `
+    -UseBasicParsing `
+    -Headers @{"Cache-Control" = "no-cache" }
 
 
 
 $oldpath = "C:\ProgramData\AppList\uninstall-apps-old.txt"
 If (Test-Path $oldpath) {
-$newcontent = get-content $templateFilePath | select-object -first 1
-$oldcontent = get-content $oldpath | select-object -first 1
-If ($newcontent -eq $oldcontent) {
-    remove-item -path $templateFilePath -force
-    Write-Output "Compliant"
-    exit 0
+    $newcontent = Get-Content $templateFilePath | Select-Object -first 1
+    $oldcontent = Get-Content $oldpath | Select-Object -first 1
+    If ($newcontent -eq $oldcontent) {
+        Remove-Item -path $templateFilePath -force
+        Write-Output "Compliant"
+        exit 0
+    }
+    else {
+        Remove-Item -path $templateFilePath -force
+        Write-Warning "Not Compliant"
+        Exit 1
+
+    }
+
+
 }
 else {
-    remove-item -path $templateFilePath -force
-    Write-Warning "Not Compliant"
-    Exit 1
-
-}
-
-
-}
-else {
-    remove-item -path $templateFilePath -force
+    Remove-Item -path $templateFilePath -force
     Write-Warning "Not Compliant"
     Exit 1
 }

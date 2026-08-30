@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,15 +11,13 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 
 $appid = ""
 
 $ResolveWingetPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe"
-if ($ResolveWingetPath){
-       $WingetPath = $ResolveWingetPath[-1].Path
-       $Winget = $WingetPath + "\winget.exe"
-       &$winget install --id $appid --silent --force --accept-package-agreements --accept-source-agreements --scope machine --exact | out-null
+if ($ResolveWingetPath) {
+    $WingetPath = $ResolveWingetPath[-1].Path
+    $Winget = $WingetPath + "\winget.exe"
+    &$winget install --id $appid --silent --force --accept-package-agreements --accept-source-agreements --scope machine --exact | Out-Null
 }
-
-

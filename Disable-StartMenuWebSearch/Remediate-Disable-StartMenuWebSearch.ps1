@@ -1,13 +1,13 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 Tom Coleman
 Script: Stop Web Search
-Description: Disabling web search on the start menu makes it so much faster and effective. No lag at all anymore! 
+Description: Disabling web search on the start menu makes it so much faster and effective. No lag at all anymore!
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 $Path = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search"
 $Name = "BingSearchEnabled"

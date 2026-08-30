@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: clear-tempfiles.ps1
@@ -35,7 +35,8 @@ try {
         }
         $ThumbCache = Join-Path $Profile.FullName "AppData\Local\Microsoft\Windows\Explorer"
         if (Test-Path $ThumbCache) {
-            Get-ChildItem -Path $ThumbCache -Filter "thumbcache_*.db" -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+            Get-ChildItem -Path $ThumbCache -Filter "thumbcache_*.db" -ErrorAction SilentlyContinue |
+                Remove-Item -Force -ErrorAction SilentlyContinue
         }
     }
 

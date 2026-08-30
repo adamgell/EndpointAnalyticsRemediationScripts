@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,7 +11,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User
 Context: 64 Bit
-#> 
+#>
 
 function Save-VerifiedDownload {
     param (
@@ -37,15 +37,13 @@ function Save-VerifiedDownload {
 #Remove Teams Chat
 $MSTeams = "MicrosoftTeams"
 
-$WinPackage = Get-AppxPackage -allusers | Where-Object {$_.Name -eq $MSTeams}
+$WinPackage = Get-AppxPackage -allusers | Where-Object { $_.Name -eq $MSTeams }
 $ProvisionedPackage = Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $WinPackage.Name }
-If ($null -ne $WinPackage) 
-{
+If ($null -ne $WinPackage) {
     Remove-AppxPackage  -Package $WinPackage.PackageFullName
-} 
+}
 
-If ($null -ne $ProvisionedPackage) 
-{
+If ($null -ne $ProvisionedPackage) {
     Remove-AppxProvisionedPackage -online -Packagename $ProvisionedPackage.Packagename
 }
 
@@ -59,7 +57,7 @@ Remove-Item -Path $setAclPath -Force
 
 ##Stop it coming back
 $registryPath = "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Communications"
-If (!(Test-Path $registryPath)) { 
+If (!(Test-Path $registryPath)) {
     New-Item $registryPath
 }
 Set-ItemProperty $registryPath ConfigureChatAutoInstall -Value 0
@@ -67,8 +65,8 @@ Set-ItemProperty $registryPath ConfigureChatAutoInstall -Value 0
 
 ##Unpin it
 $registryPath = "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Chat"
-If (!(Test-Path $registryPath)) { 
+If (!(Test-Path $registryPath)) {
     New-Item $registryPath
 }
 Set-ItemProperty $registryPath "ChatIcon" -Value 2
-write-host "Removed Teams Chat"
+Write-Host "Removed Teams Chat"

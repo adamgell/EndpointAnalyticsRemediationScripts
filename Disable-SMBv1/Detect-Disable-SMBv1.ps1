@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,14 +11,14 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 
 $smbv1 = get-smbserverconfiguration | Select-Object -ExpandProperty EnableSMB1Protocol
 if ($smbv1 -eq $false) {
-    write-host "SMBv1 is disabled"
+    Write-Host "SMBv1 is disabled"
     exit 0
 }
 else {
-    write-host "SMBv1 is enabled"
+    Write-Host "SMBv1 is enabled"
     exit 1
 }

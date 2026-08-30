@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (https://www.joeyverlinden.com/)
 - Andrew Taylor (https://andrewstaylor.com/)
 - Jannik Reinhard (jannikreinhard.com)
@@ -10,7 +10,7 @@ Release notes:
 Version 1.0: Init
 Run as: Admin/User
 Context: 64 Bit
-#> 
+#>
 
 ##Enter the path to the registry key for example HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
 $regpath = ""

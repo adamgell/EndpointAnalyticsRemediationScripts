@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-fontcache.ps1
@@ -17,7 +17,8 @@ try {
 
     $TotalSize = 0
     if (Test-Path $FontCachePath) {
-        $TotalSize += (Get-ChildItem -Path $FontCachePath -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+        $TotalSize += (Get-ChildItem -Path $FontCachePath -Recurse -Force -ErrorAction SilentlyContinue |
+                Measure-Object -Property Length -Sum).Sum
     }
     if (Test-Path $FontCacheFile) {
         $TotalSize += (Get-Item $FontCacheFile -ErrorAction SilentlyContinue).Length

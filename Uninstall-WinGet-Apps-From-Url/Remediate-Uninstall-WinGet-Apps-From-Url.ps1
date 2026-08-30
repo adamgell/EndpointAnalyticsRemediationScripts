@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,7 +11,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 
 
 #####################################################################################################################################
@@ -39,18 +39,18 @@ $templateFilePath = "C:\ProgramData\AppList\uninstall-apps.txt"
 
 ##Download the list
 Invoke-WebRequest `
--Uri $uninstalluri `
--OutFile $templateFilePath `
--UseBasicParsing `
--Headers @{"Cache-Control"="no-cache"}
+    -Uri $uninstalluri `
+    -OutFile $templateFilePath `
+    -UseBasicParsing `
+    -Headers @{"Cache-Control" = "no-cache" }
 
 
 ##Find Winget Path
 
 $ResolveWingetPath = Resolve-Path "C:\Program Files\WindowsApps\Microsoft.DesktopAppInstaller_*_x64__8wekyb3d8bbwe"
-    if ($ResolveWingetPath){
-           $WingetPath = $ResolveWingetPath[-1].Path
-    }
+if ($ResolveWingetPath) {
+    $WingetPath = $ResolveWingetPath[-1].Path
+}
 
 $config
 
@@ -58,20 +58,20 @@ $config
 Set-Location $wingetpath
 
 ##Loop through app list
-$apps = get-content $templateFilePath | select-object -skip 1
+$apps = Get-Content $templateFilePath | Select-Object -skip 1
 
 ##Uninstall each app
 foreach ($app in $apps) {
 
-write-host "Uninstalling $app"
-.\winget.exe uninstall --exact --id $app --silent --accept-source-agreements
+    Write-Host "Uninstalling $app"
+    .\winget.exe uninstall --exact --id $app --silent --accept-source-agreements
 }
 
 ##Delete the .old file to replace it with the new one
 $oldpath = "C:\ProgramData\AppList\uninstall-apps-old.txt"
 If (Test-Path $oldpath) {
-    remove-item $oldpath -Force
+    Remove-Item $oldpath -Force
 }
 
 ##Rename new to old
-rename-item $templateFilePath $oldpath
+Rename-Item $templateFilePath $oldpath

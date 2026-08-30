@@ -1,4 +1,4 @@
-BeforeAll {
+﻿BeforeAll {
     Import-Module "$PSScriptRoot/../tools/RepositoryCatalog.psm1" -Force
 
     $repoRoot = (Resolve-Path "$PSScriptRoot/..").Path
@@ -261,13 +261,15 @@ Describe 'Catalog script manifests' {
             $scriptName = [IO.Path]::GetFileNameWithoutExtension($row.NewPath)
             $expectedRole = if ($scriptName.StartsWith('Detect-', [StringComparison]::Ordinal)) {
                 'Detection'
-            } else {
+            }
+            else {
                 'Remediation'
             }
             $packageRows = @($rowsByPackage[$packageName])
             $expectedCounterpart = if ($packageRows.Count -eq 2) {
                 @($packageRows | Where-Object NewPath -ne $row.NewPath)[0].NewPath
-            } else {
+            }
+            else {
                 ''
             }
 
@@ -506,8 +508,8 @@ Describe 'Deterministic manifest generation' {
 
         $run.ExitCode | Should -Not -Be 0
         $run.Output | Should -Match ([regex]::Escape(
-            'Fixture/Detect-Fixture.ps1.Description contains sentinel metadata.'
-        ))
+                'Fixture/Detect-Fixture.ps1.Description contains sentinel metadata.'
+            ))
         Test-Path -LiteralPath $markerPath | Should -BeFalse
     }
 
@@ -528,8 +530,8 @@ Describe 'Deterministic manifest generation' {
 
         $run.ExitCode | Should -Not -Be 0
         $run.Output | Should -Match ([regex]::Escape(
-            'Fixture/Detect-Fixture.ps1.Runtime.RequiresElevation must be Boolean.'
-        ))
+                'Fixture/Detect-Fixture.ps1.Runtime.RequiresElevation must be Boolean.'
+            ))
         Test-Path -LiteralPath $markerPath | Should -BeFalse
     }
 }

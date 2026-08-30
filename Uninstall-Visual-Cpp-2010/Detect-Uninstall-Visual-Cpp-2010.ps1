@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 Tom Coleman
 Script: Detect C++ 2010 Redistributable
 Description: https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170
@@ -13,9 +13,10 @@ Context: 64 Bit
 $Name = 'Microsoft.VCRedist.2010'
 
 if ($null -eq (Get-AppxPackage -Name $Name)) {
-	Write-Host "Microsoft Visual C++ 2010 is not installed"
-	exit 0
-} Else {
-	Write-Host "Microsoft Visual C++ 2010 is installed"
-	Exit 1
+    Write-Host "Microsoft Visual C++ 2010 is not installed"
+    exit 0
+}
+Else {
+    Write-Host "Microsoft Visual C++ 2010 is installed"
+    Exit 1
 }

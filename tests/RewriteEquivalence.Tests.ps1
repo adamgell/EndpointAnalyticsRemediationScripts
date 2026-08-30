@@ -1,4 +1,4 @@
-BeforeAll {
+﻿BeforeAll {
     Import-Module "$PSScriptRoot/../tools/RewriteEquivalence.psm1" -Force
     $fixtureRoot = "$PSScriptRoot/fixtures/rewrite"
     $wrapperPath = "$PSScriptRoot/../tools/Test-PowerShellRewrite.ps1"
@@ -116,7 +116,7 @@ start 'https://example.invalid/lowercase'
 Start-Process 'https://example.invalid/source-exact'
 '@ | Set-Content -LiteralPath $after -Encoding utf8
         $startAliasMapping = @($foundationSymbolMap.Aliases |
-            Where-Object Path -CEQ 'Run-Browser/Remediate-Run-Browser.ps1')[0]
+                Where-Object Path -CEQ 'Run-Browser/Remediate-Run-Browser.ps1')[0]
         $map = @{
             Aliases = @($startAliasMapping)
             Functions = @()
@@ -142,6 +142,26 @@ Start-Process 'https://example.invalid/source-exact'
 
         (Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map).Passed |
             Should -BeTrue
+    }
+
+    It 'maps command casing after an unchanged dynamic invocation' {
+        $before = Join-Path $TestDrive 'CommandAfterDynamic.Before.ps1'
+        $after = Join-Path $TestDrive 'CommandAfterDynamic.After.ps1'
+        Set-Content -LiteralPath $before -Value '& $tool; get-process' -Encoding utf8
+        Set-Content -LiteralPath $after -Value '& $tool; Get-Process' -Encoding utf8
+        $map = @{
+            Commands = @(
+                @{ OldName = 'get-process'; NewName = 'Get-Process'; Occurrence = 1 }
+            )
+            Aliases = @()
+            Functions = @()
+        }
+
+        $result = Compare-PowerShellSource `
+            -BeforePath $before `
+            -AfterPath $after `
+            -SymbolMap $map
+        $result.Passed | Should -BeTrue -Because ($result.Failures -join "`n")
     }
 
     It 'does not auto-load a module to resolve a command mapping' {
@@ -229,14 +249,15 @@ global:IsMember
     }
 
     It 'ignores a variable whose name case-insensitively matches the renamed function' {
-        $before = Join-Path $repositoryRoot 'Enable-RDP/detection_Enable-RDPDetection.ps1'
+        $source = Join-Path $repositoryRoot 'Enable-RDP/Detect-Enable-RDP.ps1'
+        $before = Join-Path $TestDrive 'FunctionVariable.Before.ps1'
         $after = Join-Path $TestDrive 'FunctionVariable.After.ps1'
-        $afterText = [System.IO.File]::ReadAllText($before)
-        $afterText = $afterText.Replace('function IsMember', 'function Test-GroupMembership')
-        $afterText = $afterText.Replace('if(IsMember ', 'if(Test-GroupMembership ')
+        $afterText = [System.IO.File]::ReadAllText($source)
+        $beforeText = $afterText.Replace('Test-GroupMembership', 'IsMember')
+        $beforeText | Set-Content -LiteralPath $before -Encoding utf8
         $afterText | Set-Content -LiteralPath $after -Encoding utf8
         $functionMapping = @($foundationSymbolMap.Functions |
-            Where-Object Path -CEQ 'Enable-RDP/Detect-Enable-RDP.ps1')[0]
+                Where-Object Path -CEQ 'Enable-RDP/Detect-Enable-RDP.ps1')[0]
         $map = @{ Aliases = @(); Functions = @($functionMapping) }
 
         $result = Compare-PowerShellSource -BeforePath $before -AfterPath $after -SymbolMap $map

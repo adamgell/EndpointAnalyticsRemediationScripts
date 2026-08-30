@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,11 +11,11 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 
 ##Check how long machine has been on for
-$now = (Get-Date -UFormat "%s" -Date (Get-Date)) -replace (",",".")
-$poweron = (Get-Date -UFormat "%s" -Date (Get-Process -Id $pid).StartTime) -replace (",",".")
+$now = (Get-Date -UFormat "%s" -Date (Get-Date)) -replace (",", ".")
+$poweron = (Get-Date -UFormat "%s" -Date (Get-Process -Id $pid).StartTime) -replace (",", ".")
 
 ##Check the difference between the two
 $diff = $now - $poweron
@@ -30,10 +30,10 @@ $thresholddays = 7
 $thresholdhours = $thresholddays * 24
 
 if ($hours -gt $thresholdhours) {
-    write-host "Machine has been on for more than $thresholddays days"
+    Write-Host "Machine has been on for more than $thresholddays days"
     exit 0
 }
 else {
-    write-host "Machine has been on for less than $thresholddays days"
+    Write-Host "Machine has been on for less than $thresholddays days"
     exit 1
 }

@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -25,7 +25,8 @@ $ClearedPaths = @()
 foreach ($path in $CachePaths) {
     if (Test-Path $path) {
         try {
-            Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+            Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue |
+                Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
             $ClearedPaths += $path
         }
         catch {

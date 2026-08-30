@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -13,8 +13,10 @@ Context: 64 Bit
 $WinlogonPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
 
 try {
-    $AutoAdminLogon = (Get-ItemProperty -Path $WinlogonPath -Name "AutoAdminLogon" -ErrorAction SilentlyContinue).AutoAdminLogon
-    $DefaultUserName = (Get-ItemProperty -Path $WinlogonPath -Name "DefaultUserName" -ErrorAction SilentlyContinue).DefaultUserName
+    $AutoAdminLogon = (
+        Get-ItemProperty -Path $WinlogonPath -Name "AutoAdminLogon" -ErrorAction SilentlyContinue).AutoAdminLogon
+    $DefaultUserName = (
+        Get-ItemProperty -Path $WinlogonPath -Name "DefaultUserName" -ErrorAction SilentlyContinue).DefaultUserName
 
     if ($AutoAdminLogon -eq "1" -and $DefaultUserName) {
         Write-Output "Autologon is configured for user: $DefaultUserName"

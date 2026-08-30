@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Adam Gell
 Script: remediate-automatictimezone.ps1
 Description: Sets up Automatic Timezone and Time Sync
@@ -8,7 +8,7 @@ Release notes:
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 ##Enter the path to the registry key for example HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
 $regpath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location"

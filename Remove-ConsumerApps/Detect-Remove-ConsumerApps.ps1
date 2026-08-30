@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Marius Wyss (marius.wyss@microsoft.com)
 Script: Remove-ConsumerAppsDetection.ps1
 Description:
@@ -8,7 +8,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: System
 Context: 64 Bit
-#> 
+#>
 
 $ConsumerApps = @{
     "Microsoft.XboxApp" = "Xbox App"
@@ -21,7 +21,7 @@ $ConsumerApps = @{
 # Check if any of the Consumer Apps are installed
 $UninstallPackages = $ConsumerApps.Keys
 
-$InstalledPackages = Get-AppxPackage -AllUsers | Where { ($UninstallPackages -contains $_.Name) }
+$InstalledPackages = Get-AppxPackage -AllUsers | Where-Object { ($UninstallPackages -contains $_.Name) }
 
 If ($InstalledPackages -eq $null) {
     Write-Output "No Consumer Apps installed"

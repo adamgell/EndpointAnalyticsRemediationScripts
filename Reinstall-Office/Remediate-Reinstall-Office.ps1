@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -16,7 +16,8 @@ try {
 
     if (Test-Path $OfficeC2RClient) {
         # Trigger online repair
-        Start-Process -FilePath $OfficeC2RClient -ArgumentList "/repair", "RepairType=FullRepair", "DisplayLevel=False" -Wait -NoNewWindow -ErrorAction Stop
+        Start-Process -FilePath $OfficeC2RClient -ArgumentList "/repair", "RepairType=FullRepair",
+        "DisplayLevel=False" -Wait -NoNewWindow -ErrorAction Stop
         Write-Output "Office online repair initiated successfully."
         exit 0
     }

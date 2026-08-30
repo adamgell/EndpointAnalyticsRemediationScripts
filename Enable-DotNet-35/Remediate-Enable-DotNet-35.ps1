@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -12,17 +12,17 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
-try  {
- 
+try {
+
     Enable-WindowsOptionalFeature -Online -FeatureName NetFx3
     Write-Output 'NetFx3 will be Enabled'
     exit 0
 }
 catch {
- 
+
     $errMsg = $_.Exception.Message
-    Write-host $errMsg
+    Write-Host $errMsg
     exit 1
 }

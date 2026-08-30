@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: collect-eventlogerrors.ps1
@@ -17,8 +17,8 @@ try {
 
     $StartTime = (Get-Date).AddHours(-$HoursBack)
     $Events = Get-WinEvent -FilterHashtable @{
-        LogName   = 'System', 'Application'
-        Level     = 1, 2
+        LogName = 'System', 'Application'
+        Level = 1, 2
         StartTime = $StartTime
     } -ErrorAction SilentlyContinue
 

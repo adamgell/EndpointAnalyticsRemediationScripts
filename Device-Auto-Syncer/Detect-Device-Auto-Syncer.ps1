@@ -1,7 +1,7 @@
-# Create variable for the time of the last Intune sync.
+﻿# Create variable for the time of the last Intune sync.
 $PushInfo = Get-ScheduledTask -TaskName PushLaunch | Get-ScheduledTaskInfo
 $LastPush = $PushInfo.LastRunTime
-$CurrentTime=(GET-DATE)
+$CurrentTime = (Get-Date)
 
 # Calculate the time difference between the current date/time and the date stored in the variable.
 $TimeDiff = New-TimeSpan -Start $LastPush -End $CurrentTime
@@ -11,7 +11,8 @@ if ($TimeDiff.Days -gt 2) {
     # The time difference is more than 2 days
     Write-Host "Last Sync was more than 2 days ago"
     Exit 1
-} else {
+}
+else {
     # The time difference is less than 2 days
     Write-Host "Sync Complete"
     Exit 0

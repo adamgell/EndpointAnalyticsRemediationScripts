@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-bluescreenhistory.ps1
@@ -15,10 +15,10 @@ try {
     $StartTime = (Get-Date).AddDays(-$DaysBack)
 
     $BSODs = Get-WinEvent -FilterHashtable @{
-        LogName      = 'System'
-        Id           = 1001
+        LogName = 'System'
+        Id = 1001
         ProviderName = 'Microsoft-Windows-WER-SystemErrorReporting'
-        StartTime    = $StartTime
+        StartTime = $StartTime
     } -ErrorAction SilentlyContinue
 
     $BSODCount = ($BSODs | Measure-Object).Count

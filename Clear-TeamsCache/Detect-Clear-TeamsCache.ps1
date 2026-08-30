@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -17,10 +17,11 @@ Author:
 -Michael Oliveri
 Add "-Confirm:$false" for Remove-Item
 Replace "Return" by "Exit"
-#> 
+#>
 
-if(Test-Path -Path $env:APPDATA\"Microsoft\teams"){
+if (Test-Path -Path $env:APPDATA\"Microsoft\teams") {
     Exit 1
-}else{
+}
+else {
     Exit 0
 }

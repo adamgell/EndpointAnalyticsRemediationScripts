@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Adam Gell
 Script: detect-automatictimezone.ps1
 Description: Sets up Automatic Timezone and Time Sync
@@ -8,7 +8,7 @@ Release notes:
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 ##Enter the path to the registry key for example HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System
 $regpath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location"
@@ -22,8 +22,10 @@ $regvalue2 = "3"
 
 
 Try {
-    $Registry = Get-ItemProperty -Path $regpath -Name $regname -ErrorAction Stop | Select-Object -ExpandProperty $regname
-    $Registry2 = Get-ItemProperty -Path $regpath2 -Name $regname2 -ErrorAction Stop | Select-Object -ExpandProperty $regname2
+    $Registry = Get-ItemProperty -Path $regpath -Name $regname -ErrorAction Stop |
+        Select-Object -ExpandProperty $regname
+    $Registry2 = Get-ItemProperty -Path $regpath2 -Name $regname2 -ErrorAction Stop |
+        Select-Object -ExpandProperty $regname2
     If (($Registry -eq $regvalue) -and ($Registry2 -eq $regvalue2)) {
         Write-Output "Compliant"
         Exit 0
@@ -33,9 +35,9 @@ Try {
         Exit 1
 
     }
-    
 
-} 
+
+}
 Catch {
     Write-Warning "Not Compliant"
     Exit 1

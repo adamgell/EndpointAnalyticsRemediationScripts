@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -17,17 +17,17 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 $cleanupTypeSelection = 'Temporary Sync Files', 'Downloaded Program Files', 'Memory Dump Files', 'Recycle Bin'
 
 foreach ($keyName in $cleanupTypeSelection) {
     $newItemParams = @{
-        Path         = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\$keyName"
-        Name         = 'StateFlags0001'
-        Value        = 2
+        Path = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\VolumeCaches\$keyName"
+        Name = 'StateFlags0001'
+        Value = 2
         PropertyType = 'DWord'
-        ErrorAction  = 'SilentlyContinue'
+        ErrorAction = 'SilentlyContinue'
     }
     New-ItemProperty @newItemParams | Out-Null
 }

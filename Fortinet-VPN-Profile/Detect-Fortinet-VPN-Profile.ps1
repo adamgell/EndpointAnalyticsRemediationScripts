@@ -1,4 +1,4 @@
-<#
+﻿<#
   .NOTES
   ===========================================================================
    Created on:   	27.06.2022
@@ -16,10 +16,10 @@
 $VPNName = "Simons VPN"
 
 if ((Test-Path -LiteralPath "HKLM:\SOFTWARE\Fortinet\FortiClient\Sslvpn\Tunnels\$VPNName") -ne $true) {
-  Write-Host "Not existing"
-  Exit 1
+    Write-Host "Not existing"
+    Exit 1
 }
 Else {
-  Write-Host "OK"
-  Exit 0
+    Write-Host "OK"
+    Exit 0
 }

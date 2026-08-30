@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,31 +11,28 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User
 Context: 64 Bit
-#> 
+#>
 ##Detect Teams Chat
 
 $MSTeams = "MicrosoftTeams"
 ##Look for Package
-$WinPackage = Get-AppxPackage -allusers | Where-Object {$_.Name -eq $MSTeams}
+$WinPackage = Get-AppxPackage -allusers | Where-Object { $_.Name -eq $MSTeams }
 $ProvisionedPackage = Get-AppxProvisionedPackage -Online | Where-Object { $_.DisplayName -eq $WinPackage }
 ##Set a detection counter
 $detection = 0
 ##If the package is found, increment the counter
-if ($null -ne $WinPackage) 
-{
+if ($null -ne $WinPackage) {
     $detection++
-} 
-if ($null -ne $ProvisionedPackage) 
-{
+}
+if ($null -ne $ProvisionedPackage) {
     $detection++
 }
 
 if ($detection -eq 0) {
-    write-host "Teams Chat not found, compliance met"
+    Write-Host "Teams Chat not found, compliance met"
     exit 0
 }
 else {
-    write-host "Teams Chat found, compliance not met"
+    Write-Host "Teams Chat found, compliance not met"
     exit 1
 }
-

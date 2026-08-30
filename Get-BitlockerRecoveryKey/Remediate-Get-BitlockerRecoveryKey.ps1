@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,25 +11,22 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
-Try 
-{
-	$BLinfo = Get-Bitlockervolume
-	if($BLinfo.EncryptionPercentage -eq '100')
-	{
-			$Result = (Get-BitLockerVolume -MountPoint C).KeyProtector
-			$Recoverykey = $result.recoverypassword	
-			Write-Output "Bitlocker recovery key $recoverykey"
-		Exit 0
-	}else{
-		Write-Output "This is only for reporting, no key aviable"
-		Exit 1
-	}
+Try {
+    $BLinfo = Get-Bitlockervolume
+    if ($BLinfo.EncryptionPercentage -eq '100') {
+        $Result = (Get-BitLockerVolume -MountPoint C).KeyProtector
+        $Recoverykey = $result.recoverypassword
+        Write-Output "Bitlocker recovery key $recoverykey"
+        Exit 0
+    }
+    else {
+        Write-Output "This is only for reporting, no key aviable"
+        Exit 1
+    }
 }
-catch
-{
-Write-Warning "Value Missing"
-	Exit 1
+catch {
+    Write-Warning "Value Missing"
+    Exit 1
 }
-

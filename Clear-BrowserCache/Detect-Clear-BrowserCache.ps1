@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -28,7 +28,8 @@ $CachePaths = @($ChromeCachePath, $ChromeCodeCachePath, $EdgeCachePath, $EdgeCod
 
 foreach ($path in $CachePaths) {
     if (Test-Path $path) {
-        $size = (Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+        $size = (Get-ChildItem -Path $path -Recurse -Force -ErrorAction SilentlyContinue |
+                Measure-Object -Property Length -Sum).Sum
         $TotalCacheSizeMB += [math]::Round($size / 1MB, 2)
     }
 }

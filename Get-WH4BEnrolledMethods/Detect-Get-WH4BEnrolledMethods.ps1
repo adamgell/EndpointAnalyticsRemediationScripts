@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -12,7 +12,7 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: User
 Context: 64 Bit
-#> 
+#>
 
 # Detect which WHfB method has been configured
 
@@ -26,17 +26,18 @@ $LogFileFullPath = $LogFilePath + "\" + $LogFileName
 # check if folder exists or create
 If (-Not (Test-Path -Path $LogDir -PathType Container)) {
     New-Item -Path $env:temp -Name "Logs" -ItemType "directory" > $null
-} 
+}
 If (-Not (Test-Path -Path $LogFilePath -PathType Container)) {
     New-Item -Path $LogDir -Name $LogDirSubFolderName -ItemType "directory" > $null
-} 
+}
 #endregion SetupLog
 
 Start-Transcript $LogFileFullPath -Append
 
-# Check WHfB reg key 
+# Check WHfB reg key
 $LoggedOnUserSID = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-$PinKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\Credential Providers\{D6886603-9D2F-4EB2-B667-1971041FA96B}\$LoggedOnUserSID"
+$PinKeyPath =
+"HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\Credential Providers\{D6886603-9D2F-4EB2-B667-1971041FA96B}\$LoggedOnUserSID"
 $BioKeyPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WinBio\AccountInfo\$LoggedOnUserSID"
 $BioValueName = "EnrolledFactors"
 $PinValueName = "LogonCredsAvailable"
@@ -66,20 +67,20 @@ Try {
                 Write-Warning $exitmessage
                 $exitcode = 1
             }
-        } 
+        }
         # Only PIN is configured
         else {
             $exitmessage = "PIN configured"
             #Write-Host $exitmessage
             $exitcode = 0
         }
-    } 
+    }
     else {
         $exitmessage = "Windows Hello not configured"
         Write-Warning $exitmessage
         $exitcode = 1
     }
-    
+
 }
 catch {
     if ($_ -contains "Cannot find path") {

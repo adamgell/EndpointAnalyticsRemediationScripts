@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -21,17 +21,18 @@ $ClassFilterInclude = "*"
 $DeviceIDFilterExclude = ""
 $DeviceIDFilterInclude = "*"
 
-[array]$DevicesWithIssue = Get-PnpDevice -PresentOnly -Status ERROR -ErrorAction SilentlyContinue | 
-    Where-Object PNPClass -notin $ClassFilterExclude | 
-    Where-Object {if ("*" -in $ClassFilterInclude) { $_} elseif ($_.PNPClass -in $ClassFilterInclude) {$_}} |
-    Where-Object PNPDeviceID -notin $DeviceIDFilterExclude | 
-    Where-Object {if ("*" -in $DeviceIDFilterInclude) { $_} elseif ($_.PNPDeviceID -in $DeviceIDFilterInclude) {$_}}
+[array]$DevicesWithIssue = Get-PnpDevice -PresentOnly -Status ERROR -ErrorAction SilentlyContinue |
+    Where-Object PNPClass -notin $ClassFilterExclude |
+    Where-Object { if ("*" -in $ClassFilterInclude) { $_ } elseif ($_.PNPClass -in $ClassFilterInclude) { $_ } } |
+    Where-Object PNPDeviceID -notin $DeviceIDFilterExclude |
+    Where-Object { if ("*" -in $DeviceIDFilterInclude) { $_ } elseif ($_.PNPDeviceID -in
+            $DeviceIDFilterInclude) { $_ } }
 
 $Output = ""
 if ($DevicesWithIssue.count -gt 0) {
     Foreach ($Device in $DevicesWithIssue) {
-        $FriendlyName = if ([string]::IsNullOrWhiteSpace($Device.FriendlyName)) {"N/A"} else {$Device.FriendlyName}
-        $PNPClass = if ([string]::IsNullOrWhiteSpace($Device.PNPClass)) {"N/A"} else {$Device.PNPClass}
+        $FriendlyName = if ([string]::IsNullOrWhiteSpace($Device.FriendlyName)) { "N/A" } else { $Device.FriendlyName }
+        $PNPClass = if ([string]::IsNullOrWhiteSpace($Device.PNPClass)) { "N/A" } else { $Device.PNPClass }
 
         Write-Verbose "Removing PNPDeviceID: $($Device.PNPDeviceID) Device: $FriendlyName Class: $PNPClass"
         $PnpUtilOut += (pnputil.exe /remove-device "$($Device.PNPDeviceID)") | Out-String
@@ -44,5 +45,3 @@ if ($DevicesWithIssue.count -gt 0) {
 else {
     Write-Host "No Devices with issues found"
 }
-
-

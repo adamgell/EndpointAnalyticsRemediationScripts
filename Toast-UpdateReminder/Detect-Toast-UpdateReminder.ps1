@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-pendingupdates.ps1
@@ -19,7 +19,8 @@ try {
         }
     }
 
-    $PendingReboot = Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired"
+    $PendingReboot =
+    Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired"
     if ($PendingReboot) {
         Write-Warning "Not Compliant - Reboot pending for Windows Update"
         exit 1

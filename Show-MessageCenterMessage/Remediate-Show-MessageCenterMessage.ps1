@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -49,7 +49,8 @@ try {
     $Toast.Tag = "MessageCenter"
     $Toast.Group = "MessageCenter"
 
-    $Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Microsoft.Windows.Shell.RunDialog")
+    $Notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier(
+        "Microsoft.Windows.Shell.RunDialog")
     $Notifier.Show($Toast)
 
     # Track shown message

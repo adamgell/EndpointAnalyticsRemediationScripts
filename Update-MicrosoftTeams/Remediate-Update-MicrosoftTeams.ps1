@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author:
 - Jannik Reinhard (jannikreinhard.com)
@@ -11,16 +11,21 @@ Context: 64 Bit
 #>
 
 try {
-    $Winget = Get-ChildItem -Path (Join-Path -Path (Join-Path -Path $env:ProgramFiles -ChildPath "WindowsApps") -ChildPath "Microsoft.DesktopAppInstaller*_x64*\winget.exe") |
+    $Winget = Get-ChildItem -Path (Join-Path -Path (
+            Join-Path -Path $env:ProgramFiles -ChildPath "WindowsApps"
+        ) -ChildPath "Microsoft.DesktopAppInstaller*_x64*\winget.exe") |
         Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName
 
     if (-not $Winget) {
-        $Winget = Get-ChildItem -Path (Join-Path -Path (Join-Path -Path $env:ProgramFiles -ChildPath "WindowsApps") -ChildPath "Microsoft.DesktopAppInstaller*_x64*\AppInstallerCLI.exe") |
+        $Winget = Get-ChildItem -Path (Join-Path -Path (
+                Join-Path -Path $env:ProgramFiles -ChildPath "WindowsApps"
+            ) -ChildPath "Microsoft.DesktopAppInstaller*_x64*\AppInstallerCLI.exe") |
             Sort-Object LastWriteTime | Select-Object -Last 1 -ExpandProperty FullName
     }
 
     if ($Winget) {
-        $Result = &$Winget upgrade --id "Microsoft.Teams" --silent --force --accept-package-agreements --accept-source-agreements 2>&1
+        $Result =
+        &$Winget upgrade --id "Microsoft.Teams" --silent --force --accept-package-agreements --accept-source-agreements 2>&1
         Write-Output "Teams update result: $Result"
         exit 0
     }

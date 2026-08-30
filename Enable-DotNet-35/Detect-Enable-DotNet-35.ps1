@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -12,9 +12,9 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 Start-Transcript -Path $(Join-Path $env:temp "NetFx3.log")
- 
+
 if ((Get-WindowsOptionalFeature -Online -FeatureName NetFx3).State -eq "Enabled") {
     Write-Output 'NetFx3 Enabled'
     exit 0

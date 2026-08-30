@@ -1,4 +1,4 @@
-<#
+﻿<#
 Version: 1.0
 Author: Jannik Reinhard (jannikreinhard.com)
 Script: detect-notificationcenter.ps1
@@ -18,7 +18,8 @@ try {
     foreach ($Profile in $UserProfiles) {
         $NotifPath = Join-Path $Profile.FullName "AppData\Local\Microsoft\Windows\Notifications"
         if (Test-Path $NotifPath) {
-            $Size = (Get-ChildItem -Path $NotifPath -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+            $Size = (Get-ChildItem -Path $NotifPath -Recurse -Force -ErrorAction SilentlyContinue |
+                    Measure-Object -Property Length -Sum).Sum
             $SizeMB = [math]::Round($Size / 1MB, 2)
             if ($SizeMB -gt $MaxSizeMB) {
                 Write-Warning "Not Compliant - Notification database for $($Profile.Name) is $SizeMB MB"

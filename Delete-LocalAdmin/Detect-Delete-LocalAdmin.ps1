@@ -1,6 +1,6 @@
-<#
+﻿<#
 Version: 1.0
-Author: 
+Author:
 - Joey Verlinden (joeyverlinden.com)
 - Andrew Taylor (andrewstaylor.com)
 - Florian Slazmann (scloud.work)
@@ -11,15 +11,16 @@ Hint: This is a community script. There is no guarantee for this. Please check t
 Version 1.0: Init
 Run as: Admin
 Context: 64 Bit
-#> 
+#>
 
 $localAdminName = ""
 
-$la = 
-if(Get-LocalUser | where-Object Name -eq $localAdminName){
+$la =
+if (Get-LocalUser | Where-Object Name -eq $localAdminName) {
     Write-Host "User does not exist"
     return 0
-}else{
+}
+else {
     Write-Host "User does exist"
     return 1
 }
