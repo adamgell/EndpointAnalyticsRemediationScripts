@@ -489,15 +489,33 @@ Describe 'Deterministic manifest generation' {
         $run.Output | Should -Match 'Missing/Detect-Missing\.ps1.*metadata'
     }
 
-    It 'exits nonzero for sentinel metadata and quoted native scalars' {
-        $fixtureRoot = Join-Path $TestDrive 'invalid-metadata'
+    It 'exits nonzero for sentinel description metadata' {
+        $fixtureRoot = Join-Path $TestDrive 'sentinel-metadata'
         $markerPath = Join-Path $fixtureRoot 'catalog-executed.txt'
         $fixture = New-GeneratorFixture -Root $fixtureRoot -MarkerPath $markerPath
-        $invalidText = Get-Content -LiteralPath $fixture.Metadata -Raw
-        $invalidText = $invalidText.Replace(
+        $invalidText = (Get-Content -LiteralPath $fixture.Metadata -Raw).Replace(
             "Description = 'Collects fixture state without executing the catalog script.'",
             "Description = 'TBD'"
-        ).Replace(
+        )
+        Set-Content -LiteralPath $fixture.Metadata -Encoding utf8 -Value $invalidText
+
+        $run = Invoke-TestManifestGenerator `
+            -TestPathMap $fixture.PathMap `
+            -TestMetadata $fixture.Metadata `
+            -OutputRoot $fixture.CatalogRoot
+
+        $run.ExitCode | Should -Not -Be 0
+        $run.Output | Should -Match ([regex]::Escape(
+            'Fixture/Detect-Fixture.ps1.Description contains sentinel metadata.'
+        ))
+        Test-Path -LiteralPath $markerPath | Should -BeFalse
+    }
+
+    It 'exits nonzero for a quoted Boolean scalar' {
+        $fixtureRoot = Join-Path $TestDrive 'quoted-boolean-metadata'
+        $markerPath = Join-Path $fixtureRoot 'catalog-executed.txt'
+        $fixture = New-GeneratorFixture -Root $fixtureRoot -MarkerPath $markerPath
+        $invalidText = (Get-Content -LiteralPath $fixture.Metadata -Raw).Replace(
             'RequiresElevation = $false',
             "RequiresElevation = 'false'"
         )
@@ -509,7 +527,9 @@ Describe 'Deterministic manifest generation' {
             -OutputRoot $fixture.CatalogRoot
 
         $run.ExitCode | Should -Not -Be 0
-        $run.Output | Should -Match 'sentinel|RequiresElevation.*Boolean'
+        $run.Output | Should -Match ([regex]::Escape(
+            'Fixture/Detect-Fixture.ps1.Runtime.RequiresElevation must be Boolean.'
+        ))
         Test-Path -LiteralPath $markerPath | Should -BeFalse
     }
 }
