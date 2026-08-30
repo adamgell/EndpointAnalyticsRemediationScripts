@@ -5,3 +5,4 @@ function IsMember {
 }
 
 IsMember -Group 'Administrators'
+& (Write-Output ('Is' + 'Member') 'Get-Date' | Select-Object -Last 1)
