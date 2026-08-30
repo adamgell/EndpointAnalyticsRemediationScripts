@@ -1285,7 +1285,8 @@ Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
         function New-FoundationExternalWorktreeFixture {
             param(
                 [Parameter(Mandatory)] [string] $Root,
-                [Parameter(Mandatory)] [string] $Name
+                [Parameter(Mandatory)] [string] $Name,
+                [string] $TrackedFile = 'fixture.ps1'
             )
 
             $mainRoot = Join-Path $Root 'main'
@@ -1301,12 +1302,12 @@ Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
                     'config', 'user.name', 'Foundation Style Tests'
                 ))
             [System.IO.File]::WriteAllText(
-                (Join-Path $mainRoot 'fixture.ps1'),
+                (Join-Path $mainRoot $TrackedFile),
                 "Write-Output 'fixture'`n",
                 [System.Text.UTF8Encoding]::new($false)
             )
             [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
-                    'add', '--', 'fixture.ps1'
+                    'add', '--', $TrackedFile
                 ))
             [void] (Invoke-FoundationGitFixtureCommand -Root $mainRoot -Arguments @(
                     'commit', '--quiet', '-m', 'fixture'
@@ -1384,6 +1385,47 @@ Describe 'Foundation repository Git discovery' -Tag 'FoundationGitDiscovery' {
                     -RepositoryRoot $fixture.WorktreeRoot)
 
             $tracked | Should -Contain 'fixture.ps1'
+        }
+        finally {
+            $env:GIT_DIR = $originalGitDirectory
+            $env:GIT_WORK_TREE = $originalGitWorkTree
+        }
+    }
+
+    It 'ignores a valid explicit Git context for another repository root' {
+        $repositoryA = New-FoundationExternalWorktreeFixture `
+            -Root (Join-Path $TestDrive 'mismatched-environment-a') `
+            -Name 'mismatched-a' `
+            -TrackedFile 'repo-a.ps1'
+        $repositoryB = New-FoundationExternalWorktreeFixture `
+            -Root (Join-Path $TestDrive 'mismatched-environment-b') `
+            -Name 'mismatched-b' `
+            -TrackedFile 'repo-b.ps1'
+        $originalGitDirectory = $env:GIT_DIR
+        $originalGitWorkTree = $env:GIT_WORK_TREE
+        try {
+            $env:GIT_DIR = $repositoryA.GitDirectory
+            $env:GIT_WORK_TREE = $repositoryA.WorktreeRoot
+
+            $context = Resolve-FoundationRepositoryGitContext `
+                -RepositoryRoot $repositoryB.WorktreeRoot
+            $tracked = @(Get-FoundationTrackedPowerShellPath `
+                    -RepositoryRoot $repositoryB.WorktreeRoot)
+
+            ($tracked -join ',') | Should -BeExactly 'repo-b.ps1'
+            $comparison = if (
+                [System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT
+            ) {
+                [System.StringComparison]::OrdinalIgnoreCase
+            }
+            else {
+                [System.StringComparison]::Ordinal
+            }
+            [string]::Equals(
+                [System.IO.Path]::GetFullPath($context.WorkTree).TrimEnd('\', '/'),
+                [System.IO.Path]::GetFullPath($repositoryB.WorktreeRoot).TrimEnd('\', '/'),
+                $comparison
+            ) | Should -BeTrue
         }
         finally {
             $env:GIT_DIR = $originalGitDirectory

@@ -323,10 +323,17 @@ function Resolve-FoundationRepositoryGitContext {
             $context = Resolve-FoundationValidatedGitContext `
                 -GitDirectory $explicitGitDirectory `
                 -WorkTree $explicitWorkTree
-            if ($null -ne $context) {
+            if (
+                $null -ne $context -and
+                (Test-FoundationPathEquality `
+                    -Left $context.WorkTree `
+                    -Right $repositoryRootPath)
+            ) {
                 return $context
             }
-            $attempts.Add('the explicit GIT_DIR and GIT_WORK_TREE values were unusable')
+            $attempts.Add(
+                'the explicit GIT_DIR and GIT_WORK_TREE values did not resolve the requested repository root'
+            )
         }
         catch {
             $attempts.Add("the explicit Git environment was invalid: $($_.Exception.Message)")
