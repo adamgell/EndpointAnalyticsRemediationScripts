@@ -64,7 +64,7 @@ $CandidateSource
         $rewriteScript = Join-Path $tools 'Test-PowerShellRewrite.ps1'
 
         & $windowsPowerShellPath -NoProfile -ExecutionPolicy Bypass -File `
-                $rewriteScript `
+            $rewriteScript `
             -BaseRevision $baseRevision `
             -PathMap $pathMap `
             -SymbolMap $symbolMap `
