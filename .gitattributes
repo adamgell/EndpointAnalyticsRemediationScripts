@@ -3,5 +3,6 @@
 *.psm1 text eol=lf
 *.psd1 text eol=lf
 *.md text eol=lf
+*.json text eol=lf
 *.png binary
 *.webp binary
