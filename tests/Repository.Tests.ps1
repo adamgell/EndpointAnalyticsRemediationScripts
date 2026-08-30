@@ -1614,6 +1614,12 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
     }
 
     BeforeAll {
+        $windowsPowerShellPath = if (-not [string]::IsNullOrEmpty($env:SystemRoot)) {
+            Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
+        }
+        else {
+            ''
+        }
         $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
         $buildPath = Join-Path $repositoryRoot 'build.ps1'
         $powerShellPath = if (
