@@ -1840,6 +1840,44 @@ if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
             $transitionChecks[$index].After | Should -Be 'Covered'
         }
     }
+    It 'rejects an internally matching 270-entry deployment inventory' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        $removedScript = Join-Path $fixture 'runtime/Script271.ps1'
+        $removedManifest = Join-Path $fixture 'runtime/Script271.psd1'
+        Remove-Item -LiteralPath $removedScript, $removedManifest
+
+        $pathMapPath = Join-Path $fixture 'evidence/foundation/PathMap.psd1'
+        $pathMap = (Get-Content -LiteralPath $pathMapPath -Raw).Replace(
+            ",`n@{ NewPath = 'runtime/Script271.ps1' }",
+            ''
+        )
+        Set-Content -LiteralPath $pathMapPath -Value $pathMap -Encoding utf8
+
+        $scriptFiles = @(
+            Get-ChildItem -LiteralPath (Join-Path $fixture 'runtime') `
+                -Filter '*.ps1' -File
+        )
+        $manifestFiles = @(
+            Get-ChildItem -LiteralPath (Join-Path $fixture 'runtime') `
+                -Filter '*.psd1' -File
+        )
+        $pathMap = Import-PowerShellDataFile -LiteralPath $pathMapPath
+        $scriptFiles.Count | Should -Be 270
+        $manifestFiles.Count | Should -Be 270
+        @($pathMap.Paths).Count | Should -Be 270
+
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match `
+            'Expected 271 deployment scripts, found 270\.'
+    }
 
     It 'rejects an inventory whose destination path map does not match' `
         -Skip:(
