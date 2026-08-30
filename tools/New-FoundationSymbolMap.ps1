@@ -56,6 +56,10 @@ function Resolve-RepositoryRelativeFile {
             }
         }
 
+        if ($matchingEntries.Count -gt 1) {
+            throw "Repository path '$RelativePath' has multiple case-colliding matches for component '$approvedSegment'."
+        }
+
         $matchingEntry = $null
         foreach ($entry in $matchingEntries) {
             if ([System.StringComparer]::Ordinal.Equals($entry.Name, $approvedSegment)) {
@@ -64,9 +68,6 @@ function Resolve-RepositoryRelativeFile {
             }
         }
         if ($null -eq $matchingEntry) {
-            if ($matchingEntries.Count -gt 1) {
-                throw "Repository path '$RelativePath' has multiple case-colliding matches for component '$approvedSegment'."
-            }
             $matchingEntry = $matchingEntries[0]
         }
         $actualSegments.Add($matchingEntry.Name)

@@ -230,6 +230,41 @@ Describe 'Foundation symbol map' -Tag 'FoundationMap' {
         } | Should -Throw "*Mapped legacy source '$approvedPath' has incorrect repository-relative casing; found '$actualPath'.*"
     }
 
+    It 'rejects case-colliding directory siblings when the approved legacy source exists' {
+        $fixtureRoot = Join-Path $TestDrive 'case-colliding-legacy-source-tree'
+        $fixtureGenerator = Copy-FoundationSymbolTree -Root $fixtureRoot -Layout BasePath
+        $approvedPath = 'Profile-cleanup/detection_detect-old-profiles.ps1'
+        $approvedFullPath = Join-Path $fixtureRoot $approvedPath.Replace(
+            '/',
+            [System.IO.Path]::DirectorySeparatorChar
+        )
+        [System.IO.File]::Exists($approvedFullPath) | Should -BeTrue
+
+        [System.IO.Directory]::CreateDirectory(
+            (Join-Path $fixtureRoot 'Profile-Cleanup')
+        ) | Out-Null
+        $caseCollidingDirectories = @(
+            [System.IO.Directory]::GetDirectories($fixtureRoot) |
+                Where-Object {
+                    [System.StringComparer]::OrdinalIgnoreCase.Equals(
+                        [System.IO.Path]::GetFileName($_),
+                        'Profile-Cleanup'
+                    )
+                }
+        )
+        if ($caseCollidingDirectories.Count -ne 2) {
+            Set-ItResult -Skipped -Because 'The test filesystem does not preserve case-colliding names.'
+            return
+        }
+
+        {
+            & $fixtureGenerator `
+                -PathMap $pathMapPath `
+                -PackageData $packageDataPath `
+                -OutputPath (Join-Path $fixtureRoot 'SymbolRenames.psd1')
+        } | Should -Throw "*Repository path '$approvedPath' has multiple case-colliding matches for component 'Profile-cleanup'.*"
+    }
+
     It 'rejects wrong-case paths in a destination-only tree' {
         $fixtureRoot = Join-Path $TestDrive 'wrong-case-destination-only-tree'
         $fixtureGenerator = Copy-FoundationSymbolTreeWithDirectoryCasing `
