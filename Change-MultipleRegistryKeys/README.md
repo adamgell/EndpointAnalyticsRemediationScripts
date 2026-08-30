@@ -1,10 +1,10 @@
-# Registry
+# Change multiple registry keys
 
-Validate and set Registry settings according to your needs.
+Validate and set registry settings according to your needs.
 
-## Usage/Examples
+## Usage and examples
 
-In the **Change-MultipleRegistryKeysDetection.ps1** and **Change-MultipleRegistryKeysRemediaton.ps1** add to or change the ```$RegistrySettingsToValidate``` array with registry settings, represented as a ```pscustomobject```, you want to validate respectively set/remediate.
+Update `$RegistrySettingsToValidate` in [`Detect-Change-MultipleRegistryKeys.ps1`](Detect-Change-MultipleRegistryKeys.ps1) and [`Remediate-Change-MultipleRegistryKeys.ps1`](Remediate-Change-MultipleRegistryKeys.ps1). The detection and remediation scripts use the same `[pscustomobject]` records to validate and set the registry values.
 
 e.g:
 

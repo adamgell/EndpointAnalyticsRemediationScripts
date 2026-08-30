@@ -1,6 +1,6 @@
-# WH4B - Last Used Method
+# WH4B last used method
 
-This script is used to detect the last used method for Windows Hello for Business. It is a detect-only script.
+[`Detect-Get-WH4BLastUsedMethod.ps1`](Detect-Get-WH4BLastUsedMethod.ps1) detects the last authentication method used for Windows Hello for Business. This package contains a detection-only script.
 
 Normal states (exit 0)
 
@@ -16,12 +16,9 @@ Error states: (exit 1)
 - `Authentication method cannot be checked`
 - `Something went wrong:`
 
-## Usage/Examples
+## Usage and examples
 
-In **detect.ps1** change the ```$LogDirSubFolderName = "YOURFOLDERNAME"```. Import it a dectection script, make sure:
-
-- Run this script using the logged-on credentials = Yes
-- Run script in 64-bit PowerShell = Yes
+In [`Detect-Get-WH4BLastUsedMethod.ps1`](Detect-Get-WH4BLastUsedMethod.ps1), set `$LogDirSubFolderName` to your log folder name. Configure the Intune script to run with logged-on credentials and in 64-bit PowerShell.
 
 Schedule it to run repeatedly, e.g. daily.
 

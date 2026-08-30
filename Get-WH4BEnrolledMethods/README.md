@@ -1,6 +1,6 @@
-# WH4B - Enrolled Methods
+# WH4B enrolled methods
 
-This script detects the Windows Hello for Business enrolled/configured methods and outputs them as Pre-remediation detection output.
+[`Detect-Get-WH4BEnrolledMethods.ps1`](Detect-Get-WH4BEnrolledMethods.ps1) detects the Windows Hello for Business enrolled or configured methods and writes pre-remediation detection output.
 The output can be any of these states:
 
 Normal states (exit 0)
@@ -20,12 +20,9 @@ Error states: (exit 1)
 - `Something went wrong`
 - `Uncaught error`
 
-## Usage/Examples
+## Usage and examples
 
-In **detect.ps1** change the ```$LogDirSubFolderName = "YOURFOLDERNAME"```. Import it a dectection script, make sure:
-
-- Run this script using the logged-on credentials = Yes
-- Run script in 64-bit PowerShell = Yes
+In [`Detect-Get-WH4BEnrolledMethods.ps1`](Detect-Get-WH4BEnrolledMethods.ps1), set `$LogDirSubFolderName` to your log folder name. Configure the Intune script to run with logged-on credentials and in 64-bit PowerShell.
 
 Schedule it to run repeatedly, e.g. daily.
 
