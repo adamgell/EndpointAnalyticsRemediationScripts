@@ -1497,6 +1497,425 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
         else {
             (Get-Command pwsh -ErrorAction SilentlyContinue).Path
         }
+        $canInvokeBuild = -not [string]::IsNullOrWhiteSpace($powerShellPath)
+
+        function New-BuildContractFixture {
+            param(
+                [Parameter(Mandatory)] [ValidateSet('Validate', 'Analyze', 'Test', 'CheckFormat')]
+                [string] $Route
+            )
+
+            $root = Join-Path $TestDrive ('BuildInterface-' + [guid]::NewGuid().ToString('N'))
+            $moduleRoot = Join-Path $root 'modules'
+            foreach ($directory in @(
+                    $root,
+                    (Join-Path $root 'tools'),
+                    (Join-Path $root 'standards'),
+                    (Join-Path $root 'evidence'),
+                    (Join-Path $root 'evidence/foundation'),
+                    (Join-Path $root 'tests'),
+                    (Join-Path $root 'runtime'),
+                    (Join-Path $moduleRoot 'Pester'),
+                    (Join-Path $moduleRoot 'PSScriptAnalyzer')
+                )) {
+                New-Item -ItemType Directory -Path $directory -Force | Out-Null
+            }
+            Copy-Item -LiteralPath $buildPath -Destination (Join-Path $root 'build.ps1')
+            Set-Content -LiteralPath (Join-Path $root 'PSScriptAnalyzerSettings.psd1') `
+                -Value '@{}' -Encoding utf8
+            Set-Content -LiteralPath (Join-Path $root 'tests/Repository.Tests.ps1') `
+                -Value '# controlled fixture' -Encoding utf8
+            Set-Content -LiteralPath (Join-Path $root 'standards/ManifestSchema.psd1') `
+                -Value '@{}' -Encoding utf8
+
+            $requiredModules = if ($Route -eq 'Analyze') {
+                "@{ PSScriptAnalyzer = @{ Version = '1.25.0'; Repository = 'PSGallery' } }"
+            }
+            elseif ($Route -in @('Test', 'CheckFormat')) {
+                "@{ Pester = @{ Version = '5.7.1'; Repository = 'PSGallery' } }"
+            }
+            else {
+                '@{}'
+            }
+            Set-Content -LiteralPath (Join-Path $root 'tools/RequiredModules.psd1') `
+                -Value $requiredModules -Encoding utf8
+
+            $pesterModule = @'
+function New-PesterConfiguration {
+    [pscustomobject]@{
+        Run = [pscustomobject]@{
+            Path = $null
+            Exit = $null
+            PassThru = $null
+        }
+        CodeCoverage = [pscustomobject]@{
+            Enabled = $false
+            Path = @()
+        }
+    }
+}
+function Invoke-Pester {
+    param(
+        [pscustomobject] $Configuration,
+        [string] $Path,
+        [string[]] $Tag,
+        [string] $Output,
+        [switch] $PassThru
+    )
+    $record = [ordered]@{ Command = 'Invoke-Pester' }
+    if ($null -ne $Configuration) {
+        $record.Configuration = [ordered]@{
+            RunPath = @($Configuration.Run.Path)
+            RunExit = [bool] $Configuration.Run.Exit
+            RunPassThru = [bool] $Configuration.Run.PassThru
+            CoverageEnabled = [bool] $Configuration.CodeCoverage.Enabled
+            CoveragePath = @($Configuration.CodeCoverage.Path)
+        }
+    }
+    else {
+        $record.Path = $Path
+        $record.Tag = @($Tag)
+        $record.Output = $Output
+        $record.PassThru = $PassThru.IsPresent
+    }
+    [System.IO.File]::AppendAllText(
+        $env:BUILD_CONTRACT_LOG,
+        (($record | ConvertTo-Json -Compress) + [Environment]::NewLine)
+    )
+    $failedCount = if ($env:BUILD_CONTRACT_FAILURE -eq '1') { 1 } else { 0 }
+    [pscustomobject]@{
+        FailedCount = $failedCount
+        PassedCount = if ($failedCount -eq 0) { 1 } else { 0 }
+        SkippedCount = 0
+    }
+}
+'@
+            $pesterManifest = @"
+@{
+    RootModule = 'Pester.psm1'
+    ModuleVersion = '5.7.1'
+    GUID = '$([guid]::NewGuid())'
+    FunctionsToExport = @('New-PesterConfiguration', 'Invoke-Pester')
+}
+"@
+            Set-Content -LiteralPath (Join-Path $moduleRoot 'Pester/Pester.psm1') `
+                -Value $pesterModule -Encoding utf8
+            Set-Content -LiteralPath (Join-Path $moduleRoot 'Pester/Pester.psd1') `
+                -Value $pesterManifest -Encoding utf8
+
+            $analyzerModule = @'
+function Invoke-ScriptAnalyzer {
+    param(
+        [string] $Path,
+        [switch] $Recurse,
+        [string] $Settings
+    )
+    $record = [ordered]@{
+        Command = 'Invoke-ScriptAnalyzer'
+        Path = $Path
+        Recurse = $Recurse.IsPresent
+        Settings = $Settings
+    }
+    [System.IO.File]::AppendAllText(
+        $env:BUILD_CONTRACT_LOG,
+        (($record | ConvertTo-Json -Compress) + [Environment]::NewLine)
+    )
+}
+'@
+            $analyzerManifest = @"
+@{
+    RootModule = 'PSScriptAnalyzer.psm1'
+    ModuleVersion = '1.25.0'
+    GUID = '$([guid]::NewGuid())'
+    FunctionsToExport = @('Invoke-ScriptAnalyzer')
+}
+"@
+            Set-Content -LiteralPath (Join-Path $moduleRoot 'PSScriptAnalyzer/PSScriptAnalyzer.psm1') `
+                -Value $analyzerModule -Encoding utf8
+            Set-Content -LiteralPath (Join-Path $moduleRoot 'PSScriptAnalyzer/PSScriptAnalyzer.psd1') `
+                -Value $analyzerManifest -Encoding utf8
+
+            if ($Route -in @('Validate', 'Test')) {
+                $catalogModule = @'
+function Write-CatalogContractLog {
+    param([string] $Command, [hashtable] $Arguments)
+    $record = [ordered]@{ Command = $Command }
+    foreach ($key in $Arguments.Keys) {
+        $record[$key] = $Arguments[$key]
+    }
+    [System.IO.File]::AppendAllText(
+        $env:BUILD_CONTRACT_LOG,
+        (($record | ConvertTo-Json -Compress) + [Environment]::NewLine)
+    )
+}
+function Get-DeploymentScript {
+    param([string] $Root)
+    Write-CatalogContractLog 'Get-DeploymentScript' @{ Root = $Root }
+    Get-ChildItem -LiteralPath (Join-Path $Root 'runtime') -Filter '*.ps1' -File
+}
+function Test-ScriptManifest {
+    param([string] $Path, [string] $SchemaPath)
+    Write-CatalogContractLog 'Test-ScriptManifest' @{
+        Path = $Path
+        SchemaPath = $SchemaPath
+    }
+    [pscustomobject]@{
+        Valid = $true
+        Errors = @()
+        Manifest = @{ Test = @{ Status = 'Covered' } }
+    }
+}
+function Test-ManifestStatusTransition {
+    param([string] $Before, [string] $After)
+    Write-CatalogContractLog 'Test-ManifestStatusTransition' @{
+        Before = $Before
+        After = $After
+    }
+    $true
+}
+function Get-UnresolvedRepositoryReference {
+    param([string] $Root)
+    Write-CatalogContractLog 'Get-UnresolvedRepositoryReference' @{ Root = $Root }
+    @()
+}
+Export-ModuleMember -Function *
+'@
+                Set-Content -LiteralPath (Join-Path $root 'tools/RepositoryCatalog.psm1') `
+                    -Value $catalogModule -Encoding utf8
+            }
+
+            $runtimePath = Join-Path $root 'runtime/Script001.ps1'
+            $scriptContent = @'
+if (-not [string]::IsNullOrEmpty($env:BUILD_CONTRACT_SENTINEL)) {
+    Set-Content -LiteralPath $env:BUILD_CONTRACT_SENTINEL -Value 'deployment script executed'
+}
+'@
+            Set-Content -LiteralPath $runtimePath -Value $scriptContent -Encoding utf8
+            Set-Content -LiteralPath (Join-Path $root 'runtime/Script001.psd1') `
+                -Value '@{}' -Encoding utf8
+
+            if ($Route -eq 'Validate') {
+                $mapEntries = @(
+                    foreach ($number in 1..271) {
+                        $name = 'Script{0:D3}.ps1' -f $number
+                        $path = Join-Path $root "runtime/$name"
+                        if ($number -gt 1) {
+                            Set-Content -LiteralPath $path -Value '# controlled script' -Encoding utf8
+                            Set-Content -LiteralPath ([System.IO.Path]::ChangeExtension($path, '.psd1')) `
+                                -Value '@{}' -Encoding utf8
+                        }
+                        "@{ NewPath = 'runtime/$name' }"
+                    }
+                )
+                Set-Content -LiteralPath (Join-Path $root 'evidence/PathMap.psd1') -Value (
+                    "@{ Paths = @(`n" +
+                    (($mapEntries -join ",`n") + "`n") +
+                    ') }'
+                ) -Encoding utf8
+                New-Item -ItemType Directory -Path (Join-Path $root 'evidence/foundation') -Force |
+                    Out-Null
+                Copy-Item -LiteralPath (Join-Path $root 'evidence/PathMap.psd1') `
+                    -Destination (Join-Path $root 'evidence/foundation/PathMap.psd1')
+            }
+            else {
+                Set-Content -LiteralPath (Join-Path $root 'evidence/foundation/PathMap.psd1') `
+                    -Value '@{ Paths = @() }' -Encoding utf8
+            }
+            $root
+        }
+
+        function Invoke-BuildContractFixture {
+            param(
+                [Parameter(Mandatory)] [string] $FixtureRoot,
+                [string[]] $Arguments = @()
+            )
+
+            $logPath = Join-Path $TestDrive ('BuildInterface-' + [guid]::NewGuid().ToString('N') + '.jsonl')
+            $sentinelPath = Join-Path $TestDrive ('BuildInterface-' + [guid]::NewGuid().ToString('N') + '.sentinel')
+            $originalModulePath = $env:PSModulePath
+            $originalLogPath = $env:BUILD_CONTRACT_LOG
+            $originalSentinelPath = $env:BUILD_CONTRACT_SENTINEL
+            $originalFailure = $env:BUILD_CONTRACT_FAILURE
+            try {
+                $env:PSModulePath = (
+                    (Join-Path $FixtureRoot 'modules') + [System.IO.Path]::PathSeparator +
+                    $originalModulePath
+                )
+                $env:BUILD_CONTRACT_LOG = $logPath
+                $env:BUILD_CONTRACT_SENTINEL = $sentinelPath
+                $env:BUILD_CONTRACT_FAILURE = $null
+                $output = @(
+                    & $powerShellPath -NoProfile -NonInteractive `
+                        -ExecutionPolicy Bypass `
+                        -File (Join-Path $FixtureRoot 'build.ps1') @Arguments 2>&1
+                )
+                $exitCode = $LASTEXITCODE
+            }
+            finally {
+                $env:PSModulePath = $originalModulePath
+                $env:BUILD_CONTRACT_LOG = $originalLogPath
+                $env:BUILD_CONTRACT_SENTINEL = $originalSentinelPath
+                $env:BUILD_CONTRACT_FAILURE = $originalFailure
+            }
+            $records = @()
+            if ([System.IO.File]::Exists($logPath)) {
+                $records = @(
+                    Get-Content -LiteralPath $logPath |
+                        Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+                        ForEach-Object { $_ | ConvertFrom-Json }
+                )
+            }
+            [pscustomobject]@{
+                ExitCode = $exitCode
+                Output = $output
+                Records = $records
+                SentinelPath = $sentinelPath
+            }
+        }
+    }
+
+    It 'invokes Validate with inventory, manifest, parser, reference, and migration checks without executing scripts' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route Validate
+        $result = Invoke-BuildContractFixture -FixtureRoot $fixture
+
+        $result.ExitCode | Should -Be 0
+        ($result.Output -join "`n") | Should -Match 'Validated 271 deployment scripts and manifests'
+        (Test-Path -LiteralPath $result.SentinelPath) | Should -BeFalse
+        $result.Records.Command | Should -Contain 'Get-DeploymentScript'
+        $result.Records.Command | Should -Contain 'Test-ScriptManifest'
+        $result.Records.Command | Should -Contain 'Test-ManifestStatusTransition'
+        $result.Records.Command | Should -Contain 'Get-UnresolvedRepositoryReference'
+        ($result.Records | Where-Object Command -eq 'Get-DeploymentScript').Root |
+            Should -Be $fixture
+        ($result.Records | Where-Object Command -eq 'Get-UnresolvedRepositoryReference').Root |
+            Should -Be $fixture
+    }
+
+    It 'invokes Analyze with recursive analysis and repository settings' -Skip:(
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
+        $fixture = New-BuildContractFixture -Route Analyze
+        $result = Invoke-BuildContractFixture `
+            -FixtureRoot $fixture `
+            -Arguments @('-Task', 'Analyze')
+        $analysis = @($result.Records | Where-Object Command -eq 'Invoke-ScriptAnalyzer')
+
+        $result.ExitCode | Should -Be 0
+        $analysis.Count | Should -Be 1
+        $analysis[0].Path | Should -Be $fixture
+        $analysis[0].Recurse | Should -BeTrue
+        $analysis[0].Settings | Should -Be (Join-Path $fixture 'PSScriptAnalyzerSettings.psd1')
+    }
+
+    It 'invokes Test with Pester configuration and Covered command coverage' -Skip:(
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
+        $fixture = New-BuildContractFixture -Route Test
+        $result = Invoke-BuildContractFixture `
+            -FixtureRoot $fixture `
+            -Arguments @('-Task', 'Test')
+        $testInvocation = @(
+            $result.Records |
+                Where-Object { $_.Command -eq 'Invoke-Pester' -and $null -ne $_.Configuration }
+        )
+
+        $result.ExitCode | Should -Be 0
+        $testInvocation.Count | Should -Be 1
+        $testInvocation[0].Configuration.RunPath | Should -Be (Join-Path $fixture 'tests')
+        $testInvocation[0].Configuration.RunExit | Should -BeFalse
+        $testInvocation[0].Configuration.RunPassThru | Should -BeTrue
+        $testInvocation[0].Configuration.CoverageEnabled | Should -BeTrue
+        @($testInvocation[0].Configuration.CoveragePath).Count | Should -Be 1
+        @($testInvocation[0].Configuration.CoveragePath)[0] |
+            Should -Be (Join-Path $fixture 'runtime/Script001.ps1')
+    }
+
+    It 'invokes CheckFormat as verification and leaves fixture bytes unchanged' -Skip:(
+        ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+            -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+        ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+            $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+    ) {
+        $fixture = New-BuildContractFixture -Route CheckFormat
+        $selectedFiles = @(
+            (Join-Path $fixture 'build.ps1'),
+            (Join-Path $fixture 'tools/RequiredModules.psd1'),
+            (Join-Path $fixture 'PSScriptAnalyzerSettings.psd1'),
+            (Join-Path $fixture 'tests/Repository.Tests.ps1'),
+            (Join-Path $fixture 'modules/Pester/Pester.psm1')
+        )
+        $before = @(
+            Get-FileHash -Algorithm SHA256 -LiteralPath $selectedFiles |
+                ForEach-Object { "$($_.Path):$($_.Hash)" }
+        )
+        $beforeTree = @(
+            foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
+                    Sort-Object -Property FullName)) {
+                $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
+                "$($file.FullName):$($hash.Hash)"
+            }
+        )
+        $result = Invoke-BuildContractFixture `
+            -FixtureRoot $fixture `
+            -Arguments @('-Task', 'CheckFormat')
+        $after = @(
+            Get-FileHash -Algorithm SHA256 -LiteralPath $selectedFiles |
+                ForEach-Object { "$($_.Path):$($_.Hash)" }
+        )
+        $afterTree = @(
+            foreach ($file in @(Get-ChildItem -LiteralPath $fixture -Recurse -File |
+                    Sort-Object -Property FullName)) {
+                $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
+                "$($file.FullName):$($hash.Hash)"
+            }
+        )
+        $formatInvocation = @(
+            $result.Records |
+                Where-Object { $_.Command -eq 'Invoke-Pester' -and $null -eq $_.Configuration }
+        )
+
+        $result.ExitCode | Should -Be 0
+        $formatInvocation.Count | Should -Be 1
+        $formatInvocation[0].Path | Should -Be (Join-Path $fixture 'tests/Repository.Tests.ps1')
+        @($formatInvocation[0].Tag) | Should -Be @('FoundationStyle')
+        $formatInvocation[0].Output | Should -Be 'Detailed'
+        $formatInvocation[0].PassThru | Should -BeTrue
+        ($after -join "`n") | Should -Be ($before -join "`n")
+        ($afterTree -join "`n") | Should -Be ($beforeTree -join "`n")
+    }
+
+    It 'propagates a failed CheckFormat result from a mutated disposable command fixture' `
+        -Skip:(
+            ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT -and
+                -not [System.IO.File]::Exists($windowsPowerShellPath)) -or
+            ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT -and
+                $null -eq (Get-Command pwsh -ErrorAction SilentlyContinue))
+        ) {
+        $fixture = New-BuildContractFixture -Route CheckFormat
+        $pesterPath = Join-Path $fixture 'modules/Pester/Pester.psm1'
+        $mutated = (Get-Content -LiteralPath $pesterPath -Raw).Replace(
+            '$failedCount = if ($env:BUILD_CONTRACT_FAILURE -eq ''1'') { 1 } else { 0 }',
+            '$failedCount = 1'
+        )
+        Set-Content -LiteralPath $pesterPath -Value $mutated -Encoding utf8
+        $result = Invoke-BuildContractFixture `
+            -FixtureRoot $fixture `
+            -Arguments @('-Task', 'CheckFormat')
+
+        $result.ExitCode | Should -Not -Be 0
+        ($result.Output -join "`n") | Should -Match 'Formatting verification reported 1 failed tests'
     }
 
     It 'retries only a publisher mismatch without forcing a module overwrite' {
@@ -1507,7 +1926,7 @@ Describe 'Build quality interface' -Tag 'BuildInterface' {
 `$global:InstallCalls = @()
 function Get-Module {
     param([string] `$Name, [switch] `$ListAvailable)
-    [pscustomobject]@{
+    [pscustomobject] @{
         Name = `$Name
         Version = [version] '3.4.0'
     }
@@ -1522,7 +1941,7 @@ function Install-Module {
         [switch] `$AllowClobber,
         [switch] `$SkipPublisherCheck
     )
-    `$global:InstallCalls += [pscustomobject]@{
+    `$global:InstallCalls += [pscustomobject] @{
         Name = `$Name
         RequiredVersion = `$RequiredVersion
         Repository = `$Repository
