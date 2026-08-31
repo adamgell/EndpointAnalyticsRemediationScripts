@@ -2678,6 +2678,7 @@ function Install-Module {
         )
         $exitCode = $LASTEXITCODE
         $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        $exitCode | Should -BeIn @(0, 1)
 
         $report.SchemaVersion | Should -Be 1
         @($report.Rows).Count | Should -Be 271
